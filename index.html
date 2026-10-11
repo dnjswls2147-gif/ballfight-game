@@ -1,19 +1,33 @@
-<script>
-    // 1. 배경음악 설정 및 재생
-    const bgm = new Audio('bgm.mp3');
-    bgm.loop = true;
-    window.addEventListener('click', () => {
-        bgm.play();
-    }, { once: true });
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공싸움 게임</title>
+</head>
+<body>
+    <!-- 게임이 정상적으로 실행되도록 기본 틀을 유지합니다 -->
+    <div id="game-container"></div>
+    <button id="exit-btn">나가기</button>
 
-    // 2. 나가기 버튼 기능 추가
-    window.addEventListener('DOMContentLoaded', () => {
-        const exitBtn = document.querySelector('button'); 
-        if (exitBtn) {
-            exitBtn.addEventListener('click', (e) => {
-                alert('로비로 나갑니다!');
-                location.reload(); 
-            });
-        }
-    });
-</script>
+    <script>
+        // 1. 배경음악 설정 및 재생
+        const bgm = new Audio('bgm.mp3');
+        bgm.loop = true;
+        window.addEventListener('click', () => {
+            bgm.play();
+        }, { once: true });
+
+        // 2. 나가기 버튼 기능 추가
+        window.addEventListener('DOMContentLoaded', () => {
+            const exitBtn = document.getElementById('exit-btn') || document.querySelector('button'); 
+            if (exitBtn) {
+                exitBtn.addEventListener('click', () => {
+                    alert('로비로 나갑니다!');
+                    location.reload(); 
+                });
+            }
+        });
+    </script>
+</body>
+</html>
