@@ -1,1 +1,99 @@
-index.html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Ball Fight Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin-top: 50px;
+        }
+        canvas {
+            border: 3px solid black;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const zone = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 120
+        };
+
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 20,
+            color: 'blue'
+        };
+
+        let targetX = player.x;
+        let targetY = player.y;
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = e.clientX - rect.left;
+            targetY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches.length > 0) {
+                targetX = e.touches[0].clientX - rect.left;
+                targetY = e.touches[0].clientY - rect.top;
+            }
+        });
+
+        function update() {
+            player.x += (targetX - player.x) * 0.1;
+            player.y += (targetY - player.y) * 0.1;
+
+            const dx = player.x - zone.x;
+            const dy = player.y - zone.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance + player.radius > zone.radius) {
+                const angle = Math.atan2(dy, dx);
+                player.x = zone.x + (zone.radius - player.radius) * Math.cos(angle);
+                player.y = zone.y + (zone.radius - player.radius) * Math.sin(angle);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(200, 220, 255, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
