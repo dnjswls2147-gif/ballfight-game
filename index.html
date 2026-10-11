@@ -1,8 +1,22 @@
+
 <script>
-    // 배경음악 설정
+    // 1. 배경음악 설정 및 재생
     const bgm = new Audio('bgm.mp3');
     bgm.loop = true;
     window.addEventListener('click', () => {
         bgm.play();
     }, { once: true });
+
+    // 2. 나가기 버튼 기능 추가 (버튼을 누르면 메인/로비로 이동하거나 새로고침)
+    window.addEventListener('DOMContentLoaded', () => {
+        const exitBtn = document.querySelector('button'); // 빨간색 나가기 버튼
+        if (exitBtn) {
+            exitBtn.addEventListener('click', (e) => {
+                // 원하시는 로비 주소가 있다면 아래 'index.html' 대신 입력하세요.
+                // 현재는 메인 페이지로 이동하도록 설정합니다.
+                alert('로비로 나갑니다!');
+                location.href = './index.html'; 
+            });
+        }
+    });
 </script>
