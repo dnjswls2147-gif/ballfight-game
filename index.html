@@ -232,3 +232,17 @@ bgm.loop = true;
 window.addEventListener('click', () => {
     bgm.play();
 }, { once: true });</seript>
+7
+<script>
+  // 1. 배경음악 재생 설정
+  const bgm = new Audio('bgm.mp3');
+  bgm.loop = true;
+  window.addEventListener('click', () => {
+      bgm.play();
+  }, { once: true });
+
+  // 2. 나가기 버튼 작동 기능 추가
+  // 화면에 있는 '나가기' 버튼을 찾아서 클릭했을 때 동작하도록 합니다.
+  const exitButton = document.querySelector('button'); // 혹은 나가기 버튼을 가리키는 올바른 선택자
+  // 만약 버튼에 특정 클래스나 아이디가 있다면 그것을 적어주어야 합니다.
+</script>
