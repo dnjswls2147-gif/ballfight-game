@@ -181,6 +181,140 @@
     </div>
 
     <script>
-        // 배경음악 설정 ('배경음악.mp3' 파일과 연동)
+        // 배경음악 설정 (처음 터치할 때 확실히 재생되도록 설정)
         const bgm = new Audio('배경음악.mp3');
-        bgm
+        bgm.loop = true;
+
+        function playBGM() {
+            bgm.play().catch(e => console.log("음악 재생 대기 중"));
+            window.removeEventListener('click', playBGM);
+            window.removeEventListener('touchstart', playBGM);
+        }
+        window.addEventListener('click', playBGM);
+        window.addEventListener('touchstart', playBGM);
+
+        // 화면 전환 로직
+        const lobbyScreen = document.getElementById('lobby-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const startBtn = document.getElementById('start-btn');
+        const exitBtn = document.getElementById('exit-btn');
+
+        let gameRunning = false;
+
+        startBtn.addEventListener('click', () => {
+            lobbyScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            playBGM(); // 시작 버튼 누를 때 음악 재생 시도
+            if (!gameRunning) {
+                gameRunning = true;
+                loop();
+            }
+        });
+
+        exitBtn.addEventListener('click', () => {
+            gameScreen.classList.add('hidden');
+            lobbyScreen.classList.remove('hidden');
+            player1.hp = player1.maxHp;
+            player2.hp = player2.maxHp;
+            player1.x = 100; player1.y = 190;
+            player2.x = 280; player2.y = 190;
+        });
+
+        // 게임 엔진 코드 (공격 판정 및 움직임 개선)
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const player1 = {
+            x: 100, y: 190, vx: 2.2, vy: 1.8,
+            radius: 22, auraRadius: 50,
+            hp: 250, maxHp: 250, color: '#3498db'
+        };
+
+        const player2 = {
+            x: 280, y: 190, vx: -2.2, vy: -1.8,
+            radius: 22, auraRadius: 50,
+            hp: 250, maxHp: 250, color: '#e74c3c'
+        };
+
+        function updateGame() {
+            if (!gameRunning) return;
+
+            player1.x += player1.vx;
+            player1.y += player1.vy;
+            player2.x += player2.vx;
+            player2.y += player2.vy;
+
+            // 벽에 부딪히면 튕기기
+            if (player1.x - player1.radius < 0 || player1.x + player1.radius > canvas.width) player1.vx *= -1;
+            if (player1.y - player1.radius < 0 || player1.y + player1.radius > canvas.height) player1.vy *= -1;
+
+            if (player2.x - player2.radius < 0 || player2.x + player2.radius > canvas.width) player2.vx *= -1;
+            if (player2.y - player2.radius < 0 || player2.y + player2.radius > canvas.height) player2.vy *= -1;
+
+            // 두 공이 가까워지면(공격/충돌 시) 체력이 깎이도록 수정
+            const dx = player1.x - player2.x;
+            const dy = player1.y - player2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 공끼리 부딪히거나 오라 범위가 겹치면 데미지 감소
+            if (distance < player1.radius + player2.radius + 30) {
+                if (player1.hp > 0) player1.hp -= 0.8;
+                if (player2.hp > 0) player2.hp -= 0.8;
+            }
+
+            // HP 바 업데이트
+            document.getElementById('p1-hp').style.width = Math.max(0, (player1.hp / player1.maxHp) * 100) + '%';
+            document.getElementById('p1-hp-text').innerText = Math.ceil(player1.hp) + ' / ' + player1.maxHp;
+
+            document.getElementById('p2-hp').style.width = Math.max(0, (player2.hp / player2.maxHp) * 100) + '%';
+            document.getElementById('p2-hp-text').innerText = Math.ceil(player2.hp) + ' / ' + player2.maxHp;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 플레이어 1 오라 및 공 그리기
+            ctx.beginPath();
+            ctx.arc(player1.x, player1.y, player1.auraRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#3498db';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(player1.x, player1.y, player1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player1.color;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+
+            // 플레이어 2 오라 및 공 그리기
+            ctx.beginPath();
+            ctx.arc(player2.x, player2.y, player2.auraRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(231, 76, 60, 0.2)';
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(player2.x, player2.y, player2.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player2.color;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+        }
+
+        function loop() {
+            updateGame();
+            if (gameRunning) {
+                draw();
+                requestAnimationFrame(loop);
+            }
+        }
+    </script>
+</body>
+</html>
