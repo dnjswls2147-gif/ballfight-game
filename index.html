@@ -20,6 +20,7 @@
             box-sizing: border-box;
             padding-bottom: 30px;
         }
+
         .screen {
             width: 100%;
             display: flex;
@@ -28,9 +29,11 @@
             flex: 1;
             justify-content: center;
         }
+
         .hidden {
             display: none !important;
         }
+
         .lobby-box {
             position: relative;
             width: 340px;
@@ -40,6 +43,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         .start-btn {
             width: 340px;
             padding: 15px;
@@ -53,27 +57,11 @@
             box-shadow: 0 4px #27ae60;
             margin-top: 25px;
         }
-        #ban-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+        .start-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #27ae60;
         }
-        .ban-box {
-            border: 3px solid #000;
-            padding: 30px;
-            width: 320px;
-            text-align: center;
-            border-radius: 4px;
-            box-sizing: border-box;
-            background: #fff;
-        }
+
         #game-screen {
             background-color: #111;
             color: white;
@@ -96,7 +84,9 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        canvas { display: block; }
+        canvas {
+            display: block;
+        }
         .ui-container {
             width: 380px;
             margin-top: 10px;
@@ -124,7 +114,11 @@
             border-radius: 6px;
             overflow: hidden;
         }
-        .hp-bar-fill { height: 100%; width: 100%; }
+        .hp-bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.1s ease;
+        }
         #p1-hp { background: #2ecc71; }
         #p2-hp { background: #e74c3c; }
         #exit-btn {
@@ -138,108 +132,55 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 4px #c0392b;
+        }
+        #exit-btn:active {
+            box-shadow: 0 2px #c0392b;
+            transform: translateY(2px);
         }
     </style>
 </head>
 <body>
 
-    <div id="ban-screen" class="hidden">
-        <div class="ban-box">
-            <h2>관리자에게 추방됐어요</h2>
-            <p>남은 시간 15시간 25분</p>
-            <p style="font-size: 13px; color: #555;">사유: 오픈채팅 참여 안함</p>
-        </div>
-    </div>
-
+    <!-- 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <div style="height: 40px;"></div>
         <div class="lobby-box"></div>
         <button id="start-btn" class="start-btn">시작하기 ▶</button>
     </div>
 
+    <!-- 게임 플레이 화면 -->
     <div id="game-screen" class="screen hidden">
         <div id="game-container">
             <canvas id="gameCanvas" width="380" height="380"></canvas>
         </div>
+
         <div class="ui-container">
             <div class="player-status">
                 <div class="player-name">
                     <span style="color: #3498db;">어둠속성 김켈리</span>
                     <span id="p1-hp-text">250 / 250</span>
                 </div>
-                <div class="hp-bar-bg"><div id="p1-hp" class="hp-bar-fill"></div></div>
+                <div class="hp-bar-bg">
+                    <div id="p1-hp" class="hp-bar-fill"></div>
+                </div>
             </div>
+
             <div class="player-status">
                 <div class="player-name">
                     <span style="color: #e74c3c;">백기철 판타지</span>
                     <span id="p2-hp-text">250 / 250</span>
                 </div>
-                <div class="hp-bar-bg"><div id="p2-hp" class="hp-bar-fill"></div></div>
+                <div class="hp-bar-bg">
+                    <div id="p2-hp" class="hp-bar-fill"></div>
+                </div>
             </div>
         </div>
+
         <button id="exit-btn">나가기 🚪</button>
     </div>
 
     <script>
-        const isBanned = false; 
-        if (isBanned) {
-            document.getElementById('ban-screen').classList.remove('hidden');
-        }
-
-        const lobbyScreen = document.getElementById('lobby-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const startBtn = document.getElementById('start-btn');
-        const exitBtn = document.getElementById('exit-btn');
-
-        let gameRunning = false;
-
-        startBtn.addEventListener('click', () => {
-            lobbyScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            if (!gameRunning) {
-                gameRunning = true;
-                loop();
-            }
-        });
-
-        exitBtn.addEventListener('click', () => {
-            gameScreen.classList.add('hidden');
-            lobbyScreen.classList.remove('hidden');
-        });
-
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        const player1 = { x: 120, y: 190, vx: 1.8, vy: 2, radius: 22, auraRadius: 75, hp: 250, maxHp: 250, color: '#3498db' };
-        const player2 = { x: 260, y: 190, vx: -1.8, vy: -2, radius: 22, auraRadius: 75, hp: 250, maxHp: 250, color: '#e74c3c' };
-
-        function updateGame() {
-            if (!gameRunning) return;
-            player1.x += player1.vx; player1.y += player1.vy;
-            player2.x += player2.vx; player2.y += player2.vy;
-
-            if (player1.x - player1.auraRadius < 0 || player1.x + player1.auraRadius > canvas.width) player1.vx *= -1;
-            if (player1.y - player1.auraRadius < 0 || player1.y + player1.auraRadius > canvas.height) player1.vy *= -1;
-            if (player2.x - player2.auraRadius < 0 || player2.x + player2.auraRadius > canvas.width) player2.vx *= -1;
-            if (player2.y - player2.auraRadius < 0 || player2.y + player2.auraRadius > canvas.height) player2.vy *= -1;
-
-            document.getElementById('p1-hp').style.width = Math.max(0, (player1.hp / player1.maxHp) * 100) + '%';
-            document.getElementById('p2-hp').style.width = Math.max(0, (player2.hp / player2.maxHp) * 100) + '%';
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath(); ctx.arc(player1.x, player1.y, player1.radius, 0, Math.PI * 2); ctx.fillStyle = player1.color; ctx.fill();
-            ctx.beginPath(); ctx.arc(player2.x, player2.y, player2.radius, 0, Math.PI * 2); ctx.fillStyle = player2.color; ctx.fill();
-        }
-
-        function loop() {
-            updateGame();
-            if (gameRunning) {
-                draw();
-                requestAnimationFrame(loop);
-            }
-        }
-    </script>
-</body>
-</html>
+        // 배경음악 설정 ('배경음악.mp3' 파일과 연동)
+        const bgm = new Audio('배경음악.mp3');
+        bgm
