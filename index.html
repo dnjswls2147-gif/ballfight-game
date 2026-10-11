@@ -2,94 +2,224 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ball Fight Game</title>
     <style>
         body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
-            margin-top: 50px;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        #gameContainer {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            background-color: #fff;
+            border: 4px solid #000;
+            border-radius: 10px;
+            overflow: hidden;
         }
         canvas {
-            border: 3px solid black;
-            background-color: white;
+            display: block;
+        }
+        .ui-container {
+            width: 380px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .player-status {
+            background: #222;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+        .name-hp {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .hp-bar-bg {
+            width: 100%;
+            height: 14px;
+            background-color: #444;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .hp-bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.1s;
+        }
+        #p1-hp { background-color: #2ecc71; }
+        #p2-hp { background-color: #e74c3c; }
+
+        .btn-container {
+            margin-top: 15px;
+            width: 380px;
+            display: flex;
+            justify-content: center;
+        }
+        .exit-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px #c0392b;
+        }
+        .exit-btn:active {
+            box-shadow: 0 2px #c0392b;
+            transform: translateY(2px);
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">created by ball_fight_tiktok</div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="380" height="380"></canvas>
+    </div>
+
+    <div class="ui-container">
+        <!-- Player 1 -->
+        <div class="player-status">
+            <div class="name-hp">
+                <span style="color: #3498db;">어둠속성 김켈리</span>
+                <span id="p1-hp-text">250 / 250</span>
+            </div>
+            <div class="hp-bar-bg">
+                <div id="p1-hp" class="hp-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- Player 2 -->
+        <div class="player-status">
+            <div class="name-hp">
+                <span style="color: #e74c3c;">백기철 판타지</span>
+                <span id="p2-hp-text">250 / 250</span>
+            </div>
+            <div class="hp-bar-bg">
+                <div id="p2-hp" class="hp-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="exit-btn" onclick="alert('로비로 나갑니다!')">나 가 기 🚪</button>
+    </div>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const zone = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 120
+        let player1 = {
+            x: 120,
+            y: 190,
+            vx: 2,
+            vy: 1.5,
+            radius: 22,
+            zoneRadius: 75,
+            hp: 250,
+            maxHp: 250,
+            color: '#3498db'
         };
 
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 20,
-            color: 'blue'
+        let player2 = {
+            x: 260,
+            y: 190,
+            vx: -1.8,
+            vy: -2,
+            radius: 22,
+            zoneRadius: 75,
+            hp: 250,
+            maxHp: 250,
+            color: '#e74c3c'
         };
 
-        let targetX = player.x;
-        let targetY = player.y;
+        function updateGame() {
+            player1.x += player1.vx;
+            player1.y += player1.vy;
+            player2.x += player2.vx;
+            player2.y += player2.vy;
 
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            targetX = e.clientX - rect.left;
-            targetY = e.clientY - rect.top;
-        });
+            if (player1.x - player1.zoneRadius < 0 || player1.x + player1.zoneRadius > canvas.width) player1.vx *= -1;
+            if (player1.y - player1.zoneRadius < 0 || player1.y + player1.zoneRadius > canvas.height) player1.vy *= -1;
 
-        canvas.addEventListener('touchmove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            if (e.touches.length > 0) {
-                targetX = e.touches[0].clientX - rect.left;
-                targetY = e.touches[0].clientY - rect.top;
+            if (player2.x - player2.zoneRadius < 0 || player2.x + player2.zoneRadius > canvas.width) player2.vx *= -1;
+            if (player2.y - player2.zoneRadius < 0 || player2.y + player2.zoneRadius > canvas.height) player2.vy *= -1;
+
+            let dx = player1.x - player2.x;
+            let dy = player1.y - player2.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < player1.zoneRadius + player2.zoneRadius) {
+                if (player1.hp > 0) player1.hp -= 0.3;
+                if (player2.hp > 0) player2.hp -= 0.3;
             }
-        });
 
-        function update() {
-            player.x += (targetX - player.x) * 0.1;
-            player.y += (targetY - player.y) * 0.1;
+            document.getElementById('p1-hp').style.width = Math.max(0, (player1.hp / player1.maxHp) * 100) + '%';
+            document.getElementById('p1-hp-text').innerText = Math.ceil(player1.hp) + ' / ' + player1.maxHp;
 
-            const dx = player.x - zone.x;
-            const dy = player.y - zone.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance + player.radius > zone.radius) {
-                const angle = Math.atan2(dy, dx);
-                player.x = zone.x + (zone.radius - player.radius) * Math.cos(angle);
-                player.y = zone.y + (zone.radius - player.radius) * Math.sin(angle);
-            }
+            document.getElementById('p2-hp').style.width = Math.max(0, (player2.hp / player2.maxHp) * 100) + '%';
+            document.getElementById('p2-hp-text').innerText = Math.ceil(player2.hp) + ' / ' + player2.maxHp;
         }
 
-        function draw() {
+        function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.beginPath();
-            ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(200, 220, 255, 0.3)';
+            ctx.arc(player1.x, player1.y, player1.zoneRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.15)';
             ctx.fill();
-            ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#3498db';
             ctx.stroke();
-            ctx.closePath();
 
             ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fillStyle = player.color;
+            ctx.arc(player1.x, player1.y, player1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player1.color;
             ctx.fill();
-            ctx.closePath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(player2.x, player2.y, player2.zoneRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(231, 76, 60, 0.15)';
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(player2.x, player2.y, player2.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player2.color;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
         }
 
         function loop() {
-            update();
-            draw();
+            updateGame();
+            drawGame();
             requestAnimationFrame(loop);
         }
 
