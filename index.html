@@ -349,7 +349,6 @@
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
 
-            // 방 미생성, 번호 불일치, 4자리가 아닐 때 모두 동일하게 "비번이 틀렸습니다" 로 표시
             if (code.length !== 4 || !createdCode || code !== createdCode) {
                 err.innerText = "비번이 틀렸습니다";
                 return;
