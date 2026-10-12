@@ -25,6 +25,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
             position: relative;
+            z-index: 10;
         }
         .hidden { display: none !important; }
         h2 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; }
@@ -66,7 +67,8 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 8px;
-            -webkit-tap-highlight-color: transparent;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
         }
         .btn-ai { background-color: #2ecc71; }
         .btn-friend { background-color: #3498db; }
@@ -120,43 +122,4 @@
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
         <input type="text" id="username" placeholder="이름을 입력하세요" maxlength="10">
-        <button class="btn btn-ai" id="ai-btn">AI 자동 매칭</button>
-        <button class="btn btn-friend" id="friend-btn">친구 플레이</button>
-    </div>
-
-    <!-- 1-1. 친구 플레이 메뉴 -->
-    <div class="container hidden" id="friend-screen">
-        <h2>👥 친구 플레이 👥</h2>
-        <div class="desc">방을 생성하거나 번호를 입력하세요</div>
-        <div class="error" id="friend-error"></div>
-        
-        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button class="btn btn-create" style="margin-top:0; flex:1;" id="create-room-btn">방 생성하기 (랜덤 4자리)</button>
-            <button class="btn" style="margin-top:0; width:40px; background:#e74c3c;" id="reset-room-btn">X</button>
-        </div>
-        <div class="room-box hidden" id="room-display">----</div>
-
-        <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
-        <button class="btn btn-join" id="join-room-btn">방 번호로 시작하기</button>
-        <button class="btn btn-back" id="back-lobby-btn">뒤로 가기</button>
-    </div>
-
-    <!-- 2. 게임 화면 -->
-    <div class="container hidden" id="game-screen">
-        <canvas id="gameCanvas" width="340" height="340"></canvas>
-        <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
-        <div class="hp-bar"><div class="hp-fill" id="p1-hp"></div></div>
-        <div class="label" id="p2-label" style="color: #e74c3c;">Player 2 (레드)</div>
-        <div class="hp-bar"><div class="hp-fill p2" id="p2-hp"></div></div>
-        <button class="btn hidden" id="lobby-back-btn" style="background:#e67e22; margin-top:10px;">🏠 로비로 가기</button>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let gameStarted = false;
-        let createdCode = null;
-
-        let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
-        let p2 = { x: 25
+        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button
