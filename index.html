@@ -24,6 +24,8 @@
             padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
         .hidden { display: none !important; }
         h2 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; }
@@ -39,6 +41,8 @@
             text-align: left !important;
             margin-bottom: 10px;
             box-sizing: border-box;
+            position: relative;
+            z-index: 2;
         }
         input[type="text"]::placeholder {
             text-align: left !important;
@@ -64,6 +68,8 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 8px;
+            position: relative;
+            z-index: 2;
         }
         .btn-ai { background-color: #2ecc71; }
         .btn-friend { background-color: #3498db; }
@@ -130,4 +136,13 @@
         
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
             <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
-            <button class="btn
+            <button class="btn" style="margin-top:0; width:40px; background:#e74c3c;" onclick="resetRoom()">X</button>
+        </div>
+        <div class="room-box hidden" id="room-display">----</div>
+
+        <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
+        <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
+        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+    </div>
+
+    <!-- 2. 게임 화면 -->
