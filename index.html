@@ -26,6 +26,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
             position: relative;
+            z-index: 1;
         }
         .hidden { display: none !important; }
         h2 { color: #2c3e50; margin-bottom: 10px; font-size: 20px; }
@@ -96,6 +97,7 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             user-select: none;
+            pointer-events: auto !important;
             position: relative;
             z-index: 10;
         }
@@ -122,6 +124,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            pointer-events: auto !important;
+            z-index: 10;
         }
         .char-card.selected {
             border-color: #3498db;
@@ -173,6 +177,7 @@
             z-index: 10;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             touch-action: manipulation;
+            pointer-events: auto !important;
         }
         .speed-btn.active {
             background: #e74c3c;
@@ -260,7 +265,7 @@
         <button class="btn btn-back" id="btn-back-lobby">뒤로 가기</button>
     </div>
 
-    <!-- 1-2. 캐릭터 선택 화면 (스피드 볼 -> 아이스 볼 변경, 밑에 글자 삭제) -->
+    <!-- 1-2. 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
         <h2>⚔️ 캐릭터 선택 ⚔️</h2>
         <div class="timer-box" id="timer-display">10초</div>
@@ -316,11 +321,9 @@
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
 
-        // 아이스 볼 전용 공격 및 스킬 투사체 객체 배열
         let projectiles = [];
         let iceFallBlocks = [];
 
-        // 캐릭터 데이터
         let p1 = { 
             x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250,
             type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0 
@@ -559,7 +562,6 @@
             }
         }
 
-        // 5초 필살기: 큰 얼음 4개 순차적 폭격
         function triggerIceUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 4; i++) {
@@ -574,7 +576,7 @@
                         damage: 15,
                         target: target
                     });
-                }, i * 350); // 딱! 딱! 딱! 딱! 떨어지는 시간 간격
+                }, i * 350);
             }
         }
 
@@ -592,16 +594,13 @@
             if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
             if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
 
-            // 아이스 볼 스킬 게이지 및 공격 로직
             if (p1.type === 'ice') {
-                // 1) 5초 기술 노란색 게이지 차오름 (5초 = 300프레임)
                 p1.iceSkillGauge += (1 / 300) * speedMultiplier;
                 if (p1.iceSkillGauge >= 1) {
                     p1.iceSkillGauge = 0;
                     triggerIceUltimate(p1);
                 }
 
-                // 2) 1초마다 얼음 파편 던지기
                 let now = Date.now();
                 if (now - p1.lastIceAttackTime >= 1000 / speedMultiplier) {
                     p1.lastIceAttackTime = now;
@@ -620,19 +619,16 @@
                 }
             }
 
-            // 얼음 파편 투사체 이동 및 충돌
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let proj = projectiles[i];
                 proj.x += proj.vx;
                 proj.y += proj.vy;
 
-                // 캔버스 밖으로 나가면 삭제
                 if (proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
                     projectiles.splice(i, 1);
                     continue;
                 }
 
-                // 적 충돌 판단
                 let dx = proj.target.x - proj.x;
                 let dy = proj.target.y - proj.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
@@ -644,12 +640,10 @@
                 }
             }
 
-            // 큰 얼음 낙하 충돌 판단
             for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
                 let ice = iceFallBlocks[i];
                 ice.y += ice.speed;
 
-                // 타겟 충돌 판단
                 let dx = ice.target.x - ice.x;
                 let dy = ice.target.y - ice.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
@@ -666,7 +660,6 @@
                 }
             }
 
-            // 볼 대 볼 직접 충돌
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
@@ -696,4 +689,94 @@
             document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
             document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
 
-            document.getElementById('p2-hp').style.width = (p2.hp / p2
+            document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
+            document.getElementById('p2-hp-text').innerText = p2.hp + " / " + p2.maxHp;
+        }
+
+        function drawPlayer(p) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+
+            if (p.type === 'ice') {
+                ctx.fillStyle = '#a5f2f3';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                if (p.iceSkillGauge > 0) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.iceSkillGauge));
+                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = '#f1c40f';
+                    ctx.stroke();
+                }
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            ctx.closePath();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPlayer(p1);
+            drawPlayer(p2);
+
+            projectiles.forEach(proj => {
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#00d2d3';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            iceFallBlocks.forEach(ice => {
+                ctx.save();
+                ctx.translate(ice.x, ice.y);
+                ctx.fillStyle = '#74b9ff';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.restore();
+            });
+        }
+
+        function loop() {
+            if (!gameStarted) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function bindTouch(id, handler) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handler();
+            }, { passive: false });
+            el.addEventListener('click', handler);
+        }
+
+        bindTouch('btn-ai-match', startAI);
+        bindTouch('btn-friend-play', showFriendMenu);
+        bindTouch('btn-create-room', createRoom);
+        bindTouch('btn-reset-room', resetRoom);
+        bindTouch('btn-join-room', joinRoom);
+        bindTouch('btn-back-lobby', showLobby);
+        bindTouch('card-standard', () => selectCharacter('standard'));
+        bindTouch('card-ice', () => selectCharacter('ice'));
+        bindTouch('btn-confirm-char', confirmCharacterSelection);
+        bindTouch('speed-toggle-btn', toggleSpeed);
+        bindTouch('lobby-back-btn', showLobby);
+
+        updateCoinsUI();
+    </script>
+</body>
+</html>
