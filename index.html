@@ -114,18 +114,20 @@
             flex: 1;
             border: 3px solid #bdc3c7;
             border-radius: 10px;
-            padding: 15px 10px;
+            padding: 20px 10px;
             cursor: pointer;
             background: #f8f9fa;
             transition: 0.2s;
             touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .char-card.selected {
             border-color: #3498db;
             background: #ebf5fb;
         }
-        .char-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #2c3e50; }
-        .char-desc { font-size: 11px; color: #7f8c8d; }
+        .char-title { font-weight: bold; font-size: 15px; color: #2c3e50; }
         
         .timer-box {
             font-size: 24px;
@@ -258,7 +260,7 @@
         <button class="btn btn-back" id="btn-back-lobby">뒤로 가기</button>
     </div>
 
-    <!-- 1-2. 캐릭터 선택 화면 (10초 타이머) -->
+    <!-- 1-2. 캐릭터 선택 화면 (스피드 볼 -> 아이스 볼 변경, 밑에 글자 삭제) -->
     <div class="container hidden" id="char-select-screen">
         <h2>⚔️ 캐릭터 선택 ⚔️</h2>
         <div class="timer-box" id="timer-display">10초</div>
@@ -267,11 +269,9 @@
         <div class="char-grid">
             <div class="char-card selected" id="card-standard">
                 <div class="char-title">스탠다드 볼</div>
-                <div class="char-desc">균형 잡힌 표준형 볼</div>
             </div>
-            <div class="char-card" id="card-speed">
-                <div class="char-title">스피드 볼</div>
-                <div class="char-desc">빠르고 날렵한 볼</div>
+            <div class="char-card" id="card-ice">
+                <div class="char-title">아이스 볼</div>
             </div>
         </div>
         
@@ -316,8 +316,19 @@
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
 
-        let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
-        let p2 = { x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250 };
+        // 아이스 볼 전용 공격 및 스킬 투사체 객체 배열
+        let projectiles = [];
+        let iceFallBlocks = [];
+
+        // 캐릭터 데이터
+        let p1 = { 
+            x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250,
+            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0 
+        };
+        let p2 = { 
+            x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250,
+            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0 
+        };
 
         function updateCoinsUI() {
             document.getElementById('coin-count').innerText = userCoins;
@@ -407,7 +418,7 @@
             if (type === 'standard') {
                 document.getElementById('card-standard').classList.add('selected');
             } else {
-                document.getElementById('card-speed').classList.add('selected');
+                document.getElementById('card-ice').classList.add('selected');
             }
         }
 
@@ -498,13 +509,18 @@
 
         function resetGameState() {
             p1.hp = 250; p2.hp = 250;
-            p1.x = 85; p1.y = 170; 
-            
-            let baseSpeedX = (selectedCharType === 'speed') ? 3.2 : 2.2;
-            let baseSpeedY = (selectedCharType === 'speed') ? 2.4 : 1.6;
-
-            p1.vx = baseSpeedX; p1.vy = baseSpeedY;
+            p1.x = 85; p1.y = 170; p1.vx = 2.2; p1.vy = 1.6;
             p2.x = 255; p2.y = 170; p2.vx = -2.2; p2.vy = -1.6;
+
+            p1.type = selectedCharType;
+            p1.iceSkillGauge = 0;
+            p1.lastIceAttackTime = Date.now();
+
+            p2.type = 'standard';
+            p2.iceSkillGauge = 0;
+
+            projectiles = [];
+            iceFallBlocks = [];
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -543,6 +559,25 @@
             }
         }
 
+        // 5초 필살기: 큰 얼음 4개 순차적 폭격
+        function triggerIceUltimate(owner) {
+            let target = (owner === p1) ? p2 : p1;
+            for (let i = 0; i < 4; i++) {
+                setTimeout(() => {
+                    if (!gameStarted) return;
+                    let startX = 40 + i * 85;
+                    iceFallBlocks.push({
+                        x: startX,
+                        y: -40,
+                        size: 32,
+                        speed: 5 * speedMultiplier,
+                        damage: 15,
+                        target: target
+                    });
+                }, i * 350); // 딱! 딱! 딱! 딱! 떨어지는 시간 간격
+            }
+        }
+
         function update() {
             if (!gameStarted) return;
 
@@ -557,6 +592,81 @@
             if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
             if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
 
+            // 아이스 볼 스킬 게이지 및 공격 로직
+            if (p1.type === 'ice') {
+                // 1) 5초 기술 노란색 게이지 차오름 (5초 = 300프레임)
+                p1.iceSkillGauge += (1 / 300) * speedMultiplier;
+                if (p1.iceSkillGauge >= 1) {
+                    p1.iceSkillGauge = 0;
+                    triggerIceUltimate(p1);
+                }
+
+                // 2) 1초마다 얼음 파편 던지기
+                let now = Date.now();
+                if (now - p1.lastIceAttackTime >= 1000 / speedMultiplier) {
+                    p1.lastIceAttackTime = now;
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    projectiles.push({
+                        x: p1.x,
+                        y: p1.y,
+                        vx: (dx / dist) * 6 * speedMultiplier,
+                        vy: (dy / dist) * 6 * speedMultiplier,
+                        radius: 7,
+                        target: p2,
+                        damage: 10
+                    });
+                }
+            }
+
+            // 얼음 파편 투사체 이동 및 충돌
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let proj = projectiles[i];
+                proj.x += proj.vx;
+                proj.y += proj.vy;
+
+                // 캔버스 밖으로 나가면 삭제
+                if (proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+
+                // 적 충돌 판단
+                let dx = proj.target.x - proj.x;
+                let dy = proj.target.y - proj.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < proj.target.radius + proj.radius) {
+                    proj.target.hp = Math.max(0, proj.target.hp - proj.damage);
+                    projectiles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                }
+            }
+
+            // 큰 얼음 낙하 충돌 판단
+            for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
+                let ice = iceFallBlocks[i];
+                ice.y += ice.speed;
+
+                // 타겟 충돌 판단
+                let dx = ice.target.x - ice.x;
+                let dy = ice.target.y - ice.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < ice.target.radius + ice.size / 2) {
+                    ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
+                    iceFallBlocks.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+
+                if (ice.y > canvas.height + 50) {
+                    iceFallBlocks.splice(i, 1);
+                }
+            }
+
+            // 볼 대 볼 직접 충돌
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
@@ -577,62 +687,13 @@
                 p1.hp = Math.max(0, p1.hp - 30);
                 p2.hp = Math.max(0, p2.hp - 30);
 
-                document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
-                document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
-
-                document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
-                document.getElementById('p2-hp-text').innerText = p2.hp + " / " + p2.maxHp;
-
+                updateHpBars();
                 checkGameOver();
             }
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function updateHpBars() {
+            document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
+            document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
 
-            ctx.beginPath();
-            ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p1.color;
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p2.color;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function loop() {
-            if (!gameStarted) return;
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        function bindTouch(id, handler) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                handler();
-            }, { passive: false });
-            el.addEventListener('click', handler);
-        }
-
-        bindTouch('btn-ai-match', startAI);
-        bindTouch('btn-friend-play', showFriendMenu);
-        bindTouch('btn-create-room', createRoom);
-        bindTouch('btn-reset-room', resetRoom);
-        bindTouch('btn-join-room', joinRoom);
-        bindTouch('btn-back-lobby', showLobby);
-        bindTouch('card-standard', () => selectCharacter('standard'));
-        bindTouch('card-speed', () => selectCharacter('speed'));
-        bindTouch('btn-confirm-char', confirmCharacterSelection);
-        bindTouch('speed-toggle-btn', toggleSpeed);
-        bindTouch('lobby-back-btn', showLobby);
-
-        updateCoinsUI();
-    </script>
-</body>
-</html>
+            document.getElementById('p2-hp').style.width = (p2.hp / p2
