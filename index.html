@@ -349,6 +349,13 @@
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
 
+            // 1. 방을 생성한 본인이 자신이 생성한 방 번호를 그대로 친 경우
+            if (createdCode && code === createdCode) {
+                err.innerText = "자신과 싸울수 없습니다";
+                return;
+            }
+
+            // 2. 방 번호가 다르거나 4자리가 아닌 경우
             if (code.length !== 4 || !createdCode || code !== createdCode) {
                 err.innerText = "비번이 틀렸습니다";
                 return;
