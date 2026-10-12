@@ -125,7 +125,13 @@
         let p2 = { x: 230, y: 150, radius: 14, color: '#3498db', vx: -3.5, vy: -2.5, hp: 100, maxHp: 100 };
 
         function startGame() {
-            bgm.play().catch(e => console.log(e));
+            // 음악 재생 시도
+            bgm.play().then(() => {
+                console.log("BGM 재생 성공");
+            }).catch(e => {
+                console.log("BGM 재생 차단됨:", e);
+            });
+
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             gameStarted = true;
