@@ -353,15 +353,7 @@
                 err.innerText = "4자리 방 번호를 입력하세요!";
                 return;
             }
-            if (!createdCode) {
-                err.innerText = "방을 먼저 생성해주세요!";
-                return;
-            }
-            if (code === createdCode) {
-                err.innerText = "자신과 대결할 수 없습니다";
-                return;
-            }
-            if (code !== createdCode) {
+            if (!createdCode || code !== createdCode) {
                 err.innerText = "비번이 틀렸습니다";
                 return;
             }
@@ -601,7 +593,6 @@
             requestAnimationFrame(loop);
         }
 
-        // 🌟 모바일 터치 시 지연 없이 즉각 반응하는 이벤트 바인딩 적용
         function bindTouch(id, handler) {
             const el = document.getElementById(id);
             if (!el) return;
