@@ -30,49 +30,21 @@
             font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             text-align: center;
         }
         .lobby-box {
             width: 100%;
+            height: 180px;
             background: #ffffff;
             border: 3px solid #34495e;
             border-radius: 12px;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .lobby-desc {
-            font-size: 14px;
+            font-size: 15px;
             color: #7f8c8d;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-        /* 이름 입력창 스타일 */
-        .name-input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            outline: none;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .name-input:focus {
-            border-color: #2ecc71;
-        }
-        /* 경고 메시지 스타일 */
-        #error-msg {
-            height: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-bottom: 8px;
-            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .start-btn {
             width: 100%;
@@ -85,11 +57,7 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px #27ae60;
-            margin-top: 5px;
-        }
-        .start-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px #27ae60;
+            margin-top: 15px;
         }
         #game-container {
             width: 300px;
@@ -119,7 +87,7 @@
 </head>
 <body>
 
-    <!-- 배경음악 오디오 태그 -->
+    <!-- 안정적인 아케이드 배경음악 오디오 태그 -->
     <audio id="bgm" loop preload="auto">
         <source src="https://actions.google.com/sounds/v1/science_fiction/arcade_game_loop.ogg" type="audio/ogg">
     </audio>
@@ -127,13 +95,7 @@
     <!-- 1. 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <div class="welcome-title">🎮 릴리 볼 파이트 🎮</div>
-        <div class="lobby-box">
-            <div class="lobby-desc">플레이어 이름을 입력하세요!</div>
-            <!-- 에러 메시지 표시 영역 -->
-            <div id="error-msg"></div>
-            <!-- 이름 입력 텍스트 박스 -->
-            <input type="text" id="username" class="name-input" placeholder="이름을 입력하세요" maxlength="10">
-        </div>
+        <div class="lobby-box">버튼을 눌러 게임을 시작하세요!</div>
         <button class="start-btn" onclick="startGame()">게임 시작하기</button>
     </div>
 
@@ -144,11 +106,11 @@
         </div>
         <div class="ui-container">
             <div class="hp-bar-wrapper">
-                <div id="p1-label" class="hp-label" style="color: #e74c3c;">Player 1 (레드)</div>
+                <div class="hp-label" style="color: #e74c3c;">Player 1 (레드)</div>
                 <div class="hp-bg"><div id="p1-hp" class="hp-fill"></div></div>
             </div>
             <div class="hp-bar-wrapper">
-                <div class="hp-label" style="color: #3498db;">Player 2 (AI 블루)</div>
+                <div class="hp-label" style="color: #3498db;">Player 2 (블루)</div>
                 <div class="hp-bg"><div id="p2-hp" class="hp-fill"></div></div>
             </div>
         </div>
@@ -164,24 +126,14 @@
         let p2 = { x: 230, y: 150, radius: 14, color: '#3498db', vx: -3.5, vy: -2.5, hp: 100, maxHp: 100 };
 
         function startGame() {
-            const nameInput = document.getElementById('username').value.trim();
-            const errorMsg = document.getElementById('error-msg');
-
-            // 이름을 입력하지 않았을 때 검사
-            if (nameInput === "") {
-                errorMsg.innerText = "이름부터 써주세요!";
-                return; // 게임 시작 막기
-            }
-
-            // 에러 메시지 초기화 및 음악 재생
-            errorMsg.innerText = "";
+            // 사용자의 터치/클릭 이벤트 직후에 오디오 재생 실행
             bgm.volume = 1.0;
-            bgm.play().catch(e => console.log("음악 재생 차단됨:", e));
+            bgm.play().then(() => {
+                console.log("음악 재생 성공");
+            }).catch(err => {
+                console.log("재생 차단됨:", err);
+            });
 
-            // 입력한 이름을 P1 레이블에 반영
-            document.getElementById('p1-label').innerText = nameInput + " (레드)";
-
-            // 화면 전환
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             
