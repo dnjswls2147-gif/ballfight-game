@@ -92,23 +92,43 @@
             margin: 0 auto 10px auto;
         }
         
+        /* 체력바 및 가운데 텍스트 스타일 */
         .hp-bar {
+            position: relative;
             width: 100%;
-            height: 20px;
+            height: 22px;
             background: #e0e0e0;
             border: 2.5px solid #2c3e50;
-            border-radius: 0px; 
             overflow: hidden;
             margin-bottom: 8px;
         }
         .hp-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 100%;
             width: 100%;
             background-color: #3498db;
             transition: width 0.1s;
-            border-radius: 0px;
         }
         .hp-fill.p2 { background-color: #e74c3c; }
+        
+        .hp-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000000;
+            z-index: 5;
+            pointer-events: none;
+        }
+
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
     </style>
 </head>
@@ -144,10 +164,19 @@
     <!-- 2. 게임 화면 -->
     <div class="container hidden" id="game-screen">
         <canvas id="gameCanvas" width="340" height="340"></canvas>
+        
         <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
-        <div class="hp-bar"><div class="hp-fill" id="p1-hp"></div></div>
+        <div class="hp-bar">
+            <div class="hp-fill" id="p1-hp"></div>
+            <div class="hp-text" id="p1-hp-text">250 / 250</div>
+        </div>
+
         <div class="label" id="p2-label" style="color: #e74c3c;">Player 2 (레드)</div>
-        <div class="hp-bar"><div class="hp-fill p2" id="p2-hp"></div></div>
+        <div class="hp-bar">
+            <div class="hp-fill p2" id="p2-hp"></div>
+            <div class="hp-text" id="p2-hp-text">250 / 250</div>
+        </div>
+
         <button class="btn hidden" id="lobby-back-btn" onclick="showLobby()" style="background:#e67e22; margin-top:10px;">🏠 로비로 가기</button>
     </div>
 
@@ -162,7 +191,6 @@
         let p2 = { x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250 };
 
         function validateName() {
-            // 키보드 포커스 강제 해제 (모바일 터치 씹힘 방지)
             document.activeElement.blur();
             const name = document.getElementById('username').value.trim();
             if (!name) {
@@ -185,6 +213,7 @@
 
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+            resetGameState();
             gameStarted = true;
             requestAnimationFrame(loop);
         }
@@ -254,6 +283,7 @@
 
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+            resetGameState();
             gameStarted = true;
             requestAnimationFrame(loop);
         }
@@ -264,6 +294,8 @@
             p2.x = 255; p2.y = 170; p2.vx = -2.2; p2.vy = -1.6;
             document.getElementById('p1-hp').style.width = '100%';
             document.getElementById('p2-hp').style.width = '100%';
+            document.getElementById('p1-hp-text').innerText = "250 / 250";
+            document.getElementById('p2-hp-text').innerText = "250 / 250";
         }
 
         function update() {
@@ -299,7 +331,10 @@
                 p2.hp = Math.max(0, p2.hp - 30);
 
                 document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
+                document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
+
                 document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
+                document.getElementById('p2-hp-text').innerText = p2.hp + " / " + p2.maxHp;
             }
         }
 
