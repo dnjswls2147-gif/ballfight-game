@@ -42,7 +42,7 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 6px 12px;
+            padding: 8px 14px;
             font-size: 13px;
             font-weight: bold;
             cursor: pointer;
@@ -51,6 +51,8 @@
             gap: 4px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            pointer-events: auto !important;
+            z-index: 100;
         }
         .red-dot {
             position: absolute;
@@ -108,6 +110,7 @@
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
+            pointer-events: auto !important;
         }
 
         h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -360,10 +363,10 @@
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
         <div class="mailbox-top-bar">
-            <div class="mailbox-btn" id="btn-open-mailbox">
+            <button type="button" class="mailbox-btn" id="btn-open-mailbox">
                 📬 우편함
                 <div class="red-dot hidden" id="mail-red-dot"></div>
-            </div>
+            </button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.1 버전</div>
@@ -486,7 +489,7 @@
         let iceFallBlocks = [];
 
         // 우편함 보상 관련 설정
-        let mailClaimed = false; // 보상 수령 여부
+        let mailClaimed = false; 
         // 유효기간: 2026년 10월 13일 오전 9시 00분
         const EXPIRY_TIME = new Date(2026, 9, 13, 9, 0, 0).getTime(); 
 
@@ -906,4 +909,25 @@
                 setTimeout(() => {
                     if (!gameStarted) return;
                     let startX = 50 + i * 80;
-                    iceFallBlocks.
+                    iceFallBlocks.push({
+                        x: startX,
+                        y: -60,
+                        size: 55,
+                        speed: 5 * speedMultiplier,
+                        damage: 20,
+                        target: target
+                    });
+                }, i * 350);
+            }
+        }
+
+        function update() {
+            if (!gameStarted) return;
+
+            if (p1.freezeTimer > 0) {
+                p1.freezeTimer -= speedMultiplier;
+            } else {
+                p1.x += p1.vx * speedMultiplier; 
+                p1.y += p1.vy * speedMultiplier;
+                if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
+                if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.
