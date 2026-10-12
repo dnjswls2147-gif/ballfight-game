@@ -25,7 +25,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
             position: relative;
-            z-index: 10;
         }
         .hidden { display: none !important; }
         h2 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; }
@@ -67,8 +66,7 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 8px;
-            pointer-events: auto;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-ai { background-color: #2ecc71; }
         .btn-friend { background-color: #3498db; }
@@ -122,4 +120,211 @@
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
         <input type="text" id="username" placeholder="이름을 입력하세요" maxlength="10">
-        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button
+        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button>
+        <button class="btn btn-friend" onclick="showFriendMenu()">친구 플레이</button>
+    </div>
+
+    <!-- 1-1. 친구 플레이 메뉴 -->
+    <div class="container hidden" id="friend-screen">
+        <h2>👥 친구 플레이 👥</h2>
+        <div class="desc">방을 생성하거나 번호를 입력하세요</div>
+        <div class="error" id="friend-error"></div>
+        
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
+            <button class="btn" style="margin-top:0; width:40px; background:#e74c3c;" onclick="resetRoom()">X</button>
+        </div>
+        <div class="room-box hidden" id="room-display">----</div>
+
+        <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
+        <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
+        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+    </div>
+
+    <!-- 2. 게임 화면 -->
+    <div class="container hidden" id="game-screen">
+        <canvas id="gameCanvas" width="340" height="340"></canvas>
+        <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
+        <div class="hp-bar"><div class="hp-fill" id="p1-hp"></div></div>
+        <div class="label" id="p2-label" style="color: #e74c3c;">Player 2 (레드)</div>
+        <div class="hp-bar"><div class="hp-fill p2" id="p2-hp"></div></div>
+        <button class="btn hidden" id="lobby-back-btn" onclick="showLobby()" style="background:#e67e22; margin-top:10px;">🏠 로비로 가기</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameStarted = false;
+        let createdCode = null;
+
+        let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
+        let p2 = { x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250 };
+
+        function validateName() {
+            // 키보드 포커스 강제 해제 (모바일 터치 씹힘 방지)
+            document.activeElement.blur();
+            const name = document.getElementById('username').value.trim();
+            if (!name) {
+                document.getElementById('error-msg').innerText = "이름부터 써주세요!";
+                document.getElementById('friend-error').innerText = "이름부터 써주세요!";
+                return null;
+            }
+            document.getElementById('error-msg').innerText = "";
+            document.getElementById('friend-error').innerText = "";
+            return name;
+        }
+
+        function startAI() {
+            const name = validateName();
+            if (!name) return;
+
+            document.getElementById('p1-label').innerText = name + " (블루)";
+            document.getElementById('p2-label').innerText = "AI 봇 (레드)";
+            document.getElementById('lobby-back-btn').classList.remove('hidden');
+
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            gameStarted = true;
+            requestAnimationFrame(loop);
+        }
+
+        function showFriendMenu() {
+            const name = validateName();
+            if (!name) return;
+
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.remove('hidden');
+        }
+
+        function showLobby() {
+            gameStarted = false;
+            resetGameState();
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        }
+
+        function createRoom() {
+            document.activeElement.blur();
+            createdCode = Math.floor(1000 + Math.random() * 9000).toString();
+            const box = document.getElementById('room-display');
+            box.innerText = "방 번호: " + createdCode;
+            box.classList.remove('hidden');
+            document.getElementById('friend-error').innerText = "";
+        }
+
+        function resetRoom() {
+            document.activeElement.blur();
+            createdCode = null;
+            document.getElementById('room-display').classList.add('hidden');
+            document.getElementById('room-input').value = "";
+            document.getElementById('friend-error').innerText = "방이 초기화되었습니다.";
+        }
+
+        function joinRoom() {
+            const name = validateName();
+            if (!name) return;
+
+            document.activeElement.blur();
+            const code = document.getElementById('room-input').value.trim();
+            const err = document.getElementById('friend-error');
+
+            if (code.length !== 4) {
+                err.innerText = "4자리 방 번호를 입력하세요!";
+                return;
+            }
+            if (!createdCode) {
+                err.innerText = "방을 먼저 생성해주세요!";
+                return;
+            }
+            if (code === createdCode) {
+                err.innerText = "자신과 대결할 수 없습니다";
+                return;
+            }
+            if (code !== createdCode) {
+                err.innerText = "비번이 틀렸습니다";
+                return;
+            }
+
+            err.innerText = "";
+            document.getElementById('p1-label').innerText = name + " (블루)";
+            document.getElementById('p2-label').innerText = "친구 (레드)";
+            document.getElementById('lobby-back-btn').classList.add('hidden');
+
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            gameStarted = true;
+            requestAnimationFrame(loop);
+        }
+
+        function resetGameState() {
+            p1.hp = 250; p2.hp = 250;
+            p1.x = 85; p1.y = 170; p1.vx = 2.2; p1.vy = 1.6;
+            p2.x = 255; p2.y = 170; p2.vx = -2.2; p2.vy = -1.6;
+            document.getElementById('p1-hp').style.width = '100%';
+            document.getElementById('p2-hp').style.width = '100%';
+        }
+
+        function update() {
+            if (!gameStarted) return;
+
+            p1.x += p1.vx; p1.y += p1.vy;
+            p2.x += p2.vx; p2.y += p2.vy;
+
+            if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
+            if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+
+            if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
+            if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+
+            let dx = p2.x - p1.x;
+            let dy = p2.y - p1.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < p1.radius + p2.radius) {
+                let tempVx = p1.vx; let tempVy = p1.vy;
+                p1.vx = p2.vx; p1.vy = p2.vy;
+                p2.vx = tempVx; p2.vy = tempVy;
+
+                let overlap = (p1.radius + p2.radius) - dist;
+                let nx = dx / (dist || 1);
+                let ny = dy / (dist || 1);
+                p1.x -= nx * overlap / 2;
+                p1.y -= ny * overlap / 2;
+                p2.x += nx * overlap / 2;
+                p2.y += ny * overlap / 2;
+
+                p1.hp = Math.max(0, p1.hp - 30);
+                p2.hp = Math.max(0, p2.hp - 30);
+
+                document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
+                document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p1.color;
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p2.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function loop() {
+            if (!gameStarted) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+    </script>
+</body>
+</html>
