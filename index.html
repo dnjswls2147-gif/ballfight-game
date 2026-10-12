@@ -326,11 +326,11 @@
 
         let p1 = { 
             x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250,
-            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0 
+            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0, freezeTimer: 0 
         };
         let p2 = { 
             x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250,
-            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0 
+            type: 'standard', iceSkillGauge: 0, lastIceAttackTime: 0, freezeTimer: 0 
         };
 
         function updateCoinsUI() {
@@ -431,12 +431,13 @@
             document.getElementById('game-screen').classList.remove('hidden');
 
             const name = document.getElementById('username').value.trim();
-            document.getElementById('p1-label').innerText = name + " (블루)";
+            const ballName = (selectedCharType === 'ice') ? '아이스 볼' : '스탠다드 볼';
+            document.getElementById('p1-label').innerText = `${name} (${ballName}) (블루)`;
 
             if (nextGameMode === 'ai') {
-                document.getElementById('p2-label').innerText = "AI 봇 (레드)";
+                document.getElementById('p2-label').innerText = "AI 봇 (스탠다드 볼) (레드)";
             } else {
-                document.getElementById('p2-label').innerText = "친구 (레드)";
+                document.getElementById('p2-label').innerText = "친구 (스탠다드 볼) (레드)";
             }
 
             resetGameState();
@@ -518,9 +519,11 @@
             p1.type = selectedCharType;
             p1.iceSkillGauge = 0;
             p1.lastIceAttackTime = Date.now();
+            p1.freezeTimer = 0;
 
             p2.type = 'standard';
             p2.iceSkillGauge = 0;
+            p2.freezeTimer = 0;
 
             projectiles = [];
             iceFallBlocks = [];
@@ -562,18 +565,19 @@
             }
         }
 
+        // 아이스 볼 필살기: 훨씬 더 큰 얼음 4개 폭격 및 1.5초(90프레임) 동안 상대 얼림
         function triggerIceUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 4; i++) {
                 setTimeout(() => {
                     if (!gameStarted) return;
-                    let startX = 40 + i * 85;
+                    let startX = 50 + i * 80;
                     iceFallBlocks.push({
                         x: startX,
-                        y: -40,
-                        size: 32,
+                        y: -60,
+                        size: 55, // 훨씬 커진 큰 얼음
                         speed: 5 * speedMultiplier,
-                        damage: 15,
+                        damage: 20,
                         target: target
                     });
                 }, i * 350);
@@ -583,17 +587,27 @@
         function update() {
             if (!gameStarted) return;
 
-            p1.x += p1.vx * speedMultiplier; 
-            p1.y += p1.vy * speedMultiplier;
-            p2.x += p2.vx * speedMultiplier; 
-            p2.y += p2.vy * speedMultiplier;
+            // 플레이어 1 이동 (얼어있지 않을 때만)
+            if (p1.freezeTimer > 0) {
+                p1.freezeTimer -= speedMultiplier;
+            } else {
+                p1.x += p1.vx * speedMultiplier; 
+                p1.y += p1.vy * speedMultiplier;
+                if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
+                if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+            }
 
-            if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-            if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+            // 플레이어 2 이동 (얼어있지 않을 때만)
+            if (p2.freezeTimer > 0) {
+                p2.freezeTimer -= speedMultiplier;
+            } else {
+                p2.x += p2.vx * speedMultiplier; 
+                p2.y += p2.vy * speedMultiplier;
+                if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
+                if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+            }
 
-            if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-            if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
-
+            // 아이스 볼 스킬 게이지 및 공격 로직
             if (p1.type === 'ice') {
                 p1.iceSkillGauge += (1 / 300) * speedMultiplier;
                 if (p1.iceSkillGauge >= 1) {
@@ -612,13 +626,14 @@
                         y: p1.y,
                         vx: (dx / dist) * 6 * speedMultiplier,
                         vy: (dy / dist) * 6 * speedMultiplier,
-                        radius: 7,
+                        radius: 8,
                         target: p2,
                         damage: 10
                     });
                 }
             }
 
+            // 얼음 파편 투사체 이동 및 충돌
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let proj = projectiles[i];
                 proj.x += proj.vx;
@@ -640,6 +655,7 @@
                 }
             }
 
+            // 큰 얼음 낙하 충돌 판단 (맞으면 1.5초 = 90프레임 동안 얼림)
             for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
                 let ice = iceFallBlocks[i];
                 ice.y += ice.speed;
@@ -647,19 +663,21 @@
                 let dx = ice.target.x - ice.x;
                 let dy = ice.target.y - ice.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < ice.target.radius + ice.size / 2) {
+                if (dist < ice.target.radius + ice.size / 2.5) {
                     ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
+                    ice.target.freezeTimer = 90; // 1.5초 동안 제자리 얼음 상태 고정
                     iceFallBlocks.splice(i, 1);
                     updateHpBars();
                     checkGameOver();
                     continue;
                 }
 
-                if (ice.y > canvas.height + 50) {
+                if (ice.y > canvas.height + 80) {
                     iceFallBlocks.splice(i, 1);
                 }
             }
 
+            // 볼 대 볼 직접 충돌
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
@@ -698,12 +716,14 @@
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
 
             if (p.type === 'ice') {
-                ctx.fillStyle = '#a5f2f3';
+                // 더 진하고 선명한 파란빛 얼음 볼 색상
+                ctx.fillStyle = '#0984e3';
                 ctx.fill();
                 ctx.lineWidth = 3;
-                ctx.strokeStyle = '#ffffff';
+                ctx.strokeStyle = '#74b9ff';
                 ctx.stroke();
 
+                // 스킬 게이지 노란색 테두리
                 if (p.iceSkillGauge > 0) {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.iceSkillGauge));
@@ -716,6 +736,16 @@
                 ctx.fill();
             }
             ctx.closePath();
+
+            // 얼려있을 때 얼음 감옥 시각 효과
+            if (p.freezeTimer > 0) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#00cec9';
+                ctx.stroke();
+                ctx.closePath();
+            }
         }
 
         function draw() {
@@ -727,7 +757,7 @@
             projectiles.forEach(proj => {
                 ctx.beginPath();
                 ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#00d2d3';
+                ctx.fillStyle = '#0984e3';
                 ctx.fill();
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
@@ -739,8 +769,8 @@
                 ctx.save();
                 ctx.translate(ice.x, ice.y);
                 ctx.fillStyle = '#74b9ff';
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0984e3';
+                ctx.lineWidth = 3;
                 ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
                 ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
                 ctx.restore();
