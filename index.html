@@ -25,7 +25,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
             position: relative;
-            z-index: 1;
         }
         .hidden { display: none !important; }
         h2 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; }
@@ -41,8 +40,7 @@
             text-align: left !important;
             margin-bottom: 10px;
             box-sizing: border-box;
-            position: relative;
-            z-index: 2;
+            background: #fff;
         }
         input[type="text"]::placeholder {
             text-align: left !important;
@@ -60,16 +58,15 @@
         }
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 8px;
-            position: relative;
-            z-index: 2;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-ai { background-color: #2ecc71; }
         .btn-friend { background-color: #3498db; }
@@ -95,7 +92,6 @@
             margin: 0 auto 10px auto;
         }
         
-        /* 네모나고 더 커진 체력바 스타일 */
         .hp-bar {
             width: 100%;
             height: 20px;
@@ -108,11 +104,11 @@
         .hp-fill {
             height: 100%;
             width: 100%;
-            background-color: #3498db; /* 내 팀(파란색) */
+            background-color: #3498db;
             transition: width 0.1s;
             border-radius: 0px;
         }
-        .hp-fill.p2 { background-color: #e74c3c; /* 상대 팀(빨간색) */ }
+        .hp-fill.p2 { background-color: #e74c3c; }
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
     </style>
 </head>
@@ -124,8 +120,8 @@
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
         <input type="text" id="username" placeholder="이름을 입력하세요" maxlength="10">
-        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button>
-        <button class="btn btn-friend" onclick="showFriendMenu()">친구 플레이</button>
+        <button class="btn btn-ai" id="ai-btn">AI 자동 매칭</button>
+        <button class="btn btn-friend" id="friend-btn">친구 플레이</button>
     </div>
 
     <!-- 1-1. 친구 플레이 메뉴 -->
@@ -135,14 +131,32 @@
         <div class="error" id="friend-error"></div>
         
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
-            <button class="btn" style="margin-top:0; width:40px; background:#e74c3c;" onclick="resetRoom()">X</button>
+            <button class="btn btn-create" style="margin-top:0; flex:1;" id="create-room-btn">방 생성하기 (랜덤 4자리)</button>
+            <button class="btn" style="margin-top:0; width:40px; background:#e74c3c;" id="reset-room-btn">X</button>
         </div>
         <div class="room-box hidden" id="room-display">----</div>
 
         <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
-        <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
-        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+        <button class="btn btn-join" id="join-room-btn">방 번호로 시작하기</button>
+        <button class="btn btn-back" id="back-lobby-btn">뒤로 가기</button>
     </div>
 
     <!-- 2. 게임 화면 -->
+    <div class="container hidden" id="game-screen">
+        <canvas id="gameCanvas" width="340" height="340"></canvas>
+        <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
+        <div class="hp-bar"><div class="hp-fill" id="p1-hp"></div></div>
+        <div class="label" id="p2-label" style="color: #e74c3c;">Player 2 (레드)</div>
+        <div class="hp-bar"><div class="hp-fill p2" id="p2-hp"></div></div>
+        <button class="btn hidden" id="lobby-back-btn" style="background:#e67e22; margin-top:10px;">🏠 로비로 가기</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameStarted = false;
+        let createdCode = null;
+
+        let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
+        let p2 = { x: 25
