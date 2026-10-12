@@ -27,9 +27,36 @@
             position: relative;
         }
         .hidden { display: none !important; }
-        h2 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; }
+        h2 { color: #2c3e50; margin-bottom: 10px; font-size: 20px; }
         .desc { font-size: 13px; color: #7f8c8d; margin-bottom: 10px; }
         
+        /* 코인 표시 UI 박스 */
+        .coin-box {
+            display: inline-flex;
+            align-items: center;
+            background: #fef9e7;
+            border: 2px solid #f1c40f;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #d68910;
+            margin-bottom: 15px;
+        }
+        .coin-icon {
+            width: 18px;
+            height: 18px;
+            background: #f1c40f;
+            border: 2px solid #d68910;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            text-align: center;
+            line-height: 14px;
+            font-size: 11px;
+            color: #fff;
+        }
+
         input[type="text"] {
             width: 100%;
             padding: 12px 15px;
@@ -74,7 +101,6 @@
         .btn-join { background-color: #e67e22; font-size: 14px; padding: 10px; }
         .btn-back { background-color: #95a5a6; font-size: 13px; padding: 8px; }
         
-        /* 캐릭터 선택 카드 스타일 */
         .char-grid {
             display: flex;
             gap: 10px;
@@ -165,6 +191,7 @@
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
         <h2>🎮 릴리 볼 파이트 🎮</h2>
+        <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">0</span>개</div>
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
         <input type="text" id="username" placeholder="이름을 입력하세요" maxlength="10">
@@ -175,6 +202,7 @@
     <!-- 1-1. 친구 플레이 메뉴 -->
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
+        <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-friend">0</span>개</div>
         <div class="desc">방을 생성하거나 번호를 입력하세요</div>
         <div class="error" id="friend-error"></div>
         
@@ -237,10 +265,16 @@
         let selectedCharType = 'standard';
         let remainingTime = 10;
         let timerInterval = null;
-        let nextGameMode = 'ai'; // 'ai' 또는 'friend'
+        let nextGameMode = 'ai';
+        let userCoins = 0; // 코인 초기 개수
 
         let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
         let p2 = { x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250 };
+
+        function updateCoinsUI() {
+            document.getElementById('coin-count').innerText = userCoins;
+            document.getElementById('coin-count-friend').innerText = userCoins;
+        }
 
         function validateName() {
             document.activeElement.blur();
@@ -296,7 +330,6 @@
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.remove('hidden');
 
-            // 10초 타이머 시작
             remainingTime = 10;
             document.getElementById('timer-display').innerText = remainingTime + "초";
             
@@ -306,7 +339,7 @@
                 document.getElementById('timer-display').innerText = remainingTime + "초";
                 if (remainingTime <= 0) {
                     clearInterval(timerInterval);
-                    confirmCharacterSelection(); // 시간 초과 시 자동 시작
+                    confirmCharacterSelection();
                 }
             }, 1000);
         }
@@ -337,7 +370,6 @@
                 document.getElementById('lobby-back-btn').classList.add('hidden');
             }
 
-            // 캐릭터 스펙 적용
             if (selectedCharType === 'speed') {
                 p1.vx = 3.2; p1.vy = 2.4;
             } else {
@@ -361,6 +393,7 @@
             if (timerInterval) clearInterval(timerInterval);
             gameStarted = false;
             resetGameState();
+            updateCoinsUI();
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
@@ -466,6 +499,9 @@
             draw();
             requestAnimationFrame(loop);
         }
+
+        // 초기 코인 UI 세팅
+        updateCoinsUI();
     </script>
 </body>
 </html>
