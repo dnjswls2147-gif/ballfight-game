@@ -19,7 +19,7 @@
         .screen {
             width: 100%;
             max-width: 360px;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,4 +27,113 @@
         }
         .hidden { display: none !important; }
         .welcome-title {
-            font-size
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .lobby-box {
+            width: 100%;
+            background: #ffffff;
+            border: 3px solid #34495e;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .lobby-desc {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .name-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .name-input:focus {
+            border-color: #2ecc71;
+        }
+        #error-msg {
+            height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .start-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px #27ae60;
+            margin-top: 5px;
+        }
+        /* 게임 화면 컨테이너 크기 최적화 */
+        #game-container {
+            width: 240px;
+            height: 240px;
+            background: #ffffff;
+            border: 3px solid #2c3e50;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        canvas { display: block; }
+        .ui-container {
+            width: 240px;
+            margin-top: 8px;
+        }
+        .hp-bar-wrapper { margin-bottom: 4px; }
+        .hp-label { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+        .hp-bg {
+            width: 100%; height: 12px;
+            background: #e0e0e0; border-radius: 6px;
+            overflow: hidden; border: 2px solid #2c3e50;
+        }
+        .hp-fill { height: 100%; width: 100%; transition: width 0.1s; }
+        #p1-hp { background-color: #e74c3c; }
+        #p2-hp { background-color: #3498db; }
+        
+        /* 로비로 가기 버튼 스타일 */
+        .lobby-btn {
+            width: 240px;
+            padding: 8px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px #d35400;
+            margin-top: 8px;
+        }
+        .start-btn:active, .lobby-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 배경음악 오디오 태그 -->
+    <audio id="bgm" loop preload="auto">
+        <source src="https://actions.google.com/sounds/v1/science_fiction/arcade_game_loop.ogg" type="audio/ogg">
+    
