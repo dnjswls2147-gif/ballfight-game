@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -234,7 +233,7 @@
         <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">0</span>개</div>
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
-        <input type="text" id="username" placeholder="이름을 입력하세요" maxlength="10">
+        <input type="text" id="username" placeholder="이름을 입력하세요 (최대 10자)">
         <button class="btn btn-ai" id="btn-ai-match">AI 자동 매칭</button>
         <button class="btn btn-friend" id="btn-friend-play">친구 플레이</button>
     </div>
@@ -298,7 +297,6 @@
 
         <div id="game-result-box" class="result-box hidden"></div>
 
-        <!-- AI 및 친구 대결 중 언제든 누를 수 있는 로비로 가기 버튼 -->
         <button class="btn" id="lobby-back-btn" style="background:#e67e22; margin-top:10px;">🏠 로비로 가기</button>
     </div>
 
@@ -332,10 +330,25 @@
                 document.getElementById('friend-error').innerText = "이름부터 써주세요!";
                 return null;
             }
+            if (name.length > 10) {
+                document.getElementById('error-msg').innerText = "10글자가 넘었습니다";
+                document.getElementById('friend-error').innerText = "10글자가 넘었습니다";
+                return null;
+            }
             document.getElementById('error-msg').innerText = "";
             document.getElementById('friend-error').innerText = "";
             return name;
         }
+
+        // 입력창 실시간 검증 (10글자 넘어가면 즉시 오류 문구 출력)
+        document.getElementById('username').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val.length > 10) {
+                document.getElementById('error-msg').innerText = "10글자가 넘었습니다";
+            } else {
+                document.getElementById('error-msg').innerText = "";
+            }
+        });
 
         function startAI() {
             const name = validateName();
@@ -517,105 +530,4 @@
                     resBox.className = "result-box result-win";
                     resBox.innerText = "🎉 승리! (+1 코인 획득!)";
                 } else if (p1.hp <= 0 && p2.hp > 0) {
-                    resBox.className = "result-box result-lose";
-                    resBox.innerText = "💀 패배! (0 코인)";
-                } else {
-                    resBox.className = "result-box result-draw";
-                    resBox.innerText = "🤝 무승부! (0 코인)";
-                }
-            }
-        }
-
-        function update() {
-            if (!gameStarted) return;
-
-            p1.x += p1.vx * speedMultiplier; 
-            p1.y += p1.vy * speedMultiplier;
-            p2.x += p2.vx * speedMultiplier; 
-            p2.y += p2.vy * speedMultiplier;
-
-            if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-            if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
-
-            if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-            if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
-
-            let dx = p2.x - p1.x;
-            let dy = p2.y - p1.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < p1.radius + p2.radius) {
-                let tempVx = p1.vx; let tempVy = p1.vy;
-                p1.vx = p2.vx; p1.vy = p2.vy;
-                p2.vx = tempVx; p2.vy = tempVy;
-
-                let overlap = (p1.radius + p2.radius) - dist;
-                let nx = dx / (dist || 1);
-                let ny = dy / (dist || 1);
-                p1.x -= nx * overlap / 2;
-                p1.y -= ny * overlap / 2;
-                p2.x += nx * overlap / 2;
-                p2.y += ny * overlap / 2;
-
-                p1.hp = Math.max(0, p1.hp - 30);
-                p2.hp = Math.max(0, p2.hp - 30);
-
-                document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
-                document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
-
-                document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
-                document.getElementById('p2-hp-text').innerText = p2.hp + " / " + p2.maxHp;
-
-                checkGameOver();
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.beginPath();
-            ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p1.color;
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p2.color;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function loop() {
-            if (!gameStarted) return;
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        function bindTouch(id, handler) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                handler();
-            }, { passive: false });
-            el.addEventListener('click', handler);
-        }
-
-        bindTouch('btn-ai-match', startAI);
-        bindTouch('btn-friend-play', showFriendMenu);
-        bindTouch('btn-create-room', createRoom);
-        bindTouch('btn-reset-room', resetRoom);
-        bindTouch('btn-join-room', joinRoom);
-        bindTouch('btn-back-lobby', showLobby);
-        bindTouch('card-standard', () => selectCharacter('standard'));
-        bindTouch('card-speed', () => selectCharacter('speed'));
-        bindTouch('btn-confirm-char', confirmCharacterSelection);
-        bindTouch('speed-toggle-btn', toggleSpeed);
-        bindTouch('lobby-back-btn', showLobby);
-
-        updateCoinsUI();
-    </script>
-</body>
-</html>
+                    resBox.className = "result-
