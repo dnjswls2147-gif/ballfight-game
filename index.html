@@ -30,13 +30,15 @@
         .desc { font-size: 13px; color: #7f8c8d; margin-bottom: 10px; }
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             font-size: 15px;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
             outline: none;
-            text-align: center;
+            text-align: left !important; /* 글자 입력 시 왼쪽부터 정렬되도록 강제 설정 */
+            direction: ltr;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
         input:focus { border-color: #2ecc71; }
         .error {
@@ -128,7 +130,7 @@
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
-    <!-- 2. 게임 화면 (경기장 크기 확대: 340x340) -->
+    <!-- 2. 게임 화면 -->
     <div class="container hidden" id="game-screen">
         <canvas id="gameCanvas" width="340" height="340"></canvas>
         <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
@@ -145,7 +147,6 @@
         let gameStarted = false;
         let createdCode = null;
 
-        // 공 크기 2배(지름 24 -> 반지름 24), 체력 250, 속도 낮춤(vx: 2.2, vy: 1.6)
         let p1 = { x: 85, y: 170, radius: 24, color: '#3498db', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250 };
         let p2 = { x: 255, y: 170, radius: 24, color: '#e74c3c', vx: -2.2, vy: -1.6, hp: 250, maxHp: 250 };
 
