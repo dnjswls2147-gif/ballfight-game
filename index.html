@@ -6,7 +6,7 @@
     <title>릴리 볼 파이트</title>
     <style>
         body {
-            background-color: #2c163a; /* 할로윈 다크 퍼플 배경 유지 */
+            background-color: #2c163a; /* 할로윈 다크 퍼플 배경 */
             font-family: sans-serif;
             margin: 0;
             padding: 20px;
@@ -282,7 +282,7 @@
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">5</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피: <span id="trophy-count">0</span>개</div>
             <div class="myball-btn-box" id="btn-open-myball">⚽ 나의 공</div>
         </div>
@@ -298,7 +298,7 @@
         <h2>⚽ 나의 공 보관함 ⚽</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container" style="margin-top: 5px;">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-shop">5</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-shop">0</span>개</div>
             <div class="trophy-box">🏆 트로피: <span id="trophy-count-shop">0</span>개</div>
         </div>
         <div class="desc">공을 선택하거나 코인으로 구매하세요!</div>
@@ -315,7 +315,7 @@
         <h2>👥 친구 플레이 👥</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-friend">5</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-friend">0</span>개</div>
             <div class="trophy-box">🏆 트로피: <span id="trophy-count-friend">0</span>개</div>
         </div>
         <div class="desc">방을 생성하거나 번호를 입력하세요</div>
@@ -384,11 +384,39 @@
         let projectiles = [];
         let iceFallBlocks = [];
 
-        // 공 목록 및 상점 데이터 (스탠다드 볼은 무료 기본 공, 아이스 볼은 10코인)
+        // 기본 공 목록 및 데이터
         let ballsData = [
             { id: 'standard', name: '스탠다드 볼', desc: '기본 공 (기본 장착)', price: 0, owned: true, equipped: true },
             { id: 'ice', name: '아이스 볼', desc: '1초마다 투사체 발사 & 5초마다 얼음 낙하 폭격', price: 10, owned: false, equipped: false }
         ];
+
+        // --- 데이터 저장 및 불러오기 기능 ---
+        function saveData() {
+            const gameData = {
+                coins: userCoins,
+                trophies: userTrophies,
+                username: document.getElementById('username').value,
+                balls: ballsData
+            };
+            localStorage.setItem('lily_ball_fight_data', JSON.stringify(gameData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('lily_ball_fight_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.coins !== undefined) userCoins = parsed.coins;
+                    if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
+                    if (parsed.username !== undefined) document.getElementById('username').value = parsed.username;
+                    if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
+                        ballsData = parsed.balls;
+                    }
+                } catch (e) {
+                    console.error("데이터 로드 실패:", e);
+                }
+            }
+        }
 
         let p1 = { 
             x: 85, y: 170, radius: 24, color: '#2980b9', vx: 2.2, vy: 1.6, hp: 250, maxHp: 250,
@@ -456,6 +484,7 @@
                 equipBall(id);
                 updateCoinsUI();
                 renderShop();
+                saveData(); // 데이터 저장
                 alert(`${ball.name} 구매 완료!`);
             } else {
                 alert("코인이 부족합니다! (필요 코인: 10개)");
@@ -465,6 +494,7 @@
         function equipBall(id) {
             ballsData.forEach(b => b.equipped = (b.id === id));
             renderShop();
+            saveData(); // 데이터 저장
         }
 
         function getEquippedBall() {
@@ -486,6 +516,7 @@
             }
             document.getElementById('error-msg').innerText = "";
             document.getElementById('friend-error').innerText = "";
+            saveData(); // 닉네임 입력 후 데이터 저장
             return name;
         }
 
@@ -496,6 +527,7 @@
             } else {
                 document.getElementById('error-msg').innerText = "";
             }
+            saveData();
         });
 
         function startAI() {
@@ -690,6 +722,7 @@
                     userCoins += 1;
                     userTrophies += 1;
                     updateCoinsUI();
+                    saveData(); // 승리 보상 저장
                     resBox.className = "result-box result-win";
                     resBox.innerText = "🎉 승리! (+1 코인 / +1 트로피 획득!)";
                 } else if (p1.hp <= 0 && p2.hp > 0) {
@@ -932,6 +965,8 @@
         bindElementTouch(document.getElementById('speed-toggle-btn'), toggleSpeed);
         bindElementTouch(document.getElementById('lobby-back-btn'), showLobby);
 
+        // 실행 시 기존 저장 데이터 불러오기
+        loadData();
         updateCoinsUI();
     </script>
 </body>
