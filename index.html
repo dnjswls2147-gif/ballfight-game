@@ -30,7 +30,7 @@
             font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
         }
         .lobby-box {
@@ -38,7 +38,7 @@
             background: #ffffff;
             border: 3px solid #34495e;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -48,43 +48,60 @@
         .lobby-desc {
             font-size: 13px;
             color: #7f8c8d;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
         }
         .name-input {
             width: 100%;
-            padding: 10px;
-            font-size: 15px;
+            padding: 9px;
+            font-size: 14px;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
             outline: none;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .name-input:focus {
             border-color: #2ecc71;
         }
         #error-msg {
-            height: 18px;
+            height: 16px;
             font-size: 12px;
             font-weight: bold;
             color: #e74c3c;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-align: center;
         }
-        .start-btn {
+        .btn {
             width: 100%;
-            padding: 12px;
-            background-color: #2ecc71;
+            padding: 11px;
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px #27ae60;
-            margin-top: 5px;
+            margin-top: 6px;
         }
+        .start-btn { background-color: #2ecc71; box-shadow: 0 4px #27ae60; }
+        .friend-btn { background-color: #3498db; box-shadow: 0 4px #2980b9; }
+        .room-create-btn { background-color: #9b59b6; box-shadow: 0 4px #8e44ad; font-size: 14px; padding: 9px; }
+        .room-start-btn { background-color: #e67e22; box-shadow: 0 4px #d35400; font-size: 14px; padding: 9px; }
+        .back-sub-btn { background-color: #95a5a6; box-shadow: 0 4px #7f8c8d; font-size: 13px; padding: 8px; }
+
+        .room-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            background: #ecf0f1;
+            padding: 8px;
+            border-radius: 6px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 3px;
+        }
+
         #game-container {
             width: 240px;
             height: 240px;
@@ -123,7 +140,7 @@
             box-shadow: 0 3px #d35400;
             margin-top: 8px;
         }
-        .start-btn:active, .lobby-btn:active {
+        .btn:active, .lobby-btn:active {
             transform: translateY(2px);
             box-shadow: 0 2px rgba(0,0,0,0.2);
         }
@@ -135,7 +152,7 @@
         <source src="https://actions.google.com/sounds/v1/science_fiction/arcade_game_loop.ogg" type="audio/ogg">
     </audio>
 
-    <!-- 1. 로비 화면 -->
+    <!-- 1. 메인 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <div class="welcome-title">🎮 릴리 볼 파이트 🎮</div>
         <div class="lobby-box">
@@ -143,7 +160,24 @@
             <div id="error-msg"></div>
             <input type="text" id="username" class="name-input" placeholder="이름을 입력하세요" maxlength="10">
         </div>
-        <button class="start-btn" onclick="startGame()">게임 시작하기</button>
+        <button class="btn start-btn" onclick="startSingleGame()">게임 시작하기</button>
+        <button class="btn friend-btn" onclick="openFriendMenu()">친구 플레이</button>
+    </div>
+
+    <!-- 1-1. 친구 플레이 메뉴 화면 -->
+    <div id="friend-screen" class="screen hidden">
+        <div class="welcome-title">👥 친구 플레이 👥</div>
+        <div class="lobby-box">
+            <div class="lobby-desc">방을 생성하거나 번호를 입력하세요</div>
+            <div id="friend-error-msg" style="height:16px; font-size:12px; font-weight:bold; color:#e74c3c; margin-bottom:4px;"></div>
+            
+            <button class="btn room-create-btn" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
+            <div id="room-code-display" class="room-display hidden">----</div>
+
+            <input type="text" id="room-input" class="name-input" placeholder="방 번호 4자리 입력" maxlength="4">
+            <button class="btn room-start-btn" onclick="joinRoom()">방 번호로 시작하기</button>
+        </div>
+        <button class="btn back-sub-btn" onclick="backToMainLobby()">뒤로 가기</button>
     </div>
 
     <!-- 2. 게임 화면 -->
@@ -157,7 +191,7 @@
                 <div class="hp-bg"><div id="p1-hp" class="hp-fill"></div></div>
             </div>
             <div class="hp-bar-wrapper">
-                <div class="hp-label" style="color: #3498db;">Player 2 (AI 블루)</div>
+                <div id="p2-label" class="hp-label" style="color: #3498db;">Player 2 (블루)</div>
                 <div class="hp-bg"><div id="p2-hp" class="hp-fill"></div></div>
             </div>
         </div>
@@ -173,20 +207,27 @@
         let p1 = { x: 60, y: 120, radius: 12, color: '#e74c3c', vx: 3.5, vy: 2.5, hp: 100, maxHp: 100 };
         let p2 = { x: 180, y: 120, radius: 12, color: '#3498db', vx: -3.5, vy: -2.5, hp: 100, maxHp: 100 };
 
-        function startGame() {
+        function checkName() {
             const nameInput = document.getElementById('username').value.trim();
-            const errorMsg = document.getElementById('error-msg');
-
             if (nameInput === "") {
-                errorMsg.innerText = "이름부터 써주세요!";
-                return;
+                document.getElementById('error-msg').innerText = "이름부터 써주세요!";
+                document.getElementById('friend-error-msg').innerText = "이름부터 써주세요!";
+                return null;
             }
+            document.getElementById('error-msg').innerText = "";
+            document.getElementById('friend-error-msg').innerText = "";
+            return nameInput;
+        }
 
-            errorMsg.innerText = "";
+        function startSingleGame() {
+            const nameInput = checkName();
+            if (!nameInput) return;
+
             bgm.volume = 1.0;
             bgm.play().catch(e => console.log("음악 재생 차단됨:", e));
 
             document.getElementById('p1-label').innerText = nameInput + " (레드)";
+            document.getElementById('p2-label').innerText = "Player 2 (AI 블루)";
 
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -195,9 +236,51 @@
             requestAnimationFrame(gameLoop);
         }
 
+        function openFriendMenu() {
+            const nameInput = checkName();
+            if (!nameInput) return;
+
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.remove('hidden');
+        }
+
+        function backToMainLobby() {
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        }
+
+        function createRoom() {
+            const randomCode = Math.floor(1000 + Math.random() * 9000);
+            const display = document.getElementById('room-code-display');
+            display.innerText = "방 번호: " + randomCode;
+            display.classList.remove('hidden');
+        }
+
+        function joinRoom() {
+            const nameInput = checkName();
+            if (!nameInput) return;
+
+            const roomCode = document.getElementById('room-input').value.trim();
+            if (roomCode.length !== 4) {
+                document.getElementById('friend-error-msg').innerText = "4자리 방 번호를 입력하세요!";
+                return;
+            }
+
+            bgm.volume = 1.0;
+            bgm.play().catch(e => console.log("음악 재생 차단됨:", e));
+
+            document.getElementById('p1-label').innerText = nameInput + " (레드)";
+            document.getElementById('p2-label').innerText = "친구 (블루)";
+
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            gameStarted = true;
+            requestAnimationFrame(gameLoop);
+        }
+
         function goToLobby() {
             gameStarted = false;
-            
             bgm.pause();
             bgm.currentTime = 0;
 
@@ -208,7 +291,10 @@
             document.getElementById('p2-hp').style.width = '100%';
 
             document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('lobby-screen').classList.remove('hidden');
+            document.getElementById('room-code-display').classList.add('hidden');
+            document.getElementById('room-input').value = "";
         }
 
         function update() {
