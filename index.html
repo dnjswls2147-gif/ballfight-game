@@ -87,10 +87,6 @@
 </head>
 <body>
 
-    <audio id="bgm" loop preload="auto">
-        <source src="https://actions.google.com/sounds/v1/science_fiction/arcade_game_loop.ogg" type="audio/ogg">
-    </audio>
-
     <!-- 1. 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <div class="welcome-title">🎮 릴리 볼 파이트 🎮</div>
@@ -100,103 +96,4 @@
 
     <!-- 2. 게임 화면 -->
     <div id="game-screen" class="screen hidden">
-        <div id="game-container">
-            <canvas id="gameCanvas" width="300" height="300"></canvas>
-        </div>
-        <div class="ui-container">
-            <div class="hp-bar-wrapper">
-                <div class="hp-label" style="color: #e74c3c;">Player 1 (레드)</div>
-                <div class="hp-bg"><div id="p1-hp" class="hp-fill"></div></div>
-            </div>
-            <div class="hp-bar-wrapper">
-                <div class="hp-label" style="color: #3498db;">Player 2 (블루)</div>
-                <div class="hp-bg"><div id="p2-hp" class="hp-fill"></div></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const bgm = document.getElementById('bgm');
-
-        let gameStarted = false;
-        let p1 = { x: 70, y: 150, radius: 14, color: '#e74c3c', vx: 3.5, vy: 2.5, hp: 100, maxHp: 100 };
-        let p2 = { x: 230, y: 150, radius: 14, color: '#3498db', vx: -3.5, vy: -2.5, hp: 100, maxHp: 100 };
-
-        function startGame() {
-            // 음악 재생 시도
-            bgm.play().then(() => {
-                console.log("BGM 재생 성공");
-            }).catch(e => {
-                console.log("BGM 재생 차단됨:", e);
-            });
-
-            document.getElementById('lobby-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            gameStarted = true;
-            requestAnimationFrame(gameLoop);
-        }
-
-        function update() {
-            if (!gameStarted) return;
-
-            p1.x += p1.vx; p1.y += p1.vy;
-            p2.x += p2.vx; p2.y += p2.vy;
-
-            if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-            if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
-
-            if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-            if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
-
-            let dx = p2.x - p1.x;
-            let dy = p2.y - p1.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < p1.radius + p2.radius) {
-                let tempVx = p1.vx; let tempVy = p1.vy;
-                p1.vx = p2.vx; p1.vy = p2.vy;
-                p2.vx = tempVx; p2.vy = tempVy;
-
-                let overlap = (p1.radius + p2.radius) - dist;
-                let nx = dx / (dist || 1);
-                let ny = dy / (dist || 1);
-                p1.x -= nx * overlap / 2;
-                p1.y -= ny * overlap / 2;
-                p2.x += nx * overlap / 2;
-                p2.y += ny * overlap / 2;
-
-                p1.hp = Math.max(0, p1.hp - 10);
-                p2.hp = Math.max(0, p2.hp - 10);
-
-                document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
-                document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.beginPath();
-            ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p1.color;
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p2.color;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function gameLoop() {
-            if (!gameStarted) return;
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-    </script>
-</body>
-</html>
+        <div id="game
