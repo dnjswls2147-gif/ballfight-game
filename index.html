@@ -596,10 +596,8 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_reset_v4';
-
-        // 금지/기본 등록 닉네임 리스트
-        const forbiddenNames = ["운영자", "관리자", "AI 봇", "system", "admin", "릴리", "이"];
+        // 전체 데이터 초기화를 위한 새로운 저장 키
+        const STORAGE_KEY = 'lily_ball_fight_reset_v5';
 
         let savedUsername = "";
 
@@ -716,9 +714,11 @@
         }
 
         function loadData() {
+            // 이전 스토리지 키 완벽 삭제로 전체 초기화 실행
             localStorage.removeItem('lily_ball_fight_data');
             localStorage.removeItem('lily_ball_fight_reset_v2');
             localStorage.removeItem('lily_ball_fight_reset_v3');
+            localStorage.removeItem('lily_ball_fight_reset_v4');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -769,22 +769,16 @@
                 return;
             }
 
-            // 1차 기본 금지 닉네임 검사
-            if (forbiddenNames.some(u => u.toLowerCase() === val.toLowerCase())) {
-                err.innerText = "중복되는 닉네임 입니다!";
-                return;
-            }
-
             err.style.color = "#2980b9";
-            err.innerText = "닉네임 중복 확인 중...";
+            err.innerText = "닉네임 확인 중...";
             btn.disabled = true;
 
-            // 실시간 네트워크 중복 검사 (PeerJS 서버 조회)
-            const checkPeerId = 'lily-ball-namecheck-' + encodeURIComponent(val.toLowerCase());
+            // 전체 문장(100%)이 정확히 똑같은 경우에만 중복 처리하는 실시간 PeerJS 검사
+            const checkPeerId = 'lily-ball-exactname-' + encodeURIComponent(val.toLowerCase());
             const testPeer = new Peer(checkPeerId);
 
             testPeer.on('open', () => {
-                // 내 이름이 정상적으로 중복 없이 생성 가능함
+                // 완전히 똑같은 이름이 없으므로 중복 통과!
                 testPeer.destroy();
                 savedUsername = val;
                 saveData();
@@ -794,7 +788,7 @@
             });
 
             testPeer.on('error', (e) => {
-                // 이미 타인에 의해 Peer ID가 선점/사용 중인 경우
+                // 정확히 100% 동일한 이름이 이미 등록되어 사용 중인 경우
                 testPeer.destroy();
                 err.style.color = "#e74c3c";
                 err.innerText = "중복되는 닉네임 입니다!";
