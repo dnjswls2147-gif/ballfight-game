@@ -1159,19 +1159,30 @@
             requestAnimationFrame(loop);
         }
 
+        // 0.5초(500ms) 딜레이(쿨타임) 적용 함수
+        let lastClickTime = 0;
         function bindElementTouch(el, handler) {
             if (!el) return;
-            let triggered = false;
+            
+            function handleAction(e) {
+                const now = Date.now();
+                if (now - lastClickTime < 500) {
+                    return; // 0.5초 이내 연속 클릭 방지
+                }
+                lastClickTime = now;
+                handler();
+            }
 
+            let triggered = false;
             el.addEventListener('pointerdown', (e) => {
                 triggered = true;
-                handler();
+                handleAction(e);
                 e.stopPropagation();
             }, { passive: true });
 
             el.addEventListener('click', (e) => {
                 if (!triggered) {
-                    handler();
+                    handleAction(e);
                 }
                 triggered = false;
                 e.stopPropagation();
