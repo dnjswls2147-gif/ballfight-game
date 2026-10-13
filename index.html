@@ -273,7 +273,7 @@
             color: #fff;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 12px 15px;
             font-size: 14px;
@@ -287,7 +287,7 @@
             user-select: auto;
             -webkit-user-select: auto;
         }
-        input[type="text"]:focus { 
+        input[type="text"]:focus, input[type="password"]:focus { 
             border-color: #e67e22; 
         }
         
@@ -313,6 +313,7 @@
         .btn-friend { background-color: #2980b9; }
         .btn-group { background-color: #8e44ad; }
         .btn-boss { background-color: #e67e22; border: 2px solid #d35400; }
+        .btn-admin { background-color: #34495e; border: 1px solid #2c3e50; font-size: 12px; padding: 10px; }
         .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
@@ -438,33 +439,164 @@
             pointer-events: none;
         }
 
-        /* 보스전 조이스틱 패드 스타일 */
-        .joystick-pad {
+        /* 어드민 패널 스타일 */
+        .admin-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            background: #1e1b29;
+            border: 2px solid #e91e63;
+            border-radius: 12px;
+            padding: 15px;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            z-index: 10000;
+        }
+        .admin-header {
             display: flex;
             justify-content: space-between;
-            gap: 8px;
-            margin-top: 8px;
+            align-items: center;
+            border-bottom: 1px solid #3a354d;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
-        .joy-btn {
-            flex: 1;
-            background: #34495e;
-            color: white;
-            border: 2px solid #2c3e50;
-            border-radius: 8px;
-            padding: 12px 0;
-            font-size: 15px;
+        .admin-title {
+            font-size: 14px;
             font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            color: #e91e63;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .joy-btn:active {
-            background: #2980b9;
+        .admin-body {
+            display: flex;
+            gap: 10px;
+        }
+        .admin-sidebar {
+            width: 70px;
+            border-right: 1px solid #3a354d;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 8px;
+        }
+        .admin-tab-btn {
+            background: transparent;
+            border: none;
+            color: #8b85a1;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .admin-tab-btn.active {
+            background: #2d2640;
+            color: #e91e63;
+        }
+        .admin-content {
+            flex: 1;
+            font-size: 12px;
+        }
+        .admin-section-title {
+            color: #ffe0b2;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .admin-btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .admin-small-btn {
+            background: #2d2a3e;
+            border: 1px solid #4a4463;
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .admin-small-btn:active {
+            background: #e91e63;
+        }
+        .admin-slider-container {
+            margin-bottom: 10px;
+        }
+        .admin-slider-container input {
+            width: 100%;
+            accent-color: #e91e63;
         }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
     </style>
 </head>
 <body>
+
+    <!-- 어드민 비밀번호 입력 모달 -->
+    <div class="modal-overlay hidden" id="admin-auth-modal">
+        <div class="modal-box" style="max-width: 300px;">
+            <div class="header-row">
+                <h2>🔒 관리자 인증</h2>
+                <button class="btn-close-x" onclick="closeAdminAuth()">X</button>
+            </div>
+            <div class="version-text">비밀번호를 입력하세요</div>
+            <div class="error" id="admin-auth-error"></div>
+            <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.keyCode===13) checkAdminPassword()">
+            <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
+        </div>
+    </div>
+
+    <!-- 어드민 패널 모달 창 -->
+    <div class="admin-window hidden" id="admin-panel">
+        <div class="admin-header">
+            <div class="admin-title">⚙️ 어드민 패널</div>
+            <button class="btn-close-x" style="width:24px; height:24px; font-size:12px;" onclick="closeAdminPanel()">X</button>
+        </div>
+        <div class="admin-body">
+            <div class="admin-sidebar">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('main')">메인</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('currency')">재화</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
+            </div>
+            <div class="admin-content">
+                <!-- 메인 탭 -->
+                <div id="admin-tab-main">
+                    <div class="admin-section-title">플레이어 체력 제어</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminSetHp('p1', 9999)">P1 무적</button>
+                        <button class="admin-small-btn" onclick="adminSetHp('p2', 0)">P2 즉사</button>
+                    </div>
+                </div>
+                <!-- 재화 탭 -->
+                <div id="admin-tab-currency" class="hidden">
+                    <div class="admin-section-title">코인 조절</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminAddCoins(100)">+100</button>
+                        <button class="admin-small-btn" onclick="adminAddCoins(-100)">-100</button>
+                    </div>
+                    <div class="admin-section-title">트로피 조절</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminAddTrophies(10)">+10</button>
+                        <button class="admin-small-btn" onclick="adminAddTrophies(-10)">-10</button>
+                    </div>
+                </div>
+                <!-- 설정 탭 -->
+                <div id="admin-tab-screen" class="hidden">
+                    <div class="admin-section-title">패널 투명도</div>
+                    <div class="admin-slider-container">
+                        <input type="range" id="admin-opacity-slider" min="0.2" max="1" step="0.1" value="1" oninput="changeAdminOpacity(this.value)">
+                    </div>
+                    <button class="admin-small-btn" style="width:100%" onclick="resetAdminPos()">패널 위치 초기화</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 0. 최초 1회 이름 설정 팝업 -->
     <div class="modal-overlay hidden" id="name-modal">
@@ -536,6 +668,7 @@
             <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 6px;">친구 플레이</button>
             <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 6px;">👥 그룹</button>
         </div>
+        <button class="btn btn-admin" onclick="openAdminAuth()" style="margin-top: 12px;">⚙️ 어드민 패널 (F2)</button>
     </div>
 
     <!-- 1-0-1. 우편함 화면 -->
@@ -629,33 +762,14 @@
         </div>
     </div>
 
-    <!-- 3. 보스 피하기 게임 화면 -->
-    <div class="container hidden" id="boss-screen">
-        <div class="canvas-container" style="margin-bottom: 5px;">
-            <canvas id="bossCanvas" width="340" height="340"></canvas>
-        </div>
-
-        <div class="label" style="color: #e67e22; text-align: center; font-size: 13px; margin-bottom: 6px;" id="boss-status-text">권루트(L)의 공격을 피하세요!</div>
-        
-        <!-- 조이스틱 패드 -->
-        <div class="joystick-pad">
-            <button class="joy-btn" onmousedown="startMove(-1)" onmouseup="stopMove()" ontouchstart="startMove(-1)" ontouchend="stopMove()">⬅️ 왼쪽</button>
-            <button class="joy-btn" onmousedown="startJump()" ontouchstart="startJump()">⬆️ 점프</button>
-            <button class="joy-btn" onmousedown="startMove(1)" onmouseup="stopMove()" ontouchstart="startMove(1)" ontouchend="stopMove()">➡️ 오른쪽</button>
-        </div>
-
-        <button class="btn btn-back" onclick="showLobby()" style="margin-top: 10px; padding: 12px;">🏠 로비로 가기</button>
-    </div>
-
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const bossCanvas = document.getElementById('bossCanvas');
-        const bossCtx = bossCanvas.getContext('2d');
-
-        // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
+
+        // 관리자 전용 비밀번호 (변경됨: 9467)
+        const ADMIN_PASSWORD = "9467";
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -695,15 +809,93 @@
         let isHost = false; 
         let friendName = "친구";
 
-        // 보스 피하기 모드 변수
-        let bossGameActive = false;
-        let bossCountdown = 3;
-        let bossCountdownInterval = null;
-        let bossPlayer = { x: 170, y: 290, radius: 18, vx: 0, speed: 4, vy: 0, isJumping:false };
-        let bossProjectiles = [];
-        let bossAttackCount = 0;
-        let bossAttackTimer = null;
-        let bossGameOver = false;
+        // --- 어드민 패널 보안 제어 함수 ---
+        function openAdminAuth() {
+            document.getElementById('admin-password-input').value = "";
+            document.getElementById('admin-auth-error').innerText = "";
+            document.getElementById('admin-auth-modal').classList.remove('hidden');
+        }
+
+        function closeAdminAuth() {
+            document.getElementById('admin-auth-modal').classList.add('hidden');
+        }
+
+        function checkAdminPassword() {
+            const input = document.getElementById('admin-password-input').value;
+            const err = document.getElementById('admin-auth-error');
+
+            if (input === ADMIN_PASSWORD) {
+                closeAdminAuth();
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } else {
+                err.innerText = "비밀번호가 올바르지 않습니다!";
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                openAdminAuth();
+            }
+        });
+
+        function switchAdminTab(tabName) {
+            document.getElementById('admin-tab-main').classList.add('hidden');
+            document.getElementById('admin-tab-currency').classList.add('hidden');
+            document.getElementById('admin-tab-screen').classList.add('hidden');
+
+            const tabs = document.querySelectorAll('.admin-tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tabName === 'main') {
+                document.getElementById('admin-tab-main').classList.remove('hidden');
+                tabs[0].classList.add('active');
+            } else if (tabName === 'currency') {
+                document.getElementById('admin-tab-currency').classList.remove('hidden');
+                tabs[1].classList.add('active');
+            } else if (tabName === 'screen') {
+                document.getElementById('admin-tab-screen').classList.remove('hidden');
+                tabs[2].classList.add('active');
+            }
+        }
+
+        function adminAddCoins(amount) {
+            userCoins = Math.max(0, userCoins + amount);
+            updateCoinsUI();
+            saveData();
+        }
+
+        function adminAddTrophies(amount) {
+            userTrophies = Math.max(0, userTrophies + amount);
+            updateCoinsUI();
+            saveData();
+        }
+
+        function adminSetHp(player, hp) {
+            if (player === 'p1') {
+                p1.hp = hp;
+                p1.maxHp = Math.max(p1.maxHp, hp);
+            } else {
+                p2.hp = hp;
+            }
+            updateHpBars();
+            checkGameOver();
+        }
+
+        function changeAdminOpacity(val) {
+            document.getElementById('admin-panel').style.opacity = val;
+        }
+
+        function resetAdminPos() {
+            const panel = document.getElementById('admin-panel');
+            panel.style.top = "50%";
+            panel.style.left = "50%";
+            panel.style.transform = "translate(-50%, -50%)";
+        }
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -958,27 +1150,12 @@
             showCharacterSelect();
         }
 
-        // 보스 피하기 버튼 클릭 시 점검 중 메시지 출력 및 진입 차단
         function startBossMode() {
             const err = document.getElementById('lobby-error-msg');
             err.innerText = "🛠️ 현재 보스 피하기 기능은 점검 중입니다!";
             setTimeout(() => {
                 err.innerText = "";
             }, 3000);
-        }
-
-        // 조이스틱 조작 함수
-        function startMove(dir) {
-            bossPlayer.vx = dir * bossPlayer.speed;
-        }
-        function stopMove() {
-            bossPlayer.vx = 0;
-        }
-        function startJump() {
-            if (!bossPlayer.isJumping && bossGameActive) {
-                bossPlayer.vy = -9;
-                bossPlayer.isJumping = true;
-            }
         }
 
         function openGroupMenu() {
@@ -1221,13 +1398,10 @@
         function showLobby() {
             if (timerInterval) clearInterval(timerInterval);
             if (countdownInterval) clearInterval(countdownInterval);
-            if (bossCountdownInterval) clearInterval(bossCountdownInterval);
-            if (bossAttackTimer) clearInterval(bossAttackTimer);
 
             gameStarted = false;
             isCountingDown = false;
             gameOverState = null;
-            bossGameActive = false;
 
             if (peer) {
                 peer.destroy();
@@ -1241,7 +1415,6 @@
             checkMailRedDot();
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
-            document.getElementById('boss-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
@@ -1734,4 +1907,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
