@@ -16,7 +16,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            touch-action: manipulation;
         }
         .container {
             width: 100%;
@@ -28,7 +27,6 @@
             box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
             text-align: center;
             position: relative;
-            z-index: 10;
         }
         .hidden { display: none !important; }
 
@@ -51,11 +49,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            pointer-events: auto !important;
-            z-index: 100;
         }
         .red-dot {
             position: absolute;
@@ -91,8 +84,6 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            touch-action: manipulation;
-            pointer-events: auto !important;
         }
 
         /* 갈색 네모 우편함 모달 */
@@ -142,8 +133,6 @@
             font-size: 13px;
             font-weight: bold;
             cursor: pointer;
-            touch-action: manipulation;
-            pointer-events: auto !important;
         }
 
         h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -191,10 +180,6 @@
             font-weight: bold;
             color: #8e44ad;
             cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            pointer-events: auto !important;
         }
         .coin-icon {
             width: 16px;
@@ -243,12 +228,6 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 8px;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-            pointer-events: auto !important;
-            position: relative;
-            z-index: 20;
         }
         .btn-ai { background-color: #27ae60; }
         .btn-friend { background-color: #2980b9; }
@@ -286,8 +265,6 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            touch-action: manipulation;
-            pointer-events: auto !important;
         }
         .btn-buy { background-color: #d35400; }
         .btn-select { background-color: #2980b9; }
@@ -336,8 +313,6 @@
             cursor: pointer;
             z-index: 20;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            touch-action: manipulation;
-            pointer-events: auto !important;
         }
         .speed-btn.active {
             background: #c0392b;
@@ -388,7 +363,7 @@
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
         <div class="mailbox-top-bar">
-            <button type="button" class="mailbox-btn" id="btn-open-mailbox">
+            <button class="mailbox-btn" onclick="showMailbox()">
                 📬 우편함
                 <div class="red-dot hidden" id="mail-red-dot"></div>
             </button>
@@ -398,20 +373,20 @@
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피: <span id="trophy-count">0</span>개</div>
-            <div class="myball-btn-box" id="btn-open-myball">⚽ 나의 공</div>
+            <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
         <div class="desc">플레이어 이름을 입력하세요!</div>
         <div class="error" id="error-msg"></div>
         <input type="text" id="username" placeholder="이름을 입력하세요 (최대 10글자)">
-        <button class="btn btn-ai" id="btn-ai-match">AI 자동 매칭</button>
-        <button class="btn btn-friend" id="btn-friend-play">친구 플레이</button>
+        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button>
+        <button class="btn btn-friend" onclick="showFriendMenu()">친구 플레이</button>
     </div>
 
     <!-- 1-0-1. 우편함 화면 -->
     <div class="container hidden" id="mailbox-screen">
         <div class="header-row">
             <h2>📬 우편함 📬</h2>
-            <button type="button" class="btn-close-x" id="btn-close-mailbox">X</button>
+            <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
         <div class="version-text">v1.1 버전</div>
         
@@ -433,7 +408,7 @@
         
         <div class="shop-list" id="shop-list-container"></div>
 
-        <button class="btn btn-back" id="btn-close-myball">로비로 돌아가기</button>
+        <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
     <!-- 1-1. 친구 플레이 메뉴 -->
@@ -448,33 +423,33 @@
         <div class="error" id="friend-error"></div>
         
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button class="btn btn-create" style="margin-top:0; flex:1;" id="btn-create-room">방 생성하기 (랜덤 4자리)</button>
-            <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" id="btn-reset-room">X</button>
+            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
+            <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" onclick="resetRoom()">X</button>
         </div>
         <div class="room-box hidden" id="room-display">----</div>
 
         <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
-        <button class="btn btn-join" id="btn-join-room">방 번호로 시작하기</button>
-        <button class="btn btn-back" id="btn-back-lobby">뒤로 가기</button>
+        <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
+        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
     <!-- 1-2. 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
         <div class="header-row">
             <h2>⚔️ 출전 준비 ⚔️</h2>
-            <button type="button" class="btn-close-x" id="btn-close-char">X</button>
+            <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
         <div class="version-text">v1.1 버전</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
-        <button class="btn btn-ai" id="btn-confirm-char">게임 시작</button>
+        <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
     </div>
 
     <!-- 2. 게임 화면 -->
     <div class="container hidden" id="game-screen">
         <div class="canvas-container">
             <canvas id="gameCanvas" width="340" height="340"></canvas>
-            <button class="speed-btn" id="speed-toggle-btn">⚡ 2X 배속</button>
+            <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
         <div class="label" id="p1-label" style="color: #2980b9;">Player 1 (블루)</div>
@@ -530,6 +505,7 @@
 
         function checkMailRedDot() {
             const redDot = document.getElementById('mail-red-dot');
+            if (!redDot) return;
             if (isMailValid()) {
                 redDot.classList.remove('hidden');
             } else {
@@ -557,10 +533,9 @@
                             <div class="mail-info-title">🎁 선물: 10 코인</div>
                             <div class="mail-info-time">유효 기간: 10월 13일 오전 9시 6분까지</div>
                         </div>
-                        <button class="btn-claim" id="btn-claim-reward">보상 받기</button>
+                        <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
                     </div>
                 `;
-                bindElementTouch(document.getElementById('btn-claim-reward'), claimMailReward);
             } else {
                 msgEl.innerText = "받을 보상이 없습니다";
                 contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">도착한 선물이 없거나 이미 수령한 보상입니다.</div>`;
@@ -590,10 +565,11 @@
         }
 
         function saveData() {
+            const usernameInput = document.getElementById('username');
             const gameData = {
                 coins: userCoins,
                 trophies: userTrophies,
-                username: document.getElementById('username').value,
+                username: usernameInput ? usernameInput.value : '',
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
@@ -607,7 +583,10 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
-                    if (parsed.username !== undefined) document.getElementById('username').value = parsed.username;
+                    if (parsed.username !== undefined) {
+                        const usernameInput = document.getElementById('username');
+                        if (usernameInput) usernameInput.value = parsed.username;
+                    }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
@@ -666,15 +645,11 @@
                 } else if (ball.owned) {
                     btn.className += ' btn-select';
                     btn.innerText = '선택하기';
-                    bindElementTouch(btn, () => {
-                        equipBall(ball.id);
-                    });
+                    btn.onclick = () => equipBall(ball.id);
                 } else {
                     btn.className += ' btn-buy';
                     btn.innerText = `${ball.price} 코인 구매`;
-                    bindElementTouch(btn, () => {
-                        buyBall(ball.id);
-                    });
+                    btn.onclick = () => buyBall(ball.id);
                 }
 
                 itemDiv.appendChild(infoDiv);
@@ -709,7 +684,8 @@
         }
 
         function validateName() {
-            const name = document.getElementById('username').value.trim();
+            const nameEl = document.getElementById('username');
+            const name = nameEl ? nameEl.value.trim() : '';
             if (!name) {
                 document.getElementById('error-msg').innerText = "이름부터 써주세요!";
                 document.getElementById('friend-error').innerText = "이름부터 써주세요!";
@@ -725,16 +701,6 @@
             saveData();
             return name;
         }
-
-        document.getElementById('username').addEventListener('input', function() {
-            const val = this.value.trim();
-            if (val.length > 10) {
-                document.getElementById('error-msg').innerText = "10글자가 넘었습니다";
-            } else {
-                document.getElementById('error-msg').innerText = "";
-            }
-            saveData();
-        });
 
         function startAI() {
             const name = validateName();
@@ -1001,8 +967,10 @@
             isDoubleSpeed = false;
             speedMultiplier = 1;
             const btn = document.getElementById('speed-toggle-btn');
-            btn.innerText = "⚡ 2X 배속";
-            btn.classList.remove('active');
+            if (btn) {
+                btn.innerText = "⚡ 2X 배속";
+                btn.classList.remove('active');
+            }
 
             updateHpBars();
         }
@@ -1170,11 +1138,16 @@
         }
 
         function updateHpBars() {
-            document.getElementById('p1-hp').style.width = Math.max(0, (p1.hp / p1.maxHp * 100)) + '%';
-            document.getElementById('p1-hp-text').innerText = Math.max(0, p1.hp) + " / " + p1.maxHp;
+            const p1HpEl = document.getElementById('p1-hp');
+            const p1TextEl = document.getElementById('p1-hp-text');
+            const p2HpEl = document.getElementById('p2-hp');
+            const p2TextEl = document.getElementById('p2-hp-text');
 
-            document.getElementById('p2-hp').style.width = Math.max(0, (p2.hp / p2.maxHp * 100)) + '%';
-            document.getElementById('p2-hp-text').innerText = Math.max(0, p2.hp) + " / " + p2.maxHp;
+            if (p1HpEl) p1HpEl.style.width = Math.max(0, (p1.hp / p1.maxHp * 100)) + '%';
+            if (p1TextEl) p1TextEl.innerText = Math.max(0, p1.hp) + " / " + p1.maxHp;
+
+            if (p2HpEl) p2HpEl.style.width = Math.max(0, (p2.hp / p2.maxHp * 100)) + '%';
+            if (p2TextEl) p2TextEl.innerText = Math.max(0, p2.hp) + " / " + p2.maxHp;
         }
 
         function drawPlayer(p) {
@@ -1281,34 +1254,6 @@
                 requestAnimationFrame(loop);
             }
         }
-
-        function bindElementTouch(el, handler) {
-            if (!el) return;
-            
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                handler();
-            });
-
-            el.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                handler();
-            }, { passive: false });
-        }
-
-        bindElementTouch(document.getElementById('btn-ai-match'), startAI);
-        bindElementTouch(document.getElementById('btn-friend-play'), showFriendMenu);
-        bindElementTouch(document.getElementById('btn-open-myball'), showMyBallShop);
-        bindElementTouch(document.getElementById('btn-close-myball'), showLobby);
-        bindElementTouch(document.getElementById('btn-open-mailbox'), showMailbox);
-        bindElementTouch(document.getElementById('btn-close-mailbox'), showLobby);
-        bindElementTouch(document.getElementById('btn-close-char'), showLobby);
-        bindElementTouch(document.getElementById('btn-create-room'), createRoom);
-        bindElementTouch(document.getElementById('btn-reset-room'), resetRoom);
-        bindElementTouch(document.getElementById('btn-join-room'), joinRoom);
-        bindElementTouch(document.getElementById('btn-back-lobby'), showLobby);
-        bindElementTouch(document.getElementById('btn-confirm-char'), confirmCharacterSelection);
-        bindElementTouch(document.getElementById('speed-toggle-btn'), toggleSpeed);
 
         loadData();
         updateCoinsUI();
