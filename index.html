@@ -831,9 +831,6 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
-                    if (parsed.username !== undefined && parsed.username.trim() !== "") {
-                        savedUsername = parsed.username;
-                    }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
@@ -849,11 +846,9 @@
                 }
             }
 
-            if (!savedUsername) {
-                document.getElementById('name-modal').classList.remove('hidden');
-            } else {
-                document.getElementById('name-modal').classList.add('hidden');
-            }
+            // 무조건 이름 정하기 팝업 창을 띄움
+            savedUsername = "";
+            document.getElementById('name-modal').classList.remove('hidden');
 
             checkMailRedDot();
             updateCoinsUI();
@@ -1951,4 +1946,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
