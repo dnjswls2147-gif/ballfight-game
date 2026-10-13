@@ -233,7 +233,7 @@
         .btn-friend { background-color: #2980b9; }
         .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
-        .btn-back { background-color: #7f8c8d; font-size: 14px; padding: 12px; }
+        .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
         
         .shop-list {
             display: flex;
@@ -463,6 +463,9 @@
             <div class="hp-fill p2" id="p2-hp"></div>
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
+
+        <!-- 게임 종료 시 나타나는 로비로 가기 버튼 -->
+        <button class="btn btn-back hidden" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 15px;">🏠 로비로 가기</button>
     </div>
 
     <script>
@@ -492,11 +495,6 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
-
-        let ballsData = [
-            { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 10, hp: 250, damage: 25, owned: false, equipped: false }
-        ];
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -563,6 +561,11 @@
                 alert("보상을 받을수 없음니다");
             }
         }
+
+        let ballsData = [
+            { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
+            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 10, hp: 250, damage: 25, owned: false, equipped: false }
+        ];
 
         function saveData() {
             const usernameInput = document.getElementById('username');
@@ -804,6 +807,9 @@
                     iceFallBlocks = data.iceFallBlocks;
                     gameOverState = data.gameOverState;
                     updateHpBars();
+                    if (gameOverState) {
+                        document.getElementById('btn-game-lobby').classList.remove('hidden');
+                    }
                 }
             } else if (data.type === 'SPEED_TOGGLE') {
                 isDoubleSpeed = data.isDoubleSpeed;
@@ -921,6 +927,7 @@
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
+            document.getElementById('btn-game-lobby').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
@@ -990,6 +997,8 @@
                 } else {
                     gameOverState = 'draw';
                 }
+
+                document.getElementById('btn-game-lobby').classList.remove('hidden');
             }
         }
 
