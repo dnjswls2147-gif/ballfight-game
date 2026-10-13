@@ -30,10 +30,25 @@
         }
         .hidden { display: none !important; }
 
-        .mailbox-top-bar {
+        /* 상단 네비게이션 바 (프로필 & 우편함) */
+        .top-nav-bar {
             display: flex;
-            justify-content: flex-end;
-            margin-bottom: 5px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .profile-btn {
+            background: #2980b9;
+            color: #fff;
+            border: 2px solid #1c5980;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .mailbox-btn {
             position: relative;
@@ -41,8 +56,8 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 12px 18px;
-            font-size: 14px;
+            padding: 10px 14px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
@@ -58,6 +73,63 @@
             background-color: #e74c3c;
             border: 2px solid #ffffff;
             border-radius: 50%;
+        }
+
+        /* 공통 오버레이 팝업 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-box {
+            width: 100%;
+            max-width: 340px;
+            background: #fff8e8;
+            border: 3px solid #e67e22;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* 갈색 네모 모달 */
+        .brown-info-box {
+            background: #5d4037;
+            border: 3px solid #3e2723;
+            border-radius: 10px;
+            padding: 18px 15px;
+            color: #ffffff;
+            margin: 15px 0;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            text-align: left;
+        }
+        .profile-info-row {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffe0b2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #795548;
+            padding-bottom: 8px;
+        }
+        .profile-info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .header-row {
@@ -210,10 +282,10 @@
         
         .error {
             min-height: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #e74c3c;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .btn {
             width: 100%;
@@ -358,9 +430,54 @@
 </head>
 <body>
 
+    <!-- 0. 최초 1회 이름 설정 팝업 -->
+    <div class="modal-overlay hidden" id="name-modal">
+        <div class="modal-box">
+            <h2>👤 이름 설정</h2>
+            <div class="version-text">릴리 볼 파이트</div>
+            <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
+                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 바꿀 수 없습니다.
+            </div>
+            <div class="error" id="modal-error-msg"></div>
+            <input type="text" id="init-username-input" placeholder="이름을 입력하세요 (최대 10글자)" maxlength="10">
+            <button class="btn btn-ai" onclick="saveInitialUsername()">이름 확정하기</button>
+        </div>
+    </div>
+
+    <!-- 0-1. 내 프로필 팝업 -->
+    <div class="modal-overlay hidden" id="profile-modal">
+        <div class="modal-box">
+            <div class="header-row">
+                <h2>👤 내 프로필</h2>
+                <button class="btn-close-x" onclick="closeProfileModal()">X</button>
+            </div>
+            <div class="version-text">릴리 볼 파이트</div>
+            
+            <div class="brown-info-box">
+                <div class="profile-info-row">
+                    <span>📛 이름:</span>
+                    <span id="profile-modal-name" style="color: #fff;">-</span>
+                </div>
+                <div class="profile-info-row">
+                    <span>🪙 보유 코인:</span>
+                    <span id="profile-modal-coin" style="color: #f1c40f;">0개</span>
+                </div>
+                <div class="profile-info-row">
+                    <span>🏆 보유 트로피:</span>
+                    <span id="profile-modal-trophy" style="color: #3498db;">0개</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-back" onclick="closeProfileModal()">닫기</button>
+        </div>
+    </div>
+
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
-        <div class="mailbox-top-bar">
+        <div class="top-nav-bar">
+            <button class="profile-btn" onclick="openProfileModal()">
+                👤 프로필
+            </button>
             <button class="mailbox-btn" onclick="showMailbox()">
                 📬 우편함
                 <div class="red-dot hidden" id="mail-red-dot"></div>
@@ -373,10 +490,8 @@
             <div class="trophy-box">🏆 트로피: <span id="trophy-count">0</span>개</div>
             <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
-        <div class="desc">플레이어 이름을 입력하세요!</div>
-        <div class="error" id="error-msg"></div>
-        <input type="text" id="username" placeholder="이름을 입력하세요 (최대 10글자)">
-        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button>
+        
+        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 15px;">AI 자동 매칭</button>
         <button class="btn btn-friend" onclick="showFriendMenu()">친구 플레이</button>
     </div>
 
@@ -475,6 +590,8 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        let savedUsername = "";
 
         let gameStarted = false;
         let isCountingDown = false;
@@ -578,11 +695,10 @@
         ];
 
         function saveData() {
-            const usernameInput = document.getElementById('username');
             const gameData = {
                 coins: userCoins,
                 trophies: userTrophies,
-                username: usernameInput ? usernameInput.value : '',
+                username: savedUsername,
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
@@ -596,9 +712,8 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
-                    if (parsed.username !== undefined) {
-                        const usernameInput = document.getElementById('username');
-                        if (usernameInput) usernameInput.value = parsed.username;
+                    if (parsed.username !== undefined && parsed.username.trim() !== "") {
+                        savedUsername = parsed.username;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
@@ -614,7 +729,42 @@
                     console.error("데이터 로드 실패:", e);
                 }
             }
+
+            if (!savedUsername) {
+                document.getElementById('name-modal').classList.remove('hidden');
+            }
+
             checkMailRedDot();
+        }
+
+        function saveInitialUsername() {
+            const input = document.getElementById('init-username-input');
+            const err = document.getElementById('modal-error-msg');
+            const val = input.value.trim();
+
+            if (!val) {
+                err.innerText = "이름을 입력해주세요!";
+                return;
+            }
+            if (val.length > 10) {
+                err.innerText = "10글자가 넘었습니다.";
+                return;
+            }
+
+            savedUsername = val;
+            saveData();
+            document.getElementById('name-modal').classList.add('hidden');
+        }
+
+        function openProfileModal() {
+            document.getElementById('profile-modal-name').innerText = savedUsername || "미설정";
+            document.getElementById('profile-modal-coin').innerText = userCoins + "개";
+            document.getElementById('profile-modal-trophy').innerText = userTrophies + "개";
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
         }
 
         let p1 = { 
@@ -696,37 +846,25 @@
             return ballsData.find(b => b.equipped) || ballsData[0];
         }
 
-        function validateName() {
-            const nameEl = document.getElementById('username');
-            const name = nameEl ? nameEl.value.trim() : '';
-            if (!name) {
-                document.getElementById('error-msg').innerText = "이름부터 써주세요!";
-                document.getElementById('friend-error').innerText = "이름부터 써주세요!";
-                return null;
+        function checkUserHasName() {
+            if (!savedUsername) {
+                document.getElementById('name-modal').classList.remove('hidden');
+                return false;
             }
-            if (name.length > 10) {
-                document.getElementById('error-msg').innerText = "10글자가 넘었습니다";
-                document.getElementById('friend-error').innerText = "10글자가 넘었습니다";
-                return null;
-            }
-            document.getElementById('error-msg').innerText = "";
-            document.getElementById('friend-error').innerText = "";
-            saveData();
-            return name;
+            return true;
         }
 
         function startAI() {
-            const name = validateName();
-            if (!name) return;
+            if (!checkUserHasName()) return;
             nextGameMode = 'ai';
             showCharacterSelect();
         }
 
         function joinRoomMatch() {
+            if (!checkUserHasName()) return;
+
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
-
-            if (!validateName()) return;
 
             if (createdCode && code === createdCode) {
                 err.innerText = "자신과 싸울수 없습니다";
@@ -753,7 +891,7 @@
                     nextGameMode = 'friend';
                     conn.send({
                         type: 'JOIN_INFO',
-                        name: document.getElementById('username').value.trim(),
+                        name: savedUsername,
                         ball: getEquippedBall()
                     });
                     showCharacterSelect();
@@ -772,7 +910,7 @@
         }
 
         function createRoom() {
-            if (!validateName()) return;
+            if (!checkUserHasName()) return;
 
             const err = document.getElementById('friend-error');
             createdCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -781,7 +919,6 @@
             box.innerText = "방 번호: " + createdCode;
             box.classList.remove('hidden');
 
-            // 내가 방을 만들면 비밀번호 입력창/시작버튼 숨기기
             document.getElementById('join-container').classList.add('hidden');
             err.style.color = "#27ae60";
             err.innerText = "친구의 접속을 기다리는 중입니다...";
@@ -864,9 +1001,8 @@
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
 
-            const name = document.getElementById('username').value.trim();
             let equipped = getEquippedBall();
-            document.getElementById('p1-label').innerText = `${name} (${equipped.name}) (블루)`;
+            document.getElementById('p1-label').innerText = `${savedUsername} (${equipped.name}) (블루)`;
 
             if (nextGameMode === 'ai') {
                 document.getElementById('p2-label').innerText = "AI 봇 (기본 볼) (레드)";
@@ -933,8 +1069,7 @@
         }
 
         function showFriendMenu() {
-            const name = validateName();
-            if (!name) return;
+            if (!checkUserHasName()) return;
 
             resetRoom();
             document.getElementById('lobby-screen').classList.add('hidden');
@@ -1305,114 +1440,3 @@
             if (p.freezeTimer > 0) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#00cec9';
-                ctx.stroke();
-                ctx.closePath();
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawPlayer(p1);
-            drawPlayer(p2);
-
-            projectiles.forEach(proj => {
-                ctx.beginPath();
-                ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#0984e3';
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                ctx.closePath();
-            });
-
-            iceFallBlocks.forEach(ice => {
-                ctx.save();
-                ctx.translate(ice.x, ice.y);
-                ctx.fillStyle = '#74b9ff';
-                ctx.strokeStyle = '#0984e3';
-                ctx.lineWidth = 3;
-                ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
-                ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
-                ctx.restore();
-            });
-
-            fireFallBlocks.forEach(fire => {
-                ctx.beginPath();
-                ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#f39c12';
-                ctx.stroke();
-                ctx.closePath();
-            });
-
-            if (isCountingDown) {
-                ctx.save();
-                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.font = "900 64px sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 8;
-                ctx.strokeText(countdownValue, canvas.width / 2, canvas.height / 2);
-
-                ctx.fillStyle = "#f1c40f";
-                ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
-                ctx.restore();
-            }
-
-            if (gameOverState) {
-                ctx.save();
-                
-                ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.font = "900 42px sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                let resultText = "";
-                let textColor = "";
-
-                if (gameOverState === 'win') {
-                    resultText = "승리!!!";
-                    textColor = "#2ecc71";
-                } else if (gameOverState === 'lose') {
-                    resultText = "패배";
-                    textColor = "#e74c3c";
-                } else {
-                    resultText = "무승부 ㅠ";
-                    textColor = "#f1c40f";
-                }
-
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 6;
-                ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
-
-                ctx.fillStyle = textColor;
-                ctx.fillText(resultText, canvas.width / 2, canvas.height / 2);
-
-                ctx.restore();
-            }
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loadData();
-        updateCoinsUI();
-        requestAnimationFrame(loop);
-    </script>
-</body>
-</html>
