@@ -288,7 +288,7 @@
         
         .error {
             min-height: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             color: #e74c3c;
             margin-bottom: 8px;
@@ -596,8 +596,10 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 초기화 저장을 위해 저장 키 이름을 새롭게 설정 (완전 초기화 효과)
-        const STORAGE_KEY = 'lily_ball_fight_reset_v2';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v3';
+
+        // 사용 금지 / 예시 기본 중복 이름 목록
+        const takenUsernames = ["운영자", "관리자", "AI 봇", "system", "admin", "릴리"];
 
         let savedUsername = "";
 
@@ -714,8 +716,8 @@
         }
 
         function loadData() {
-            // 이전 구버전 스토리지 키 삭제 처리로 깔끔한 초기화 진행
             localStorage.removeItem('lily_ball_fight_data');
+            localStorage.removeItem('lily_ball_fight_reset_v2');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -762,6 +764,13 @@
             }
             if (val.length > 10) {
                 err.innerText = "10글자가 넘었습니다.";
+                return;
+            }
+
+            // 중복 검사
+            const isDuplicate = takenUsernames.some(u => u.toLowerCase() === val.toLowerCase());
+            if (isDuplicate) {
+                err.innerText = "중복되는 이름입니다. 다시 써주세요.";
                 return;
             }
 
