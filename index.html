@@ -464,8 +464,8 @@
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
 
-        <!-- 게임 종료 시 나타나는 로비로 가기 버튼 -->
-        <button class="btn btn-back hidden" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 15px;">🏠 로비로 가기</button>
+        <!-- 게임 진행 중 및 종료 시 항상 사용할 수 있는 로비 버튼 -->
+        <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 15px;">🏠 로비로 가기</button>
     </div>
 
     <script>
@@ -807,9 +807,6 @@
                     iceFallBlocks = data.iceFallBlocks;
                     gameOverState = data.gameOverState;
                     updateHpBars();
-                    if (gameOverState) {
-                        document.getElementById('btn-game-lobby').classList.remove('hidden');
-                    }
                 }
             } else if (data.type === 'SPEED_TOGGLE') {
                 isDoubleSpeed = data.isDoubleSpeed;
@@ -927,7 +924,6 @@
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
-            document.getElementById('btn-game-lobby').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
@@ -997,8 +993,6 @@
                 } else {
                     gameOverState = 'draw';
                 }
-
-                document.getElementById('btn-game-lobby').classList.remove('hidden');
             }
         }
 
