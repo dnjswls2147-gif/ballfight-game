@@ -35,6 +35,24 @@
         }
         .hidden { display: none !important; }
 
+        /* 공지사항 띠 바 */
+        .notice-bar {
+            background: #f1c40f;
+            color: #2c3e50;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            word-break: break-all;
+        }
+
         /* 상단 네비게이션 바 (프로필 & 우편함) */
         .top-nav-bar {
             display: flex;
@@ -567,7 +585,14 @@
             <div class="admin-content">
                 <!-- 메인 탭 -->
                 <div id="admin-tab-main">
-                    <div class="admin-section-title">플레이어 체력 제어</div>
+                    <div class="admin-section-title">공지사항 설정</div>
+                    <input type="text" id="admin-notice-input" placeholder="공지 문구 입력" style="padding: 6px 8px; font-size: 11px; margin-bottom: 6px;">
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminSetNotice()">공지 적용</button>
+                        <button class="admin-small-btn" style="background:#c0392b;" onclick="adminClearNotice()">공지 삭제</button>
+                    </div>
+
+                    <div class="admin-section-title" style="margin-top: 10px;">플레이어 체력 제어</div>
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" onclick="adminSetHp('p1', 9999)">P1 무적</button>
                         <button class="admin-small-btn" onclick="adminSetHp('p2', 0)">P2 즉사</button>
@@ -644,6 +669,12 @@
 
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
+        <!-- 상단 공지사항 바 -->
+        <div class="notice-bar hidden" id="global-notice-bar">
+            <span>📢</span>
+            <span id="notice-text">공지사항 영역</span>
+        </div>
+
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">
                 👤 프로필
@@ -768,8 +799,8 @@
 
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
 
-        // 관리자 전용 비밀번호 (변경됨: 9467)
-        const ADMIN_PASSWORD = "9467";
+        // 관리자 전용 비밀번호 (777pqm)
+        const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -778,6 +809,7 @@
         ];
 
         let savedUsername = "";
+        let globalNotice = "";
 
         let gameStarted = false;
         let isCountingDown = false;
@@ -808,6 +840,36 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        // --- 어드민 패널 공지 제어 함수 ---
+        function adminSetNotice() {
+            const input = document.getElementById('admin-notice-input').value.trim();
+            if (input) {
+                globalNotice = input;
+                updateNoticeUI();
+                saveData();
+                alert("공지사항이 적용되었습니다!");
+            }
+        }
+
+        function adminClearNotice() {
+            globalNotice = "";
+            document.getElementById('admin-notice-input').value = "";
+            updateNoticeUI();
+            saveData();
+            alert("공지사항이 삭제되었습니다.");
+        }
+
+        function updateNoticeUI() {
+            const noticeBar = document.getElementById('global-notice-bar');
+            const noticeText = document.getElementById('notice-text');
+            if (globalNotice) {
+                noticeText.innerText = globalNotice;
+                noticeBar.classList.remove('hidden');
+            } else {
+                noticeBar.classList.add('hidden');
+            }
+        }
 
         // --- 어드민 패널 보안 제어 함수 ---
         function openAdminAuth() {
@@ -976,7 +1038,8 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 balls: ballsData,
-                mailClaimed: mailClaimed
+                mailClaimed: mailClaimed,
+                globalNotice: globalNotice
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
         }
@@ -992,6 +1055,7 @@
                         savedUsername = parsed.username;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
+                    if (parsed.globalNotice !== undefined) globalNotice = parsed.globalNotice;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
                             let match = ballsData.find(b => b.id === savedBall.id);
@@ -1012,6 +1076,7 @@
                 document.getElementById('name-modal').classList.add('hidden');
             }
 
+            updateNoticeUI();
             checkMailRedDot();
             updateCoinsUI();
         }
@@ -1413,6 +1478,7 @@
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
+            updateNoticeUI();
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
@@ -1907,4 +1973,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+                        </html>
