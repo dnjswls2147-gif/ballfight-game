@@ -311,6 +311,7 @@
         }
         .btn-ai { background-color: #27ae60; }
         .btn-friend { background-color: #2980b9; }
+        .btn-group { background-color: #8e44ad; }
         .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
@@ -445,7 +446,7 @@
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
-            <div class="version-text">릴리 볼 파이트</div>
+            <div class="version-text">릴리 볼 파이트 v1.2</div>
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
                 최대 10글자까지 입력할 수 있으며,<br>
                 한 번 정하면 변경할 수 없습니다.<br>
@@ -464,7 +465,7 @@
                 <h2 id="profile-modal-title">👤 내 프로필</h2>
                 <button class="btn-close-x" onclick="closeProfileModal()">X</button>
             </div>
-            <div class="version-text">릴리 볼 파이트</div>
+            <div class="version-text">릴리 볼 파이트 v1.2</div>
             
             <div class="brown-info-box">
                 <div class="profile-info-row">
@@ -497,7 +498,7 @@
             </button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
-        <div class="version-text">v1.1 버전</div>
+        <div class="version-text">v1.2 버전</div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
@@ -505,7 +506,10 @@
         </div>
         
         <button class="btn btn-ai" onclick="startAI()" style="margin-top: 15px;">AI 자동 매칭</button>
-        <button class="btn btn-friend" onclick="showFriendMenu()">친구 플레이</button>
+        <div style="display: flex; gap: 6px;">
+            <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 8px;">친구 플레이</button>
+            <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 8px;">👥 그룹</button>
+        </div>
     </div>
 
     <!-- 1-0-1. 우편함 화면 -->
@@ -514,7 +518,7 @@
             <h2>📬 우편함 📬</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.1 버전</div>
+        <div class="version-text">v1.2 버전</div>
         
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">위의 받을 보상이 있습니다!</div>
@@ -525,7 +529,7 @@
     <!-- 1-0. 나의 공 상점 및 보관함 화면 -->
     <div class="container hidden" id="myball-screen">
         <h2>⚽ 나의 공 보관함 ⚽</h2>
-        <div class="version-text">v1.1 버전</div>
+        <div class="version-text">v1.2 버전</div>
         <div class="currency-container" style="margin-top: 5px;">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-shop">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-shop">0</span>개</div>
@@ -540,7 +544,7 @@
     <!-- 1-1. 친구 플레이 메뉴 -->
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
-        <div class="version-text">v1.1 버전</div>
+        <div class="version-text">v1.2 버전</div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-friend">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-friend">0</span>개</div>
@@ -562,13 +566,38 @@
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
+    <!-- 1-3. 그룹 메뉴 화면 -->
+    <div class="container hidden" id="group-screen">
+        <h2>🌐 그룹 메뉴 🌐</h2>
+        <div class="version-text">v1.2 버전</div>
+        <div class="currency-container">
+            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-group">0</span>개</div>
+            <div class="trophy-box">🏆 트로피:<span id="trophy-count-group">0</span>개</div>
+        </div>
+        <div class="desc">참여할 그룹이 없다면 그룹을 생성하세요!</div>
+        <div class="error" id="group-error"></div>
+
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createGroup()">그룹 생성하기 (랜덤 4자리)</button>
+            <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" onclick="resetGroup()">X</button>
+        </div>
+        <div class="room-box hidden" id="group-display">----</div>
+
+        <div id="group-join-container">
+            <input type="text" id="group-input" placeholder="그룹 번호 4자리 입력" maxlength="4">
+            <button class="btn btn-join" onclick="joinGroup()">그룹 참여하기</button>
+        </div>
+
+        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+    </div>
+
     <!-- 1-2. 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
         <div class="header-row">
             <h2>⚔️ 출전 준비 ⚔️</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.1 버전</div>
+        <div class="version-text">v1.2 버전</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
@@ -622,6 +651,7 @@
 
         let gameOverState = null; 
         let createdCode = null;
+        let createdGroupCode = null;
         let remainingTime = 10;
         let timerInterval = null;
         let nextGameMode = 'ai';
@@ -818,9 +848,11 @@
         function updateCoinsUI() {
             document.getElementById('coin-count').innerText = userCoins;
             document.getElementById('coin-count-friend').innerText = userCoins;
+            document.getElementById('coin-count-group').innerText = userCoins;
             document.getElementById('coin-count-shop').innerText = userCoins;
             document.getElementById('trophy-count').innerText = userTrophies;
             document.getElementById('trophy-count-friend').innerText = userTrophies;
+            document.getElementById('trophy-count-group').innerText = userTrophies;
             document.getElementById('trophy-count-shop').innerText = userTrophies;
         }
 
@@ -986,6 +1018,114 @@
             });
         }
 
+        // 그룹 기능 구현 (참여할 그룹이 없으면 그룹 생성 유도)
+        function openGroupMenu() {
+            if (!checkUserHasName()) return;
+            resetGroup();
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.remove('hidden');
+        }
+
+        function resetGroup() {
+            createdGroupCode = null;
+            if (peer) peer.destroy();
+            document.getElementById('group-display').classList.add('hidden');
+            document.getElementById('group-join-container').classList.remove('hidden');
+            document.getElementById('group-input').value = "";
+            const err = document.getElementById('group-error');
+            err.style.color = "#e74c3c";
+            err.innerText = "";
+        }
+
+        function joinGroup() {
+            if (!checkUserHasName()) return;
+
+            const code = document.getElementById('group-input').value.trim();
+            const err = document.getElementById('group-error');
+
+            if (!code) {
+                err.innerText = "참여할 그룹이 없다면 '그룹 생성하기'를 눌러주세요!";
+                return;
+            }
+
+            if (code.length !== 4 || isNaN(code)) {
+                err.innerText = "그룹 번호 4자리를 정확히 입력하세요";
+                return;
+            }
+
+            err.innerText = "그룹에 연결 중입니다...";
+
+            if (peer) peer.destroy();
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                const targetPeerId = 'lily-ball-group-' + code;
+                conn = peer.connect(targetPeerId);
+                isHost = false;
+
+                conn.on('open', () => {
+                    err.style.color = "#27ae60";
+                    err.innerText = "그룹에 성공적으로 참여했습니다!";
+                    nextGameMode = 'friend';
+                    conn.send({
+                        type: 'JOIN_INFO',
+                        name: savedUsername,
+                        ball: getEquippedBall()
+                    });
+                    setTimeout(showCharacterSelect, 1000);
+                });
+
+                conn.on('data', handleNetworkData);
+
+                conn.on('error', (e) => {
+                    err.style.color = "#e74c3c";
+                    err.innerText = "그룹을 찾을 수 없습니다. 번호를 확인하거나 새로 생성하세요.";
+                });
+            });
+
+            peer.on('error', (e) => {
+                err.innerText = "그룹 연결 실패. 다시 시도해주세요.";
+            });
+        }
+
+        function createGroup() {
+            if (!checkUserHasName()) return;
+
+            const err = document.getElementById('group-error');
+            createdGroupCode = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            const box = document.getElementById('group-display');
+            box.innerText = "그룹 번호: " + createdGroupCode;
+            box.classList.remove('hidden');
+
+            document.getElementById('group-join-container').classList.add('hidden');
+            err.style.color = "#27ae60";
+            err.innerText = "그룹 생성 완료! 팀원의 참여를 기다리는 중...";
+
+            if (peer) peer.destroy();
+            peer = new Peer('lily-ball-group-' + createdGroupCode);
+            isHost = true;
+
+            peer.on('open', (id) => {
+                console.log("그룹 개설 완료 Peer ID:", id);
+            });
+
+            peer.on('connection', (c) => {
+                conn = c;
+                conn.on('open', () => {
+                    err.innerText = "팀원이 그룹에 참여했습니다!";
+                    nextGameMode = 'friend';
+                    setTimeout(showCharacterSelect, 1000);
+                });
+                conn.on('data', handleNetworkData);
+            });
+
+            peer.on('error', (e) => {
+                err.style.color = "#e74c3c";
+                err.innerText = "그룹 생성 오류. 다시 시도해주세요.";
+            });
+        }
+
         function handleNetworkData(data) {
             if (data.type === 'JOIN_INFO') {
                 friendName = data.name;
@@ -1015,6 +1155,7 @@
         function showCharacterSelect() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.remove('hidden');
@@ -1140,6 +1281,7 @@
             }
             conn = null;
             createdCode = null;
+            createdGroupCode = null;
 
             resetGameState();
             updateCoinsUI();
@@ -1147,6 +1289,7 @@
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
@@ -1690,4 +1833,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
