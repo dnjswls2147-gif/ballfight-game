@@ -833,6 +833,7 @@
         let fireFallBlocks = [];
         let pokeFallBlocks = [];
         let amongusAttacks = [];
+        let mrBeastAttacks = []; // 미스터 비스트 댄스 스킬 이펙트
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
@@ -1031,7 +1032,8 @@
             { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 왕관 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 8초마다 30데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 10초마다 2초간 300개 이상 폭풍 폭격 (개당 10데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false },
-            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 1초마다 "쉿" 발사. 5초마다 어몽어스 벤트 습격(85데미지). HP 100 이하 시 붉어지며 2배 각성!', price: 1000, hp: 300, damage: 15, owned: false, equipped: false }
+            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 1초마다 "쉿" 발사. 5초마다 어몽어스 벤트 습격(85데미지). HP 100 이하 시 붉어지며 2배 각성!', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 3초간 위에서 미스터비스트 밈 댄스를 추며 상대를 아래로 밀어붙여 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -1332,6 +1334,7 @@
                     fireFallBlocks = data.fireFallBlocks;
                     pokeFallBlocks = data.pokeFallBlocks;
                     amongusAttacks = data.amongusAttacks || [];
+                    mrBeastAttacks = data.mrBeastAttacks || [];
                     gameOverState = data.gameOverState;
                     updateHpBars();
                 }
@@ -1548,6 +1551,7 @@
             fireFallBlocks = [];
             pokeFallBlocks = [];
             amongusAttacks = [];
+            mrBeastAttacks = [];
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -1590,6 +1594,16 @@
                 stabsLeft: 5,
                 timer: 0,
                 damagePerStab: baseDamage / 5
+            });
+        }
+
+        function triggerMrBeastUltimate(owner) {
+            let target = (owner === p1) ? p2 : p1;
+            mrBeastAttacks.push({
+                target: target,
+                duration: 180, // 3초 (60fps 기준 180프레임)
+                damagePerFrame: 150 / 180, // 총 150 데미지
+                danceAngle: 0
             });
         }
 
@@ -1673,7 +1687,14 @@
                 if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
             }
 
-            if (p1.type === 'dongryong') {
+            // 미스터 비스트 스킬 제어 (9초마다 150데미지 3초 댄스)
+            if (p1.type === 'mrbeast') {
+                p1.skillGauge += (1 / 540) * speedMultiplier; // 9초 (540프레임)
+                if (p1.skillGauge >= 1) {
+                    p1.skillGauge = 0;
+                    triggerMrBeastUltimate(p1);
+                }
+            } else if (p1.type === 'dongryong') {
                 p1.skillGauge += (1 / 300) * speedMultiplier; // 5초
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
@@ -1691,7 +1712,6 @@
                         x: p1.x,
                         y: p1.y,
                         vx: (dx / dist) * 6 * speedMultiplier,
-                        vy: (dy / dist) * 6 * speedMultiplier,
                         radius: 12,
                         text: "쉿",
                         target: p2,
@@ -1732,6 +1752,24 @@
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerPokemonUltimate(p1);
+                }
+            }
+
+            // 미스터 비스트 댄스 기술 로직 (상대를 3초간 아래로 누르며 데미지)
+            for (let i = mrBeastAttacks.length - 1; i >= 0; i--) {
+                let mb = mrBeastAttacks[i];
+                mb.duration -= speedMultiplier;
+                mb.danceAngle += 0.2 * speedMultiplier;
+                
+                // 상대방을 화면 아래쪽으로 밀어붙임
+                mb.target.y = Math.min(canvas.height - mb.target.radius, mb.target.y + 3 * speedMultiplier);
+                mb.target.hp = Math.max(0, mb.target.hp - mb.damagePerFrame * speedMultiplier);
+
+                updateHpBars();
+                checkGameOver();
+
+                if (mb.duration <= 0) {
+                    mrBeastAttacks.splice(i, 1);
                 }
             }
 
@@ -1869,6 +1907,7 @@
                     fireFallBlocks: fireFallBlocks,
                     pokeFallBlocks: pokeFallBlocks,
                     amongusAttacks: amongusAttacks,
+                    mrBeastAttacks: mrBeastAttacks,
                     gameOverState: gameOverState
                 });
             }
@@ -1922,24 +1961,68 @@
             ctx.closePath();
         }
 
-        // 동룡쓰 채널 공식 프로필 그래픽 (빨간 바탕 + 민트 안경 어몽어스 + "쉿" 손가락)
+        // 미스터 비스트 그래픽 (파란색/분홍색 로고 감성)
+        function drawMrBeastGraphic(x, y, radius, p) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.clip();
+
+            // 파란색 바탕
+            ctx.fillStyle = "#00cec9";
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+
+            // 핑크 번개 지그재그
+            ctx.fillStyle = "#e84393";
+            ctx.beginPath();
+            ctx.moveTo(x - radius * 0.2, y - radius * 0.8);
+            ctx.lineTo(x + radius * 0.4, y - radius * 0.1);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x + radius * 0.5, y + radius * 0.8);
+            ctx.lineTo(x - radius * 0.3, y + radius * 0.1);
+            ctx.lineTo(x + radius * 0.1, y);
+            ctx.closePath();
+            ctx.fill();
+
+            // 중앙 미스터 비스트 문자 로고 "B"
+            ctx.font = "900 20px sans-serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("MR", x, y - 5);
+
+            ctx.restore();
+
+            // 스킬 충전 원형 게이지 (9초 동안 연두색 테두리 회전)
+            ctx.beginPath();
+            ctx.arc(x, y, radius + 2, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * p.skillGauge));
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#55efc4";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#001e42";
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // 동룡쓰 그래픽
         function drawDongryongGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            // 1. 빨간색 공식 배경
             ctx.fillStyle = "#c0392b"; 
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            // 2. 어몽어스 상체 (빨간색)
             ctx.fillStyle = "#a93226";
             ctx.beginPath();
             ctx.arc(x, y + radius * 0.1, radius * 0.75, Math.PI, 0);
             ctx.fill();
 
-            // 3. 민트색 고글 (글래스)
             ctx.fillStyle = "#a2d9ce";
             ctx.beginPath();
             ctx.roundRect(x - radius * 0.55, y - radius * 0.35, radius * 1.1, radius * 0.45, 8);
@@ -1948,30 +2031,26 @@
             ctx.strokeStyle = "#16a085";
             ctx.stroke();
 
-            // 4. 동그란 안경 테
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(x - radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
             ctx.arc(x + radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
             ctx.stroke();
-            // 안경 알 빛 반사 하이라이트
+
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(x - radius * 0.3, y - radius * 0.22, radius * 0.08, radius * 0.18);
             ctx.fillRect(x + radius * 0.14, y - radius * 0.22, radius * 0.08, radius * 0.18);
 
-            // 5. "쉿!" 하는 빨간 손가락
             ctx.fillStyle = "#922b21";
             ctx.strokeStyle = "#641e16";
             ctx.lineWidth = 1.5;
 
-            // 검지 손가락
             ctx.beginPath();
             ctx.roundRect(x - radius * 0.12, y - radius * 0.1, radius * 0.22, radius * 0.65, 5);
             ctx.fill();
             ctx.stroke();
 
-            // 접힌 손가락들 및 주먹
             ctx.beginPath();
             ctx.arc(x + radius * 0.1, y + radius * 0.35, radius * 0.2, 0, Math.PI * 2);
             ctx.fill();
@@ -1979,14 +2058,12 @@
 
             ctx.restore();
 
-            // 스킬 충전 원형 게이지 (5초 동안 노란색 테두리 회전)
             ctx.beginPath();
             ctx.arc(x, y, radius + 2, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * p.skillGauge));
             ctx.lineWidth = 4;
             ctx.strokeStyle = "#f1c40f";
             ctx.stroke();
 
-            // 체력 100 이하 각성 모드 (겉 테두리 빨갛게 변함)
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = p.hp <= 100 ? 5 : 2.5;
@@ -1998,6 +2075,8 @@
         function drawPlayer(p) {
             if (p.type === 'dongryong') {
                 drawDongryongGraphic(p.x, p.y, p.radius, p);
+            } else if (p.type === 'mrbeast') {
+                drawMrBeastGraphic(p.x, p.y, p.radius, p);
             } else {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -2032,6 +2111,37 @@
                     ctx.stroke();
                     ctx.closePath();
                 }
+            });
+
+            // 미스터 비스트 댄스 밈 연출 (3초간 춤추며 아래로 밀어붙임)
+            mrBeastAttacks.forEach(mb => {
+                let bx = mb.target.x;
+                let by = Math.max(30, mb.target.y - 70);
+
+                ctx.save();
+                ctx.translate(bx, by);
+                ctx.rotate(Math.sin(mb.danceAngle) * 0.3); // 춤추는 모션
+
+                // 미스터 비스트 몸통 (파란 후드)
+                ctx.fillStyle = "#0984e3";
+                ctx.fillRect(-15, 0, 30, 35);
+                // 얼굴 (살구색)
+                ctx.fillStyle = "#ffeaa7";
+                ctx.beginPath();
+                ctx.arc(0, -10, 15, 0, Math.PI * 2);
+                ctx.fill();
+                // 밈 포즈 손 펼침
+                ctx.fillStyle = "#ffeaa7";
+                ctx.fillRect(-28, -5, 12, 8);
+                ctx.fillRect(16, -5, 12, 8);
+
+                // 스킬 문구
+                ctx.font = "900 12px sans-serif";
+                ctx.fillStyle = "#f1c40f";
+                ctx.textAlign = "center";
+                ctx.fillText("MR BEAST!!", 0, -30);
+
+                ctx.restore();
             });
 
             amongusAttacks.forEach(atk => {
@@ -2140,4 +2250,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-            </html>
+        </html>
