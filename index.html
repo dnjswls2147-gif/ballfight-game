@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -511,7 +510,7 @@
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
                 최대 10글자까지 입력할 수 있으며,<br>
                 한 번 정하면 변경할 수 없습니다.<br>
-                <span style="font-size: 11px; color: #c0392b;">(중복되는 이름은 쓸 수 없습니다)</span>
+                <span style="font-size: 11px; color: #27ae60;">(중복되는 이름은 쓸 수 있습니다)</span>
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
@@ -740,10 +739,6 @@
 
         let chatPollInterval = null;
 
-        function safeEncodeName(str) {
-            return Array.from(str).map(c => c.charCodeAt(0).toString(16)).join('');
-        }
-
         function isMailValid() {
             const now = new Date().getTime();
             return !mailClaimed && (now < EXPIRY_TIME);
@@ -853,6 +848,7 @@
                 }
             }
 
+            // 이름을 아직 안 정했거나 빈 경우에만 팝업 표시, 한 번 정하면 다시 안 뜸
             if (!savedUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
             } else {
@@ -863,45 +859,7 @@
             updateCoinsUI();
         }
 
-        async function checkAndRegisterGlobalName(name) {
-            try {
-                const res = await fetch(BIN_URL + '/latest');
-                let usedNames = [];
-                if (res.ok) {
-                    const data = await res.json();
-                    usedNames = data.record.names || [];
-                }
-
-                if (usedNames.includes(name.toLowerCase())) {
-                    return false;
-                }
-
-                usedNames.push(name.toLowerCase());
-                
-                let currentRecord = {};
-                if (res.ok) {
-                    const fullData = await res.json();
-                    currentRecord = fullData.record || {};
-                }
-                currentRecord.names = usedNames;
-
-                await fetch(BIN_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentRecord)
-                });
-
-                return true;
-            } catch (e) {
-                let localUsed = JSON.parse(localStorage.getItem('lily_used_names') || '[]');
-                if (localUsed.includes(name.toLowerCase())) return false;
-                localUsed.push(name.toLowerCase());
-                localStorage.setItem('lily_used_names', JSON.stringify(localUsed));
-                return true;
-            }
-        }
-
-        async function saveInitialUsername() {
+        function saveInitialUsername() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
             const btn = document.getElementById('btn-save-name');
@@ -922,37 +880,12 @@
                 return;
             }
 
-            err.style.color = "#2980b9";
-            err.innerText = "중복 이름 확인 중...";
-            btn.disabled = true;
-
-            const isAvailable = await checkAndRegisterGlobalName(val);
-            if (!isAvailable) {
-                err.style.color = "#e74c3c";
-                err.innerText = "중복된 이름입니다!";
-                btn.disabled = false;
-                return;
-            }
-
-            const encodedName = safeEncodeName(val.toLowerCase());
-            const checkPeerId = 'lily-ball-name-' + encodedName;
-            const testPeer = new Peer(checkPeerId);
-
-            testPeer.on('open', () => {
-                testPeer.destroy();
-                savedUsername = val;
-                saveData();
-                err.innerText = "";
-                btn.disabled = false;
-                document.getElementById('name-modal').classList.add('hidden');
-            });
-
-            testPeer.on('error', (e) => {
-                testPeer.destroy();
-                err.style.color = "#e74c3c";
-                err.innerText = "중복된 이름입니다!";
-                btn.disabled = false;
-            });
+            // 중복 이름은 허용하므로 바로 저장 및 적용 (변경 불가, 영구 저장)
+            savedUsername = val;
+            saveData();
+            err.innerText = "";
+            btn.disabled = false;
+            document.getElementById('name-modal').classList.add('hidden');
         }
 
         function openProfileModal() {
@@ -1008,7 +941,6 @@
                 // 24시간 이내 작성된 최신 채팅만 필터링
                 const validMessages = messages.filter(m => (now - m.timestamp) < ONE_DAY_MS);
 
-                // 만약 1일이 지나 삭제된 메시지가 있다면 서버 데이터 자동 갱신
                 if (validMessages.length !== messages.length) {
                     record.messages = validMessages;
                     await fetch(BIN_URL, {
