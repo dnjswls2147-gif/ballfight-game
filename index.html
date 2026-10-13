@@ -688,7 +688,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_reset_v11';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v12';
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
@@ -719,7 +719,7 @@
         let projectiles = [];
         let iceFallBlocks = [];
         let fireFallBlocks = [];
-        let pokeFallBlocks = []; // 포켓몬 볼 폭격용 배열
+        let pokeFallBlocks = [];
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 0, 0).getTime(); 
@@ -805,8 +805,8 @@
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 왕관 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
-            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 7초마다 5초간 100개 이상 폭풍 폭격 (개당 15데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false }
+            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 8초마다 30데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 10초마다 2초간 300개 이상 폭풍 폭격 (개당 10데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -831,6 +831,7 @@
             localStorage.removeItem('lily_ball_fight_reset_v8');
             localStorage.removeItem('lily_ball_fight_reset_v9');
             localStorage.removeItem('lily_ball_fight_reset_v10');
+            localStorage.removeItem('lily_ball_fight_reset_v11');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -1499,11 +1500,11 @@
             }
         }
 
-        // 포켓몬 볼 스킬 (5초간 100개 이상 폭풍 폭격)
+        // 포켓몬 볼 스킬 (10초 쿨타임, 2초간 300개 이상 폭풍 폭격, 개당 10데미지)
         function triggerPokemonUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
-            let totalCount = 110; 
-            let delayInterval = 5000 / totalCount; // 5초 동안 110개 낙하
+            let totalCount = 310; // 300개 이상
+            let delayInterval = 2000 / totalCount; // 2초 동안 310개 낙하
 
             for (let i = 0; i < totalCount; i++) {
                 setTimeout(() => {
@@ -1512,9 +1513,9 @@
                     pokeFallBlocks.push({
                         x: startX,
                         y: -30,
-                        radius: 12,
-                        speed: (4 + Math.random() * 4) * speedMultiplier,
-                        damage: 15,
+                        radius: 11,
+                        speed: (5 + Math.random() * 5) * speedMultiplier,
+                        damage: 10, // 개당 10데미지
                         target: target
                     });
                 }, i * delayInterval);
@@ -1545,7 +1546,7 @@
             }
 
             if (p1.type === 'ice') {
-                p1.skillGauge += (1 / 300) * speedMultiplier;
+                p1.skillGauge += (1 / 480) * speedMultiplier; // 8초마다 스킬 충전
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerIceUltimate(p1);
@@ -1574,7 +1575,7 @@
                     triggerFireUltimate(p1);
                 }
             } else if (p1.type === 'pokemon') {
-                p1.skillGauge += (1 / 420) * speedMultiplier; // 7초마다 스킬 충전
+                p1.skillGauge += (1 / 600) * speedMultiplier; // 10초마다 스킬 충전
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerPokemonUltimate(p1);
@@ -1611,7 +1612,7 @@
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < ice.target.radius + ice.size / 2.5) {
                     ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
-                    ice.target.freezeTimer = 120;
+                    ice.target.freezeTimer = 60; // 1초 정지 (60프레임)
                     iceFallBlocks.splice(i, 1);
                     updateHpBars();
                     checkGameOver();
@@ -1714,7 +1715,7 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, p2.hp) + " / " + p2.maxHp;
         }
 
-        // 포켓몬 볼 그리기용 전용 함수
+        // 포켓몬 볼 그리기 전용 함수
         function drawPokeballGraphic(x, y, radius) {
             ctx.save();
             ctx.beginPath();
@@ -1854,7 +1855,6 @@
                 ctx.closePath();
             });
 
-            // 포켓몬 볼 폭격 드로잉
             pokeFallBlocks.forEach(poke => {
                 drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
@@ -1922,4 +1922,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                </html>
+            </html>
