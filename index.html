@@ -148,6 +148,15 @@
         .chat-msg .author {
             font-weight: bold;
             color: #2980b9;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        /* 내 특수 황금색 이름 스타일 */
+        .chat-msg .author.my-gold-name {
+            color: #f39c12 !important;
+            font-weight: 900 !important;
+            text-shadow: 0 0 3px rgba(241, 196, 15, 0.8);
+            text-decoration: none !important;
         }
         .chat-msg .time {
             font-size: 10px;
@@ -507,11 +516,11 @@
         </div>
     </div>
 
-    <!-- 0-1. 내 프로필 팝업 -->
+    <!-- 0-1. 프로필 팝업 (내 프로필 및 클릭한 상대방 프로필 겸용) -->
     <div class="modal-overlay hidden" id="profile-modal">
         <div class="modal-box">
             <div class="header-row">
-                <h2>👤 내 프로필</h2>
+                <h2 id="profile-modal-title">👤 내 프로필</h2>
                 <button class="btn-close-x" onclick="closeProfileModal()">X</button>
             </div>
             <div class="version-text">릴리 볼 파이트</div>
@@ -542,7 +551,7 @@
                 <h2>💬 전체 채팅</h2>
                 <button class="btn-close-x" onclick="closeChatModal()">X</button>
             </div>
-            <div class="version-text">모든 유저와 함께 대화하세요!</div>
+            <div class="version-text">이름을 누르면 그 유저의 프로필을 볼 수 있습니다!</div>
 
             <div class="chat-box" id="global-chat-box">
                 <div class="chat-msg">
@@ -679,7 +688,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_reset_v8';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v9';
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
@@ -818,6 +827,7 @@
             localStorage.removeItem('lily_ball_fight_reset_v5');
             localStorage.removeItem('lily_ball_fight_reset_v6');
             localStorage.removeItem('lily_ball_fight_reset_v7');
+            localStorage.removeItem('lily_ball_fight_reset_v8');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -868,7 +878,6 @@
                 return;
             }
 
-            // 욕설, 비속어, 19금 단어 차단 검사
             const isBadWord = badWords.some(word => val.toLowerCase().includes(word.toLowerCase()));
             if (isBadWord) {
                 err.innerText = "이 이름을 쓸 수 없습니다.";
@@ -901,9 +910,19 @@
         }
 
         function openProfileModal() {
+            document.getElementById('profile-modal-title').innerText = "👤 내 프로필";
             document.getElementById('profile-modal-name').innerText = savedUsername || "미설정";
             document.getElementById('profile-modal-coin').innerText = userCoins + "개";
             document.getElementById('profile-modal-trophy').innerText = userTrophies + "개";
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        // 상대방 닉네임 클릭 시 그 유저의 프로필을 여는 기능
+        function openOtherUserProfileModal(username, coins, trophies) {
+            document.getElementById('profile-modal-title').innerText = "👤 유저 프로필";
+            document.getElementById('profile-modal-name').innerText = username;
+            document.getElementById('profile-modal-coin').innerText = (coins !== undefined ? coins : 0) + "개";
+            document.getElementById('profile-modal-trophy').innerText = (trophies !== undefined ? trophies : 0) + "개";
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
@@ -927,8 +946,7 @@
 
             globalChatPeer = new Peer();
             globalChatPeer.on('open', () => {
-                // 대표 공용 채팅 서버 ID 접속 시도
-                const targetPeerId = 'lily-ball-global-chat-room';
+                const targetPeerId = 'lily-ball-global-chat-room-v2';
                 const connChat = globalChatPeer.connect(targetPeerId);
 
                 connChat.on('open', () => {
@@ -937,7 +955,7 @@
 
                 connChat.on('data', (data) => {
                     if (data.type === 'CHAT_MSG') {
-                        appendChatMessage(data.author, data.text, data.time);
+                        appendChatMessage(data.author, data.text, data.time, data.coins, data.trophies);
                     }
                 });
             });
@@ -946,8 +964,7 @@
                 chatConnections.push(c);
                 c.on('data', (data) => {
                     if (data.type === 'CHAT_MSG') {
-                        appendChatMessage(data.author, data.text, data.time);
-                        // 수신한 채팅 타 유저에게 중계
+                        appendChatMessage(data.author, data.text, data.time, data.coins, data.trophies);
                         chatConnections.forEach(connItem => {
                             if (connItem !== c && connItem.open) {
                                 connItem.send(data);
@@ -964,7 +981,6 @@
 
             if (!text) return;
 
-            // 욕설 감지
             const isBadWord = badWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
             if (isBadWord) {
                 alert("욕설이나 비속어는 사용할 수 없습니다!");
@@ -979,10 +995,12 @@
                 type: 'CHAT_MSG',
                 author: savedUsername,
                 text: text,
-                time: timeStr
+                time: timeStr,
+                coins: userCoins,
+                trophies: userTrophies
             };
 
-            appendChatMessage(savedUsername, text, timeStr);
+            appendChatMessage(savedUsername, text, timeStr, userCoins, userTrophies);
 
             chatConnections.forEach(connItem => {
                 if (connItem.open) {
@@ -993,13 +1011,19 @@
             input.value = "";
         }
 
-        function appendChatMessage(author, text, time) {
+        function appendChatMessage(author, text, time, coins, trophies) {
             const chatBox = document.getElementById('global-chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-msg';
 
+            const isMe = (author === savedUsername);
+            
+            // 나(본인)일 경우 왕관 👑 마크와 함께 특수 황금색 클래스(my-gold-name) 부여
+            let nameDisplay = isMe ? `👑 ${author}` : author;
+            let goldClass = isMe ? 'my-gold-name' : '';
+
             msgDiv.innerHTML = `
-                <span class="author">${author}</span>
+                <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${author.replace(/'/g, "\\'")}', ${coins || 0}, ${trophies || 0})">${nameDisplay}</span>
                 <span class="time">${time}</span>
                 <div class="text">${text}</div>
             `;
@@ -1790,4 +1814,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                </html>
+    </html>
