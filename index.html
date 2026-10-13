@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -596,8 +597,14 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 전체 데이터 초기화를 위한 새로운 저장 키
-        const STORAGE_KEY = 'lily_ball_fight_reset_v5';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v7';
+
+        // 금지된 욕설 / 비속어 / 19금 단어 리스트
+        const badWords = [
+            "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
+            "미친", "미친놈", "미친년", "바보", "멍청이", "꺼져", "닥쳐", "새끼", "쌍놈", "씨블",
+            "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
+        ];
 
         let savedUsername = "";
 
@@ -629,6 +636,11 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        // 한글 닉네임을 PeerJS에서 안전하게 사용할 수 있도록 인코딩하는 함수
+        function safeEncodeName(str) {
+            return Array.from(str).map(c => c.charCodeAt(0).toString(16)).join('');
+        }
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -714,11 +726,12 @@
         }
 
         function loadData() {
-            // 이전 스토리지 키 완벽 삭제로 전체 초기화 실행
             localStorage.removeItem('lily_ball_fight_data');
             localStorage.removeItem('lily_ball_fight_reset_v2');
             localStorage.removeItem('lily_ball_fight_reset_v3');
             localStorage.removeItem('lily_ball_fight_reset_v4');
+            localStorage.removeItem('lily_ball_fight_reset_v5');
+            localStorage.removeItem('lily_ball_fight_reset_v6');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -769,16 +782,23 @@
                 return;
             }
 
+            // 욕설, 비속어, 19금 단어 차단 검사
+            const isBadWord = badWords.some(word => val.toLowerCase().includes(word.toLowerCase()));
+            if (isBadWord) {
+                err.innerText = "이 이름을 쓸 수 없습니다.";
+                return;
+            }
+
             err.style.color = "#2980b9";
-            err.innerText = "닉네임 확인 중...";
+            err.innerText = "확인 중...";
             btn.disabled = true;
 
-            // 전체 문장(100%)이 정확히 똑같은 경우에만 중복 처리하는 실시간 PeerJS 검사
-            const checkPeerId = 'lily-ball-exactname-' + encodeURIComponent(val.toLowerCase());
+            // 한글 포함 이름도 안전하게 100% 동일 아이디 중복 체크
+            const encodedName = safeEncodeName(val.toLowerCase());
+            const checkPeerId = 'lily-ball-name-' + encodedName;
             const testPeer = new Peer(checkPeerId);
 
             testPeer.on('open', () => {
-                // 완전히 똑같은 이름이 없으므로 중복 통과!
                 testPeer.destroy();
                 savedUsername = val;
                 saveData();
@@ -788,7 +808,6 @@
             });
 
             testPeer.on('error', (e) => {
-                // 정확히 100% 동일한 이름이 이미 등록되어 사용 중인 경우
                 testPeer.destroy();
                 err.style.color = "#e74c3c";
                 err.innerText = "중복되는 닉네임 입니다!";
