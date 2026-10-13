@@ -503,7 +503,7 @@
 <body>
 
     <!-- 0. 최초 1회 이름 설정 팝업 -->
-    <div class="modal-overlay hidden" id="name-modal">
+    <div class="modal-overlay" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
             <div class="version-text">릴리 볼 파이트</div>
@@ -860,7 +860,7 @@
         }
 
         // 영구 중복 체크를 위한 글로벌 DB 연동 (JSONBin)
-        const BIN_ID = '670be839ad19ca34f8b80b2d'; // 공용 저장소 ID
+        const BIN_ID = '670be839ad19ca34f8b80b2d';
         const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
         async function checkAndRegisterGlobalName(name) {
@@ -873,7 +873,7 @@
                 }
 
                 if (usedNames.includes(name.toLowerCase())) {
-                    return false; // 이미 등록된 중복 이름
+                    return false; // 중복 이름 존재
                 }
 
                 usedNames.push(name.toLowerCase());
@@ -885,7 +885,6 @@
 
                 return true; // 사용 가능
             } catch (e) {
-                // API 실패 시 로컬저장소 내역으로 비상 대체
                 let localUsed = JSON.parse(localStorage.getItem('lily_used_names') || '[]');
                 if (localUsed.includes(name.toLowerCase())) return false;
                 localUsed.push(name.toLowerCase());
@@ -911,7 +910,7 @@
 
             const isBadWord = badWords.some(word => val.toLowerCase().includes(word.toLowerCase()));
             if (isBadWord) {
-                err.innerText = "이 이름을 쓸 수 없습니다.";
+                err.innerText = "이 이름은 사용할 수 없습니다.";
                 return;
             }
 
@@ -928,7 +927,7 @@
                 return;
             }
 
-            // 2단계: 실시간 Peer 서버 체크
+            // 2단계: Peer 서버 연동 체크
             const encodedName = safeEncodeName(val.toLowerCase());
             const checkPeerId = 'lily-ball-name-' + encodedName;
             const testPeer = new Peer(checkPeerId);
@@ -1952,4 +1951,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
