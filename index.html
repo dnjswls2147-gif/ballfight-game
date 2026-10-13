@@ -316,116 +316,6 @@
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
         .btn-retry { background-color: #27ae60; font-size: 15px; padding: 14px; }
-        
-        /* 브롤 스타일 클럽 가입 UI */
-        .club-layout {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-            text-align: left;
-        }
-        .club-left-panel {
-            flex: 1;
-            background: #2980b9;
-            border: 2px solid #1c5980;
-            border-radius: 10px;
-            padding: 10px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .club-right-panel {
-            flex: 1.3;
-            background: #ecf0f1;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            padding: 8px;
-            max-height: 240px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .club-card {
-            background: #ffffff;
-            border: 2px solid #d5dbdb;
-            border-radius: 8px;
-            padding: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .club-card-info {
-            font-size: 11px;
-            color: #2c3e50;
-        }
-        .club-card-name {
-            font-weight: bold;
-            font-size: 12px;
-            color: #d35400;
-        }
-        .club-join-sm-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* 브롤스타즈 클럽 메인 화면 스타일 */
-        .brawl-club-main {
-            background: #1b1425;
-            border: 3px solid #9b59b6;
-            border-radius: 10px;
-            padding: 12px;
-            color: white;
-            text-align: left;
-            margin-bottom: 12px;
-        }
-        .brawl-club-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #2c163a;
-            border: 2px solid #8e44ad;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-        }
-        .brawl-club-title {
-            font-size: 15px;
-            font-weight: bold;
-            color: #f1c40f;
-        }
-        .brawl-club-members {
-            font-size: 12px;
-            background: #4a235a;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-        .brawl-chat-box {
-            background: #2c163a;
-            border: 2px solid #4a235a;
-            border-radius: 8px;
-            height: 140px;
-            overflow-y: auto;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-        .brawl-chat-msg {
-            background: #34224f;
-            padding: 6px 8px;
-            border-radius: 6px;
-            line-height: 1.3;
-        }
 
         .shop-list {
             display: flex;
@@ -609,6 +499,7 @@
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.2 버전</div>
+        <div class="error" id="lobby-error-msg" style="color: #e74c3c; font-size: 13px; font-weight: bold; margin-bottom: 6px; min-height: 18px;"></div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
@@ -676,60 +567,6 @@
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
-    <!-- 1-3. 브롤스타즈 스타일 클럽(그룹) 메뉴 화면 -->
-    <div class="container hidden" id="group-screen">
-        <div class="header-row">
-            <h2 id="group-screen-title">🛡️ 클럽 가입</h2>
-            <button class="btn-close-x" onclick="showLobby()">X</button>
-        </div>
-        <div class="version-text">v1.2 버전</div>
-        
-        <!-- 미가입 상태일 때 보이는 클럽 찾기/생성 화면 -->
-        <div id="club-not-joined-view">
-            <div class="club-layout">
-                <div class="club-left-panel">
-                    <div>
-                        <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #ffe0b2;">클럽을 찾는 중이세요?</div>
-                        <input type="text" id="club-search-input" placeholder="클럽 이름 검색" style="margin-bottom: 6px; padding: 8px; font-size: 12px;">
-                        <button class="btn-claim" style="width: 100%; padding: 8px; font-size: 12px; background: #27ae60;" onclick="searchClub()">검색</button>
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #ffe0b2;">직접 만드는 건 어때요?</div>
-                        <button class="btn-claim" style="width: 100%; padding: 10px; font-size: 12px; background: #8e44ad;" onclick="createClub()">+ 클럽 생성</button>
-                    </div>
-                </div>
-
-                <!-- 추천 클럽 목록 (사용자가 생성한 클럽만 표시) -->
-                <div class="club-right-panel" id="recommended-clubs-container">
-                    <div style="font-size: 11px; font-weight: bold; color: #7f8c8d; text-align: center; margin-bottom: 2px;">추천 클럽</div>
-                    <!-- 동적으로 생성된 클럽들이 여기에 표시됩니다 -->
-                </div>
-            </div>
-            <div class="error" id="group-error" style="text-align: center;"></div>
-        </div>
-
-        <!-- 가입 완료 상태일 때 보이는 브롤스타즈 스타일 클럽 메인 화면 -->
-        <div id="club-joined-view" class="hidden">
-            <div class="brawl-club-main">
-                <div class="brawl-club-header">
-                    <div class="brawl-club-title" id="display-my-club-name">릴리전용 클럽</div>
-                    <div class="brawl-club-members">👤 1/30</div>
-                </div>
-                <div class="brawl-chat-box" id="brawl-club-chat-box">
-                    <div class="brawl-chat-msg"><b>[알림]</b> 클럽에 가입하신 것을 환영합니다!</div>
-                    <div class="brawl-chat-msg"><b>${savedUsername || '나'}</b>님이 클럽에 가입했습니다!</div>
-                </div>
-                <div style="display: flex; gap: 4px;">
-                    <input type="text" id="brawl-chat-input" placeholder="메시지를 입력하세요..." maxlength="40" style="margin-bottom: 0; padding: 10px; font-size: 12px;" onkeyup="if(event.keyCode===13) sendClubMessage()">
-                    <button class="btn-claim" style="width: 60px; font-size: 12px;" onclick="sendClubMessage()">전송</button>
-                </div>
-            </div>
-            <button class="btn" style="background: #c0392b; font-size: 13px; padding: 12px; margin-top: 5px;" onclick="leaveClub()">클럽 탈퇴하기</button>
-        </div>
-
-        <button class="btn btn-back" onclick="showLobby()" style="margin-top: 10px;">로비로 돌아가기</button>
-    </div>
-
     <!-- 1-2. 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
         <div class="header-row">
@@ -790,7 +627,6 @@
 
         let gameOverState = null; 
         let createdCode = null;
-        let createdGroupCode = null;
         let remainingTime = 10;
         let timerInterval = null;
         let nextGameMode = 'ai';
@@ -798,12 +634,6 @@
         let userCoins = 0; 
         let userTrophies = 0;
         
-        let myClubName = null;
-        // 생성된 클럽 목록 저장 배열
-        let customClubsList = [
-            { name: "릴리전용 클럽", members: 1, trophies: 150 }
-        ];
-
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
 
@@ -900,9 +730,7 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 balls: ballsData,
-                mailClaimed: mailClaimed,
-                myClubName: myClubName,
-                customClubsList: customClubsList
+                mailClaimed: mailClaimed
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
         }
@@ -918,8 +746,6 @@
                         savedUsername = parsed.username;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
-                    if (parsed.myClubName !== undefined) myClubName = parsed.myClubName;
-                    if (parsed.customClubsList !== undefined) customClubsList = parsed.customClubsList;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
                             let match = ballsData.find(b => b.id === savedBall.id);
@@ -973,8 +799,7 @@
         }
 
         function openProfileModal() {
-            let clubDisplay = myClubName ? ` (클럽: ${myClubName})` : "";
-            document.getElementById('profile-modal-title').innerText = "👤 내 프로필" + clubDisplay;
+            document.getElementById('profile-modal-title').innerText = "👤 내 프로필";
             document.getElementById('profile-modal-name').innerText = savedUsername || "미설정";
             document.getElementById('profile-modal-coin').innerText = userCoins + "개";
             document.getElementById('profile-modal-trophy').innerText = userTrophies + "개";
@@ -1079,6 +904,15 @@
             showCharacterSelect();
         }
 
+        // 그룹 버튼 클릭 시 점검 중 메시지 출력 및 진입 차단
+        function openGroupMenu() {
+            const err = document.getElementById('lobby-error-msg');
+            err.innerText = "🛠️ 현재 그룹 기능은 점검 중입니다!";
+            setTimeout(() => {
+                err.innerText = "";
+            }, 3000);
+        }
+
         function joinRoomMatch() {
             if (!checkUserHasName()) return;
 
@@ -1166,136 +1000,6 @@
             });
         }
 
-        // 클럽 시스템 제어 함수들
-        function openGroupMenu() {
-            if (!checkUserHasName()) return;
-            document.getElementById('lobby-screen').classList.add('hidden');
-            document.getElementById('group-screen').classList.remove('hidden');
-
-            renderClubScreenState();
-        }
-
-        function renderClubScreenState() {
-            const notJoinedView = document.getElementById('club-not-joined-view');
-            const joinedView = document.getElementById('club-joined-view');
-            const titleEl = document.getElementById('group-screen-title');
-
-            if (myClubName) {
-                titleEl.innerText = "🛡️ " + myClubName;
-                notJoinedView.classList.add('hidden');
-                joinedView.classList.remove('hidden');
-                document.getElementById('display-my-club-name').innerText = myClubName;
-            } else {
-                titleEl.innerText = "🛡️ 클럽 가입";
-                joinedView.classList.add('hidden');
-                notJoinedView.classList.remove('hidden');
-                renderRecommendedClubsList();
-            }
-        }
-
-        function renderRecommendedClubsList() {
-            const container = document.getElementById('recommended-clubs-container');
-            container.innerHTML = `<div style="font-size: 11px; font-weight: bold; color: #7f8c8d; text-align: center; margin-bottom: 2px;">추천 클럽</div>`;
-
-            if (customClubsList.length === 0) {
-                container.innerHTML += `<div style="font-size: 11px; color: #7f8c8d; text-align: center; margin-top: 20px;">생성된 클럽이 없습니다.<br>클럽을 직접 생성해보세요!</div>`;
-                return;
-            }
-
-            customClubsList.forEach(club => {
-                const card = document.createElement('div');
-                card.className = 'club-card';
-                card.innerHTML = `
-                    <div class="club-card-info">
-                        <div class="club-card-name">${club.name}</div>
-                        <div>멤버 ${club.members}/30 | 🏆 ${club.trophies}</div>
-                    </div>
-                    <button class="club-join-sm-btn" onclick="joinClubByName('${club.name.replace(/'/g, "\\'")}')">가입</button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function searchClub() {
-            const query = document.getElementById('club-search-input').value.trim().toLowerCase();
-            const err = document.getElementById('group-error');
-            if (!query) {
-                err.style.color = "#e74c3c";
-                err.innerText = "검색할 클럽 이름을 입력하세요.";
-                return;
-            }
-            let found = customClubsList.find(c => c.name.toLowerCase().includes(query));
-            if (found) {
-                err.style.color = "#27ae60";
-                err.innerText = `'${found.name}' 클럽을 찾았습니다! 오른쪽에서 가입하세요.`;
-            } else {
-                err.style.color = "#e74c3c";
-                err.innerText = "일치하는 클럽이 없습니다.";
-            }
-        }
-
-        function joinClubByName(clubName) {
-            myClubName = clubName;
-            saveData();
-            renderClubScreenState();
-            alert(`축하합니다! '${clubName}' 클럽에 가입되었습니다.`);
-        }
-
-        function createClub() {
-            const clubNamePrompt = prompt("생성할 클럽 이름을 입력하세요 (최대 12글자):");
-            if (!clubNamePrompt) return;
-            const trimmed = clubNamePrompt.trim();
-            if (trimmed.length > 12) {
-                alert("클럽 이름은 12글자 이내로 입력해주세요.");
-                return;
-            }
-
-            // 중복 검사
-            if (customClubsList.some(c => c.name === trimmed)) {
-                alert("이미 존재하는 클럽 이름입니다.");
-                return;
-            }
-
-            // 새 클럽을 생성하고 추천 클럽 리스트에 추가
-            const newClub = { name: trimmed, members: 1, trophies: userTrophies || 0 };
-            customClubsList.push(newClub);
-
-            myClubName = trimmed;
-            saveData();
-            renderClubScreenState();
-            alert(`클럽 '${trimmed}'이(가) 성공적으로 생성되고 가입되었습니다!`);
-        }
-
-        function leaveClub() {
-            if (confirm("정말로 클럽을 탈퇴하시겠습니까?")) {
-                myClubName = null;
-                saveData();
-                renderClubScreenState();
-                alert("클럽을 탈퇴했습니다.");
-            }
-        }
-
-        function sendClubMessage() {
-            const input = document.getElementById('brawl-chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const isBadWord = badWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
-            if (isBadWord) {
-                alert("욕설이나 비속어는 사용할 수 없습니다!");
-                input.value = "";
-                return;
-            }
-
-            input.value = "";
-            const chatBox = document.getElementById('brawl-club-chat-box');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'brawl-chat-msg';
-            msgDiv.innerHTML = `<b>${savedUsername}</b>: ${text}`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
         function handleNetworkData(data) {
             if (data.type === 'JOIN_INFO') {
                 friendName = data.name;
@@ -1325,7 +1029,6 @@
         function showCharacterSelect() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
-            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.remove('hidden');
@@ -1451,7 +1154,6 @@
             }
             conn = null;
             createdCode = null;
-            createdGroupCode = null;
 
             resetGameState();
             updateCoinsUI();
@@ -1459,7 +1161,6 @@
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
-            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
