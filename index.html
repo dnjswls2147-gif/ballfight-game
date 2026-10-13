@@ -7,6 +7,11 @@
     <!-- 실시간 P2P 멀티플레이 라이브러리 -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
         body {
             background-color: #2c163a;
             font-family: sans-serif;
@@ -86,9 +91,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 9999;
             padding: 20px;
-            box-sizing: border-box;
         }
         .modal-box {
             width: 100%;
@@ -275,6 +279,8 @@
             margin-bottom: 10px;
             box-sizing: border-box;
             background: #fff;
+            user-select: auto;
+            -webkit-user-select: auto;
         }
         input[type="text"]:focus { 
             border-color: #e67e22; 
@@ -433,13 +439,13 @@
     <!-- 0. 최초 1회 이름 설정 팝업 -->
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
-            <h2>👤 이름 설정</h2>
+            <h2>👤 이름을 정해주세요</h2>
             <div class="version-text">릴리 볼 파이트</div>
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
-                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 바꿀 수 없습니다.
+                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 이름을 변경할 수 없습니다.
             </div>
             <div class="error" id="modal-error-msg"></div>
-            <input type="text" id="init-username-input" placeholder="이름을 입력하세요 (최대 10글자)" maxlength="10">
+            <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
             <button class="btn btn-ai" onclick="saveInitialUsername()">이름 확정하기</button>
         </div>
     </div>
@@ -486,8 +492,8 @@
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count">0</span>개</div>
-            <div class="trophy-box">🏆 트로피: <span id="trophy-count">0</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
+            <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
             <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
         
@@ -514,8 +520,8 @@
         <h2>⚽ 나의 공 보관함 ⚽</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container" style="margin-top: 5px;">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-shop">0</span>개</div>
-            <div class="trophy-box">🏆 트로피: <span id="trophy-count-shop">0</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-shop">0</span>개</div>
+            <div class="trophy-box">🏆 트로피:<span id="trophy-count-shop">0</span>개</div>
         </div>
         <div class="desc">공을 선택하거나 코인으로 구매하세요!</div>
         
@@ -529,8 +535,8 @@
         <h2>👥 친구 플레이 👥</h2>
         <div class="version-text">v1.1 버전</div>
         <div class="currency-container">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인: <span id="coin-count-friend">0</span>개</div>
-            <div class="trophy-box">🏆 트로피: <span id="trophy-count-friend">0</span>개</div>
+            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-friend">0</span>개</div>
+            <div class="trophy-box">🏆 트로피:<span id="trophy-count-friend">0</span>개</div>
         </div>
         <div class="desc">방을 생성하거나 번호를 입력하세요</div>
         <div class="error" id="friend-error"></div>
@@ -541,7 +547,6 @@
         </div>
         <div class="room-box hidden" id="room-display">----</div>
 
-        <!-- 방장이 생성 시 숨겨지는 영역 -->
         <div id="join-container">
             <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
             <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
@@ -732,9 +737,12 @@
 
             if (!savedUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('name-modal').classList.add('hidden');
             }
 
             checkMailRedDot();
+            updateCoinsUI();
         }
 
         function saveInitialUsername() {
@@ -1440,3 +1448,113 @@
             if (p.freezeTimer > 0) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#00cec9';
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPlayer(p1);
+            drawPlayer(p2);
+
+            projectiles.forEach(proj => {
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#0984e3';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            iceFallBlocks.forEach(ice => {
+                ctx.save();
+                ctx.translate(ice.x, ice.y);
+                ctx.fillStyle = '#74b9ff';
+                ctx.strokeStyle = '#0984e3';
+                ctx.lineWidth = 3;
+                ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.restore();
+            });
+
+            fireFallBlocks.forEach(fire => {
+                ctx.beginPath();
+                ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#f39c12';
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            if (isCountingDown) {
+                ctx.save();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = "900 64px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 8;
+                ctx.strokeText(countdownValue, canvas.width / 2, canvas.height / 2);
+
+                ctx.fillStyle = "#f1c40f";
+                ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
+            }
+
+            if (gameOverState) {
+                ctx.save();
+                
+                ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = "900 42px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                let resultText = "";
+                let textColor = "";
+
+                if (gameOverState === 'win') {
+                    resultText = "승리!!!";
+                    textColor = "#2ecc71";
+                } else if (gameOverState === 'lose') {
+                    resultText = "패배";
+                    textColor = "#e74c3c";
+                } else {
+                    resultText = "무승부 ㅠ";
+                    textColor = "#f1c40f";
+                }
+
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 6;
+                ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
+
+                ctx.fillStyle = textColor;
+                ctx.fillText(resultText, canvas.width / 2, canvas.height / 2);
+
+                ctx.restore();
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loadData();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
