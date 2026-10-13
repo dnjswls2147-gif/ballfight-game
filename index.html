@@ -93,7 +93,7 @@
             pointer-events: auto !important;
         }
 
-        /* 갈색 네모 우편함 모달 (더 넓게 확장) */
+        /* 갈색 네모 우편함 모달 */
         .mail-brown-box {
             background: #5d4037;
             border: 3px solid #3e2723;
@@ -707,7 +707,6 @@
         }
 
         function validateName() {
-            document.activeElement.blur();
             const name = document.getElementById('username').value.trim();
             if (!name) {
                 document.getElementById('error-msg').innerText = "이름부터 써주세요!";
@@ -736,7 +735,6 @@
         });
 
         function startAI() {
-            document.activeElement.blur();
             const name = validateName();
             if (!name) return;
             nextGameMode = 'ai';
@@ -744,10 +742,6 @@
         }
 
         function joinRoomMatch() {
-            document.activeElement.blur();
-            const name = validateName();
-            if (!name) return;
-
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
 
@@ -836,23 +830,20 @@
         }
 
         function showFriendMenu() {
-            document.activeElement.blur();
             const name = validateName();
-            if (!name) return;
+            if (!name) return; // 이름이 없으면 친구 창으로 안 넘어가고 멈춤
 
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.remove('hidden');
         }
 
         function showMyBallShop() {
-            document.activeElement.blur();
             document.getElementById('lobby-screen').classList.add('hidden');
             renderShop();
             document.getElementById('myball-screen').classList.remove('hidden');
         }
 
         function showMailbox() {
-            document.activeElement.blur();
             document.getElementById('lobby-screen').classList.add('hidden');
             renderMailbox();
             document.getElementById('mailbox-screen').classList.remove('hidden');
@@ -873,7 +864,6 @@
         }
 
         function createRoom() {
-            document.activeElement.blur();
             createdCode = Math.floor(1000 + Math.random() * 9000).toString();
             const box = document.getElementById('room-display');
             box.innerText = "방 번호: " + createdCode;
@@ -882,7 +872,6 @@
         }
 
         function resetRoom() {
-            document.activeElement.blur();
             createdCode = null;
             document.getElementById('room-display').classList.add('hidden');
             document.getElementById('room-input').value = "";
@@ -1167,7 +1156,7 @@
             function handleAction(e) {
                 const now = Date.now();
                 if (now - lastClickTime < 500) {
-                    return; // 0.5초 이내 연속 클릭 방지
+                    return; 
                 }
                 lastClickTime = now;
                 handler();
