@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -503,7 +504,7 @@
 <body>
 
     <!-- 0. 최초 1회 이름 설정 팝업 -->
-    <div class="modal-overlay" id="name-modal">
+    <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
             <div class="version-text">릴리 볼 파이트</div>
@@ -693,6 +694,10 @@
         // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
 
+        // 온라인 DB 연동 상수
+        const BIN_ID = '670be839ad19ca34f8b80b2d';
+        const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -733,8 +738,7 @@
         let isHost = false; 
         let friendName = "친구";
 
-        let globalChatPeer = null;
-        let chatConnections = [];
+        let chatPollInterval = null;
 
         function safeEncodeName(str) {
             return Array.from(str).map(c => c.charCodeAt(0).toString(16)).join('');
@@ -831,6 +835,9 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
+                    if (parsed.username !== undefined && parsed.username.trim() !== "") {
+                        savedUsername = parsed.username;
+                    }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
@@ -846,17 +853,15 @@
                 }
             }
 
-            // 무조건 이름 정하기 팝업 창을 띄움
-            savedUsername = "";
-            document.getElementById('name-modal').classList.remove('hidden');
+            if (!savedUsername) {
+                document.getElementById('name-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('name-modal').classList.add('hidden');
+            }
 
             checkMailRedDot();
             updateCoinsUI();
         }
-
-        // 영구 중복 체크를 위한 글로벌 DB 연동 (JSONBin)
-        const BIN_ID = '670be839ad19ca34f8b80b2d';
-        const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
         async function checkAndRegisterGlobalName(name) {
             try {
@@ -868,17 +873,25 @@
                 }
 
                 if (usedNames.includes(name.toLowerCase())) {
-                    return false; // 중복 이름 존재
+                    return false;
                 }
 
                 usedNames.push(name.toLowerCase());
+                
+                let currentRecord = {};
+                if (res.ok) {
+                    const fullData = await res.json();
+                    currentRecord = fullData.record || {};
+                }
+                currentRecord.names = usedNames;
+
                 await fetch(BIN_URL, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ names: usedNames })
+                    body: JSON.stringify(currentRecord)
                 });
 
-                return true; // 사용 가능
+                return true;
             } catch (e) {
                 let localUsed = JSON.parse(localStorage.getItem('lily_used_names') || '[]');
                 if (localUsed.includes(name.toLowerCase())) return false;
@@ -913,7 +926,6 @@
             err.innerText = "중복 이름 확인 중...";
             btn.disabled = true;
 
-            // 1단계: 영구 DB 등록 체크
             const isAvailable = await checkAndRegisterGlobalName(val);
             if (!isAvailable) {
                 err.style.color = "#e74c3c";
@@ -922,7 +934,6 @@
                 return;
             }
 
-            // 2단계: Peer 서버 연동 체크
             const encodedName = safeEncodeName(val.toLowerCase());
             const checkPeerId = 'lily-ball-name-' + encodedName;
             const testPeer = new Peer(checkPeerId);
@@ -967,48 +978,82 @@
         function openChatModal() {
             if (!checkUserHasName()) return;
             document.getElementById('chat-modal').classList.remove('hidden');
-            initGlobalChat();
+            fetchAndRenderGlobalChat();
+            if (!chatPollInterval) {
+                chatPollInterval = setInterval(fetchAndRenderGlobalChat, 3000);
+            }
         }
 
         function closeChatModal() {
             document.getElementById('chat-modal').classList.add('hidden');
+            if (chatPollInterval) {
+                clearInterval(chatPollInterval);
+                chatPollInterval = null;
+            }
         }
 
-        function initGlobalChat() {
-            if (globalChatPeer) return;
+        // 온라인 데이터베이스 서버에서 실시간 채팅을 가져오고 1일(24시간) 지난 채팅 필터링
+        async function fetchAndRenderGlobalChat() {
+            try {
+                const res = await fetch(BIN_URL + '/latest');
+                if (!res.ok) return;
 
-            globalChatPeer = new Peer();
-            globalChatPeer.on('open', () => {
-                const targetPeerId = 'lily-ball-global-chat-room-v2';
-                const connChat = globalChatPeer.connect(targetPeerId);
+                const data = await res.json();
+                const record = data.record || {};
+                let messages = record.messages || [];
 
-                connChat.on('open', () => {
-                    chatConnections.push(connChat);
-                });
+                const now = Date.now();
+                const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-                connChat.on('data', (data) => {
-                    if (data.type === 'CHAT_MSG') {
-                        appendChatMessage(data.author, data.text, data.time, data.coins, data.trophies);
-                    }
-                });
-            });
+                // 24시간 이내 작성된 최신 채팅만 필터링
+                const validMessages = messages.filter(m => (now - m.timestamp) < ONE_DAY_MS);
 
-            globalChatPeer.on('connection', (c) => {
-                chatConnections.push(c);
-                c.on('data', (data) => {
-                    if (data.type === 'CHAT_MSG') {
-                        appendChatMessage(data.author, data.text, data.time, data.coins, data.trophies);
-                        chatConnections.forEach(connItem => {
-                            if (connItem !== c && connItem.open) {
-                                connItem.send(data);
-                            }
-                        });
-                    }
-                });
-            });
+                // 만약 1일이 지나 삭제된 메시지가 있다면 서버 데이터 자동 갱신
+                if (validMessages.length !== messages.length) {
+                    record.messages = validMessages;
+                    await fetch(BIN_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(record)
+                    });
+                }
+
+                renderChatBox(validMessages);
+            } catch (e) {
+                console.error("채팅 로드 중 오류 발생:", e);
+            }
         }
 
-        function sendGlobalChatMessage() {
+        function renderChatBox(messages) {
+            const chatBox = document.getElementById('global-chat-box');
+            chatBox.innerHTML = `
+                <div class="chat-msg">
+                    <span class="author">[알림]</span>
+                    <span class="text">전체 채팅방에 오신 것을 환영합니다!</span>
+                </div>
+            `;
+
+            messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-msg';
+
+                const isMe = (msg.author === savedUsername);
+                let nameDisplay = isMe ? `👑 ${msg.author}` : msg.author;
+                let goldClass = isMe ? 'my-gold-name' : '';
+
+                msgDiv.innerHTML = `
+                    <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${msg.author.replace(/'/g, "\\'")}', ${msg.coins || 0}, ${msg.trophies || 0})">${nameDisplay}</span>
+                    <span class="time">${msg.time}</span>
+                    <div class="text">${msg.text}</div>
+                `;
+
+                chatBox.appendChild(msgDiv);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendGlobalChatMessage() {
             const input = document.getElementById('global-chat-input');
             const text = input.value.trim();
 
@@ -1021,46 +1066,44 @@
                 return;
             }
 
+            input.value = "";
+
             const now = new Date();
             const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            const timestamp = now.getTime();
 
-            const chatData = {
-                type: 'CHAT_MSG',
-                author: savedUsername,
-                text: text,
-                time: timeStr,
-                coins: userCoins,
-                trophies: userTrophies
-            };
+            try {
+                const res = await fetch(BIN_URL + '/latest');
+                if (res.ok) {
+                    const data = await res.json();
+                    const record = data.record || {};
+                    let messages = record.messages || [];
 
-            appendChatMessage(savedUsername, text, timeStr, userCoins, userTrophies);
+                    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+                    messages = messages.filter(m => (timestamp - m.timestamp) < ONE_DAY_MS);
 
-            chatConnections.forEach(connItem => {
-                if (connItem.open) {
-                    connItem.send(chatData);
+                    messages.push({
+                        author: savedUsername,
+                        text: text,
+                        time: timeStr,
+                        timestamp: timestamp,
+                        coins: userCoins,
+                        trophies: userTrophies
+                    });
+
+                    record.messages = messages;
+
+                    await fetch(BIN_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(record)
+                    });
+
+                    renderChatBox(messages);
                 }
-            });
-
-            input.value = "";
-        }
-
-        function appendChatMessage(author, text, time, coins, trophies) {
-            const chatBox = document.getElementById('global-chat-box');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'chat-msg';
-
-            const isMe = (author === savedUsername);
-            let nameDisplay = isMe ? `👑 ${author}` : author;
-            let goldClass = isMe ? 'my-gold-name' : '';
-
-            msgDiv.innerHTML = `
-                <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${author.replace(/'/g, "\\'")}', ${coins || 0}, ${trophies || 0})">${nameDisplay}</span>
-                <span class="time">${time}</span>
-                <div class="text">${text}</div>
-            `;
-
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (e) {
+                alert("채팅 전송에 실패했습니다. 다시 시도해주세요.");
+            }
         }
 
         let p1 = { 
