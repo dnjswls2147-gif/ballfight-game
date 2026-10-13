@@ -66,14 +66,43 @@
             border-radius: 50%;
         }
 
-        /* 갈색 네모 우편함 모달 */
+        /* 우편함 헤더 (타이틀 + 큰 X 버튼) */
+        .mailbox-header-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 2px;
+        }
+        .btn-close-x {
+            position: absolute;
+            right: 0;
+            background: #c0392b;
+            color: #ffffff;
+            border: 2px solid #962d22;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            touch-action: manipulation;
+            pointer-events: auto !important;
+        }
+
+        /* 갈색 네모 우편함 모달 (더 넓게 확장) */
         .mail-brown-box {
             background: #5d4037;
             border: 3px solid #3e2723;
             border-radius: 10px;
-            padding: 15px;
+            padding: 20px 15px;
             color: #ffffff;
-            margin-bottom: 15px;
+            margin: 15px 0;
+            width: 100%;
+            box-sizing: border-box;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
         }
         .mail-status-title {
@@ -389,15 +418,16 @@
 
     <!-- 1-0-1. 우편함 화면 -->
     <div class="container hidden" id="mailbox-screen">
-        <h2>📬 우편함 📬</h2>
+        <div class="mailbox-header-row">
+            <h2>📬 우편함 📬</h2>
+            <button type="button" class="btn-close-x" id="btn-close-mailbox">X</button>
+        </div>
         <div class="version-text">v1.1 버전</div>
         
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">위의 받을 보상이 있습니다!</div>
             <div id="mail-content-area"></div>
         </div>
-
-        <button class="btn btn-back" id="btn-close-mailbox">로비로 돌아가기</button>
     </div>
 
     <!-- 1-0. 나의 공 상점 및 보관함 화면 -->
@@ -490,7 +520,6 @@
         let iceFallBlocks = [];
 
         let mailClaimed = false; 
-        // 유효 기간: 2026년 10월 13일 오전 9시 6분까지
         const EXPIRY_TIME = new Date(2026, 9, 13, 9, 6, 0).getTime(); 
 
         let ballsData = [
