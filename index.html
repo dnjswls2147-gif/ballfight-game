@@ -151,7 +151,7 @@
             cursor: pointer;
             text-decoration: underline;
         }
-        /* 내 특수 황금색 이름 스타일 */
+        /* 내 이름 스타일 (황금색 강조) */
         .chat-msg .author.my-gold-name {
             color: #f39c12 !important;
             font-weight: 900 !important;
@@ -848,7 +848,6 @@
                 }
             }
 
-            // 이름을 아직 안 정했거나 빈 경우에만 팝업 표시, 한 번 정하면 다시 안 뜸
             if (!savedUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
             } else {
@@ -880,7 +879,6 @@
                 return;
             }
 
-            // 중복 이름은 허용하므로 바로 저장 및 적용 (변경 불가, 영구 저장)
             savedUsername = val;
             saveData();
             err.innerText = "";
@@ -926,7 +924,6 @@
             }
         }
 
-        // 온라인 데이터베이스 서버에서 실시간 채팅을 가져오고 1일(24시간) 지난 채팅 필터링
         async function fetchAndRenderGlobalChat() {
             try {
                 const res = await fetch(BIN_URL + '/latest');
@@ -939,8 +936,7 @@
                 const now = Date.now();
                 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-                // 24시간 이내 작성된 최신 채팅만 필터링
-                const validMessages = messages.filter(m => (now - m.timestamp) < ONE_DAY_MS);
+                const validMessages = messages.filter(m => (now - (m.timestamp || 0)) < ONE_DAY_MS);
 
                 if (validMessages.length !== messages.length) {
                     record.messages = validMessages;
@@ -970,14 +966,17 @@
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'chat-msg';
 
-                const isMe = (msg.author === savedUsername);
-                let nameDisplay = isMe ? `👑 ${msg.author}` : msg.author;
+                const authorName = msg.author || msg.name || "익명";
+                const isMe = (authorName === savedUsername);
+                
+                // 내가 쓴 채팅은 '나', 다른 사람은 그 사람의 이름으로 표시
+                let nameDisplay = isMe ? "나" : authorName;
                 let goldClass = isMe ? 'my-gold-name' : '';
 
                 msgDiv.innerHTML = `
-                    <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${msg.author.replace(/'/g, "\\'")}', ${msg.coins || 0}, ${msg.trophies || 0})">${nameDisplay}</span>
-                    <span class="time">${msg.time}</span>
-                    <div class="text">${msg.text}</div>
+                    <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${authorName.replace(/'/g, "\\'")}', ${msg.coins || 0}, ${msg.trophies || 0})">${nameDisplay}</span>
+                    <span class="time">${msg.time || ""}</span>
+                    <div class="text">${msg.text || ""}</div>
                 `;
 
                 chatBox.appendChild(msgDiv);
@@ -1005,6 +1004,15 @@
             const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             const timestamp = now.getTime();
 
+            const newMsg = {
+                author: savedUsername,
+                text: text,
+                time: timeStr,
+                timestamp: timestamp,
+                coins: userCoins,
+                trophies: userTrophies
+            };
+
             try {
                 const res = await fetch(BIN_URL + '/latest');
                 if (res.ok) {
@@ -1013,17 +1021,9 @@
                     let messages = record.messages || [];
 
                     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-                    messages = messages.filter(m => (timestamp - m.timestamp) < ONE_DAY_MS);
+                    messages = messages.filter(m => (timestamp - (m.timestamp || 0)) < ONE_DAY_MS);
 
-                    messages.push({
-                        author: savedUsername,
-                        text: text,
-                        time: timeStr,
-                        timestamp: timestamp,
-                        coins: userCoins,
-                        trophies: userTrophies
-                    });
-
+                    messages.push(newMsg);
                     record.messages = messages;
 
                     await fetch(BIN_URL, {
@@ -1895,7 +1895,7 @@
                     resultText = "승리!!!";
                     textColor = "#2ecc71";
                 } else if (gameOverState === 'lose') {
-                    resultText = "패배";
+                    resultTest = "패배";
                     textColor = "#e74c3c";
                 } else {
                     resultText = "무승부 ㅠ";
