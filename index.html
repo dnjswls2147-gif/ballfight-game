@@ -87,7 +87,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -439,14 +439,14 @@
     <!-- 0. 최초 1회 이름 설정 팝업 -->
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
-            <h2>👤 이름을 정해주세요</h2>
+            <h2>👤 이름을 정하세요</h2>
             <div class="version-text">릴리 볼 파이트</div>
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
-                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 이름을 변경할 수 없습니다.
+                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 변경할 수 없습니다.
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
-            <button class="btn btn-ai" onclick="saveInitialUsername()">이름 확정하기</button>
+            <button class="btn btn-ai" onclick="saveInitialUsername()">이름 정하기</button>
         </div>
     </div>
 
@@ -596,6 +596,9 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // 초기화 저장을 위해 저장 키 이름을 새롭게 설정 (완전 초기화 효과)
+        const STORAGE_KEY = 'lily_ball_fight_reset_v2';
+
         let savedUsername = "";
 
         let gameStarted = false;
@@ -707,11 +710,14 @@
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
-            localStorage.setItem('lily_ball_fight_data', JSON.stringify(gameData));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('lily_ball_fight_data');
+            // 이전 구버전 스토리지 키 삭제 처리로 깔끔한 초기화 진행
+            localStorage.removeItem('lily_ball_fight_data');
+
+            const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
