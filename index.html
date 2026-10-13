@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,25 +35,43 @@
         }
         .hidden { display: none !important; }
 
-        /* 상단 네비게이션 바 (프로필 & 우편함) */
+        /* 상단 네비게이션 바 (프로필 & 전체채팅 & 우편함) */
         .top-nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            gap: 4px;
         }
         .profile-btn {
             background: #2980b9;
             color: #fff;
             border: 2px solid #1c5980;
             border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 13px;
+            padding: 8px 10px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+        }
+        .chat-btn {
+            background: #27ae60;
+            color: #fff;
+            border: 2px solid #1e8449;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
         }
         .mailbox-btn {
             position: relative;
@@ -62,13 +79,15 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 13px;
+            padding: 8px 10px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
         }
         .red-dot {
             position: absolute;
@@ -105,6 +124,43 @@
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             position: relative;
+        }
+
+        /* 전체 채팅 디자인 */
+        .chat-box {
+            background: #ffffff;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .chat-msg {
+            font-size: 13px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        .chat-msg .author {
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .chat-msg .time {
+            font-size: 10px;
+            color: #95a5a6;
+            margin-left: 4px;
+        }
+        .chat-msg .text {
+            color: #2c3e50;
+            margin-top: 2px;
+        }
+        .chat-input-container {
+            display: flex;
+            gap: 6px;
         }
 
         /* 갈색 네모 모달 */
@@ -479,11 +535,37 @@
         </div>
     </div>
 
+    <!-- 0-2. 전체 채팅 팝업 모달 -->
+    <div class="modal-overlay hidden" id="chat-modal">
+        <div class="modal-box">
+            <div class="header-row">
+                <h2>💬 전체 채팅</h2>
+                <button class="btn-close-x" onclick="closeChatModal()">X</button>
+            </div>
+            <div class="version-text">모든 유저와 함께 대화하세요!</div>
+
+            <div class="chat-box" id="global-chat-box">
+                <div class="chat-msg">
+                    <span class="author">[알림]</span>
+                    <span class="text">전체 채팅방에 오신 것을 환영합니다!</span>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" id="global-chat-input" placeholder="메시지 입력..." maxlength="50" style="margin-bottom: 0;" onkeyup="if(event.keyCode===13) sendGlobalChatMessage()">
+                <button class="btn btn-ai" style="margin-top: 0; width: 80px; padding: 14px 0;" onclick="sendGlobalChatMessage()">전송</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">
                 👤 프로필
+            </button>
+            <button class="chat-btn" onclick="openChatModal()">
+                💬 전체 채팅
             </button>
             <button class="mailbox-btn" onclick="showMailbox()">
                 📬 우편함
@@ -597,7 +679,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_reset_v7';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v8';
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
@@ -637,7 +719,10 @@
         let isHost = false; 
         let friendName = "친구";
 
-        // 한글 닉네임을 PeerJS에서 안전하게 사용할 수 있도록 인코딩하는 함수
+        // 전체 채팅 P2P 접속용
+        let globalChatPeer = null;
+        let chatConnections = [];
+
         function safeEncodeName(str) {
             return Array.from(str).map(c => c.charCodeAt(0).toString(16)).join('');
         }
@@ -732,6 +817,7 @@
             localStorage.removeItem('lily_ball_fight_reset_v4');
             localStorage.removeItem('lily_ball_fight_reset_v5');
             localStorage.removeItem('lily_ball_fight_reset_v6');
+            localStorage.removeItem('lily_ball_fight_reset_v7');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -793,7 +879,6 @@
             err.innerText = "확인 중...";
             btn.disabled = true;
 
-            // 한글 포함 이름도 안전하게 100% 동일 아이디 중복 체크
             const encodedName = safeEncodeName(val.toLowerCase());
             const checkPeerId = 'lily-ball-name-' + encodedName;
             const testPeer = new Peer(checkPeerId);
@@ -824,6 +909,103 @@
 
         function closeProfileModal() {
             document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        /* 💬 전체 채팅 로직 */
+        function openChatModal() {
+            if (!checkUserHasName()) return;
+            document.getElementById('chat-modal').classList.remove('hidden');
+            initGlobalChat();
+        }
+
+        function closeChatModal() {
+            document.getElementById('chat-modal').classList.add('hidden');
+        }
+
+        function initGlobalChat() {
+            if (globalChatPeer) return;
+
+            globalChatPeer = new Peer();
+            globalChatPeer.on('open', () => {
+                // 대표 공용 채팅 서버 ID 접속 시도
+                const targetPeerId = 'lily-ball-global-chat-room';
+                const connChat = globalChatPeer.connect(targetPeerId);
+
+                connChat.on('open', () => {
+                    chatConnections.push(connChat);
+                });
+
+                connChat.on('data', (data) => {
+                    if (data.type === 'CHAT_MSG') {
+                        appendChatMessage(data.author, data.text, data.time);
+                    }
+                });
+            });
+
+            globalChatPeer.on('connection', (c) => {
+                chatConnections.push(c);
+                c.on('data', (data) => {
+                    if (data.type === 'CHAT_MSG') {
+                        appendChatMessage(data.author, data.text, data.time);
+                        // 수신한 채팅 타 유저에게 중계
+                        chatConnections.forEach(connItem => {
+                            if (connItem !== c && connItem.open) {
+                                connItem.send(data);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        function sendGlobalChatMessage() {
+            const input = document.getElementById('global-chat-input');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // 욕설 감지
+            const isBadWord = badWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
+            if (isBadWord) {
+                alert("욕설이나 비속어는 사용할 수 없습니다!");
+                input.value = "";
+                return;
+            }
+
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            const chatData = {
+                type: 'CHAT_MSG',
+                author: savedUsername,
+                text: text,
+                time: timeStr
+            };
+
+            appendChatMessage(savedUsername, text, timeStr);
+
+            chatConnections.forEach(connItem => {
+                if (connItem.open) {
+                    connItem.send(chatData);
+                }
+            });
+
+            input.value = "";
+        }
+
+        function appendChatMessage(author, text, time) {
+            const chatBox = document.getElementById('global-chat-box');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg';
+
+            msgDiv.innerHTML = `
+                <span class="author">${author}</span>
+                <span class="time">${time}</span>
+                <div class="text">${text}</div>
+            `;
+
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         let p1 = { 
@@ -1608,4 +1790,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                </html>
