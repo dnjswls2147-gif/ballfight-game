@@ -234,6 +234,7 @@
         .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
+        .btn-retry { background-color: #27ae60; font-size: 15px; padding: 14px; }
         
         .shop-list {
             display: flex;
@@ -464,8 +465,11 @@
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
 
-        <!-- 게임 진행 중 및 종료 시 항상 사용할 수 있는 로비 버튼 -->
-        <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 15px;">🏠 로비로 가기</button>
+        <!-- 하단 버튼 영역 (다시 플레이 + 로비로 가기) -->
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button class="btn btn-retry hidden" id="btn-game-retry" onclick="retryGame()" style="margin-top: 0; flex: 1;">🔄 다시 플레이</button>
+            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 1;">🏠 로비로 가기</button>
+        </div>
     </div>
 
     <script>
@@ -473,6 +477,10 @@
         const ctx = canvas.getContext('2d');
 
         let gameStarted = false;
+        let isCountingDown = false;
+        let countdownValue = 3;
+        let countdownInterval = null;
+
         let gameOverState = null; 
         let createdCode = null;
         let remainingTime = 10;
@@ -565,7 +573,7 @@
 
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
-            { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
+            { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 왕관 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false }
         ];
 
@@ -610,12 +618,12 @@
         }
 
         let p1 = { 
-            x: 85, y: 170, radius: 24, color: '#2980b9', vx: 2.2, vy: 1.6, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, lastSkillTime: 0, freezeTimer: 0 
+            x: 85, y: 170, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, freezeTimer: 0 
         };
         let p2 = { 
-            x: 255, y: 170, radius: 24, color: '#c0392b', vx: -2.2, vy: -1.6, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, lastSkillTime: 0, freezeTimer: 0 
+            x: 255, y: 170, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, freezeTimer: 0 
         };
 
         function updateCoinsUI() {
@@ -818,6 +826,8 @@
                 btn.innerText = isDoubleSpeed ? "⚡ 2X 온 (ON)" : "⚡ 2X 배속";
                 if (isDoubleSpeed) btn.classList.add('active');
                 else btn.classList.remove('active');
+            } else if (data.type === 'RETRY_GAME') {
+                startCountdownAndGame();
             }
         }
 
@@ -860,9 +870,34 @@
                 document.getElementById('p2-label').innerText = `${friendName} (기본 볼) (레드)`;
             }
 
+            startCountdownAndGame();
+        }
+
+        function startCountdownAndGame() {
+            gameStarted = false;
+            gameOverState = null;
+            document.getElementById('btn-game-retry').classList.add('hidden');
             resetGameState();
-            gameStarted = true;
-            requestAnimationFrame(loop);
+
+            isCountingDown = true;
+            countdownValue = 3;
+
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                countdownValue--;
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    isCountingDown = false;
+                    gameStarted = true;
+                }
+            }, 1000);
+        }
+
+        function retryGame() {
+            if (nextGameMode === 'friend' && conn && conn.open) {
+                conn.send({ type: 'RETRY_GAME' });
+            }
+            startCountdownAndGame();
         }
 
         function toggleSpeed() {
@@ -915,7 +950,9 @@
 
         function showLobby() {
             if (timerInterval) clearInterval(timerInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
             gameStarted = false;
+            isCountingDown = false;
             gameOverState = null;
             if (peer) {
                 peer.destroy();
@@ -927,6 +964,7 @@
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
+            document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
@@ -947,6 +985,18 @@
             joinRoomMatch();
         }
 
+        function getRandomVelocity() {
+            // 완전 랜덤 속도 및 방향 설정 (속도 크기 2.0 ~ 3.2 사이, 각도 랜덤)
+            let angle = Math.random() * Math.PI * 2;
+            let speed = 2.0 + Math.random() * 1.2;
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
+            // 너무 수평/수직으로 가지 않게 최소 속도 보장
+            if (Math.abs(vx) < 1.0) vx = vx > 0 ? 1.5 : -1.5;
+            if (Math.abs(vy) < 1.0) vy = vy > 0 ? 1.5 : -1.5;
+            return { vx, vy };
+        }
+
         function resetGameState() {
             let equipped = getEquippedBall();
 
@@ -954,7 +1004,9 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.x = 85; p1.y = 170; p1.vx = 2.2; p1.vy = 1.6;
+            p1.x = 90; p1.y = 170; 
+            let v1 = getRandomVelocity();
+            p1.vx = v1.vx; p1.vy = v1.vy;
             p1.skillGauge = 0;
             p1.lastIceAttackTime = Date.now();
             p1.freezeTimer = 0;
@@ -963,7 +1015,9 @@
             p2.maxHp = 200;
             p2.hp = 200;
             p2.damage = 10;
-            p2.x = 255; p2.y = 170; p2.vx = -2.2; p2.vy = -1.6;
+            p2.x = 250; p2.y = 170; 
+            let v2 = getRandomVelocity();
+            p2.vx = v2.vx; p2.vy = v2.vy;
             p2.skillGauge = 0;
             p2.freezeTimer = 0;
 
@@ -997,6 +1051,8 @@
                 } else {
                     gameOverState = 'draw';
                 }
+
+                document.getElementById('btn-game-retry').classList.remove('hidden');
             }
         }
 
@@ -1026,8 +1082,8 @@
                     let startX = 60 + i * 100;
                     fireFallBlocks.push({
                         x: startX,
-                        y: -50,
-                        radius: 20,
+                        y: -80,
+                        radius: 40, // 기존 크기의 2배 (20 -> 40)
                         speed: 6 * speedMultiplier,
                         damage: 25,
                         target: target
@@ -1083,7 +1139,7 @@
                     });
                 }
             } else if (p1.type === 'fire') {
-                p1.skillGauge += (1 / 180) * speedMultiplier; // 3초마다 발동 (초당 60프레임 기준 180프레임)
+                p1.skillGauge += (1 / 180) * speedMultiplier; // 3초마다 발동
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerFireUltimate(p1);
@@ -1147,7 +1203,7 @@
                     continue;
                 }
 
-                if (fire.y > canvas.height + 60) {
+                if (fire.y > canvas.height + 80) {
                     fireFallBlocks.splice(i, 1);
                 }
             }
@@ -1283,11 +1339,30 @@
                 ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#e74c3c';
                 ctx.fill();
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 ctx.strokeStyle = '#f39c12';
                 ctx.stroke();
                 ctx.closePath();
             });
+
+            // 3초 카운트다운 화면 표시
+            if (isCountingDown) {
+                ctx.save();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = "900 64px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 8;
+                ctx.strokeText(countdownValue, canvas.width / 2, canvas.height / 2);
+
+                ctx.fillStyle = "#f1c40f";
+                ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
+            }
 
             if (gameOverState) {
                 ctx.save();
@@ -1327,9 +1402,7 @@
         function loop() {
             update();
             draw();
-            if (gameStarted || gameOverState) {
-                requestAnimationFrame(loop);
-            }
+            requestAnimationFrame(loop);
         }
 
         loadData();
