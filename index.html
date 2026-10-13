@@ -30,7 +30,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 우편함 상단 배치 버튼 */
+        /* 우편함 상단 배치 버튼 (터치 영역 확장) */
         .mailbox-top-bar {
             display: flex;
             justify-content: flex-end;
@@ -42,15 +42,16 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 8px 14px;
-            font-size: 13px;
+            padding: 12px 18px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
             pointer-events: auto !important;
             z-index: 100;
         }
@@ -58,8 +59,8 @@
             position: absolute;
             top: -4px;
             right: -4px;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background-color: #e74c3c;
             border: 2px solid #ffffff;
             border-radius: 50%;
@@ -105,11 +106,12 @@
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
+            touch-action: manipulation;
             pointer-events: auto !important;
         }
 
@@ -131,7 +133,7 @@
             background: #fef9e7;
             border: 2px solid #f1c40f;
             border-radius: 20px;
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
             color: #d68910;
@@ -142,7 +144,7 @@
             background: #eef9ff;
             border: 2px solid #3498db;
             border-radius: 20px;
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
             color: #2980b9;
@@ -153,13 +155,15 @@
             background: #f3e5f5;
             border: 2px solid #9b59b6;
             border-radius: 20px;
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
             color: #8e44ad;
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            pointer-events: auto !important;
         }
         .coin-icon {
             width: 16px;
@@ -177,7 +181,7 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 15px;
             font-size: 15px;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
@@ -200,7 +204,7 @@
         }
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             color: white;
             border: none;
             border-radius: 10px;
@@ -217,9 +221,9 @@
         }
         .btn-ai { background-color: #27ae60; }
         .btn-friend { background-color: #2980b9; }
-        .btn-create { background-color: #8e44ad; font-size: 14px; padding: 10px; }
-        .btn-join { background-color: #d35400; font-size: 14px; padding: 10px; }
-        .btn-back { background-color: #7f8c8d; font-size: 13px; padding: 8px; }
+        .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
+        .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
+        .btn-back { background-color: #7f8c8d; font-size: 14px; padding: 12px; }
         
         .shop-list {
             display: flex;
@@ -236,7 +240,7 @@
             background: #ffffff;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 12px 15px;
         }
         .shop-item.owned { border-color: #27ae60; background: #eafaf1; }
         .shop-item.equipped { border-color: #2980b9; background: #ebf5fb; }
@@ -244,13 +248,14 @@
         .shop-name { font-weight: bold; font-size: 14px; color: #2c3e50; }
         .shop-desc { font-size: 11px; color: #7f8c8d; }
         .shop-action-btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             font-size: 12px;
             font-weight: bold;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            touch-action: manipulation;
             pointer-events: auto !important;
         }
         .btn-buy { background-color: #d35400; }
@@ -294,7 +299,7 @@
             color: white;
             border: 2px solid #a04000;
             border-radius: 6px;
-            padding: 5px 10px;
+            padding: 8px 12px;
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
@@ -389,9 +394,7 @@
         
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">위의 받을 보상이 있습니다!</div>
-            <div id="mail-content-area">
-                <!-- 선물 아이템 dynamic rendering -->
-            </div>
+            <div id="mail-content-area"></div>
         </div>
 
         <button class="btn btn-back" id="btn-close-mailbox">로비로 돌아가기</button>
@@ -407,9 +410,7 @@
         </div>
         <div class="desc">공을 선택하거나 코인으로 구매하세요!</div>
         
-        <div class="shop-list" id="shop-list-container">
-            <!-- 자바스크립트로 동적 생성 -->
-        </div>
+        <div class="shop-list" id="shop-list-container"></div>
 
         <button class="btn btn-back" id="btn-close-myball">로비로 돌아가기</button>
     </div>
@@ -427,7 +428,7 @@
         
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
             <button class="btn btn-create" style="margin-top:0; flex:1;" id="btn-create-room">방 생성하기 (랜덤 4자리)</button>
-            <button class="btn" style="margin-top:0; width:40px; background:#c0392b;" id="btn-reset-room">X</button>
+            <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" id="btn-reset-room">X</button>
         </div>
         <div class="room-box hidden" id="room-display">----</div>
 
@@ -488,9 +489,7 @@
         let projectiles = [];
         let iceFallBlocks = [];
 
-        // 우편함 보상 관련 설정
         let mailClaimed = false; 
-        // 유효기간: 2026년 10월 13일 오전 9시 00분
         const EXPIRY_TIME = new Date(2026, 9, 13, 9, 0, 0).getTime(); 
 
         let ballsData = [
@@ -622,7 +621,7 @@
                     });
                 } else {
                     btn.className += ' btn-buy';
-                    btn.innerText = `${ball.price} 코인으로 구매`;
+                    btn.innerText = `${ball.price} 코인 구매`;
                     bindElementTouch(btn, () => {
                         buyBall(ball.id);
                     });
@@ -930,4 +929,224 @@
                 p1.x += p1.vx * speedMultiplier; 
                 p1.y += p1.vy * speedMultiplier;
                 if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-                if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.
+                if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+            }
+
+            if (p2.freezeTimer > 0) {
+                p2.freezeTimer -= speedMultiplier;
+            } else {
+                p2.x += p2.vx * speedMultiplier; 
+                p2.y += p2.vy * speedMultiplier;
+                if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
+                if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+            }
+
+            if (p1.type === 'ice') {
+                p1.iceSkillGauge += (1 / 300) * speedMultiplier;
+                if (p1.iceSkillGauge >= 1) {
+                    p1.iceSkillGauge = 0;
+                    triggerIceUltimate(p1);
+                }
+
+                let now = Date.now();
+                if (now - p1.lastIceAttackTime >= 1000 / speedMultiplier) {
+                    p1.lastIceAttackTime = now;
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    projectiles.push({
+                        x: p1.x,
+                        y: p1.y,
+                        vx: (dx / dist) * 6 * speedMultiplier,
+                        vy: (dy / dist) * 6 * speedMultiplier,
+                        radius: 8,
+                        target: p2,
+                        damage: 10
+                    });
+                }
+            }
+
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let proj = projectiles[i];
+                proj.x += proj.vx;
+                proj.y += proj.vy;
+
+                if (proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+
+                let dx = proj.target.x - proj.x;
+                let dy = proj.target.y - proj.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < proj.target.radius + proj.radius) {
+                    proj.target.hp = Math.max(0, proj.target.hp - proj.damage);
+                    projectiles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                }
+            }
+
+            for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
+                let ice = iceFallBlocks[i];
+                ice.y += ice.speed;
+
+                let dx = ice.target.x - ice.x;
+                let dy = ice.target.y - ice.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < ice.target.radius + ice.size / 2.5) {
+                    ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
+                    ice.target.freezeTimer = 90;
+                    iceFallBlocks.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+
+                if (ice.y > canvas.height + 80) {
+                    iceFallBlocks.splice(i, 1);
+                }
+            }
+
+            let dx = p2.x - p1.x;
+            let dy = p2.y - p1.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < p1.radius + p2.radius) {
+                let tempVx = p1.vx; let tempVy = p1.vy;
+                p1.vx = p2.vx; p1.vy = p2.vy;
+                p2.vx = tempVx; p2.vy = tempVy;
+
+                let overlap = (p1.radius + p2.radius) - dist;
+                let nx = dx / (dist || 1);
+                let ny = dy / (dist || 1);
+                p1.x -= nx * overlap / 2;
+                p1.y -= ny * overlap / 2;
+                p2.x += nx * overlap / 2;
+                p2.y += ny * overlap / 2;
+
+                p1.hp = Math.max(0, p1.hp - 30);
+                p2.hp = Math.max(0, p2.hp - 30);
+
+                updateHpBars();
+                checkGameOver();
+            }
+        }
+
+        function updateHpBars() {
+            document.getElementById('p1-hp').style.width = (p1.hp / p1.maxHp * 100) + '%';
+            document.getElementById('p1-hp-text').innerText = p1.hp + " / " + p1.maxHp;
+
+            document.getElementById('p2-hp').style.width = (p2.hp / p2.maxHp * 100) + '%';
+            document.getElementById('p2-hp-text').innerText = p2.hp + " / " + p2.maxHp;
+        }
+
+        function drawPlayer(p) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+
+            if (p.type === 'ice') {
+                ctx.fillStyle = '#0984e3';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#74b9ff';
+                ctx.stroke();
+
+                if (p.iceSkillGauge > 0) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.iceSkillGauge));
+                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = '#f1c40f';
+                    ctx.stroke();
+                }
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            ctx.closePath();
+
+            if (p.freezeTimer > 0) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#00cec9';
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPlayer(p1);
+            drawPlayer(p2);
+
+            projectiles.forEach(proj => {
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#0984e3';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            iceFallBlocks.forEach(ice => {
+                ctx.save();
+                ctx.translate(ice.x, ice.y);
+                ctx.fillStyle = '#74b9ff';
+                ctx.strokeStyle = '#0984e3';
+                ctx.lineWidth = 3;
+                ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
+                ctx.restore();
+            });
+        }
+
+        function loop() {
+            if (!gameStarted) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // 터치/클릭 즉시 반응하도록 강력하게 바인딩하는 함수
+        function bindElementTouch(el, handler) {
+            if (!el) return;
+            let triggered = false;
+
+            el.addEventListener('pointerdown', (e) => {
+                triggered = true;
+                handler();
+                e.stopPropagation();
+            }, { passive: true });
+
+            el.addEventListener('click', (e) => {
+                if (!triggered) {
+                    handler();
+                }
+                triggered = false;
+                e.stopPropagation();
+            });
+        }
+
+        bindElementTouch(document.getElementById('btn-ai-match'), startAI);
+        bindElementTouch(document.getElementById('btn-friend-play'), showFriendMenu);
+        bindElementTouch(document.getElementById('btn-open-myball'), showMyBallShop);
+        bindElementTouch(document.getElementById('btn-close-myball'), showLobby);
+        bindElementTouch(document.getElementById('btn-open-mailbox'), showMailbox);
+        bindElementTouch(document.getElementById('btn-close-mailbox'), showLobby);
+        bindElementTouch(document.getElementById('btn-create-room'), createRoom);
+        bindElementTouch(document.getElementById('btn-reset-room'), resetRoom);
+        bindElementTouch(document.getElementById('btn-join-room'), joinRoom);
+        bindElementTouch(document.getElementById('btn-back-lobby'), showLobby);
+        bindElementTouch(document.getElementById('btn-confirm-char'), confirmCharacterSelection);
+        bindElementTouch(document.getElementById('speed-toggle-btn'), toggleSpeed);
+        bindElementTouch(document.getElementById('lobby-back-btn'), showLobby);
+
+        loadData();
+        updateCoinsUI();
+    </script>
+</body>
+</html>
