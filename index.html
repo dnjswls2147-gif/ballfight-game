@@ -312,6 +312,7 @@
         .btn-ai { background-color: #27ae60; }
         .btn-friend { background-color: #2980b9; }
         .btn-group { background-color: #8e44ad; }
+        .btn-boss { background-color: #e67e22; border: 2px solid #d35400; }
         .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
         .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
@@ -373,7 +374,7 @@
         .canvas-container {
             position: relative;
             width: 340px;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 5px auto;
         }
         canvas {
             background: #ffffff;
@@ -435,6 +436,29 @@
             color: #000000;
             z-index: 5;
             pointer-events: none;
+        }
+
+        /* 보스전 조이스틱 패드 스타일 */
+        .joystick-pad {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .joy-btn {
+            flex: 1;
+            background: #34495e;
+            color: white;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .joy-btn:active {
+            background: #2980b9;
         }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
@@ -506,10 +530,11 @@
             <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
         
-        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 15px;">AI 자동 매칭</button>
+        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 10px;">AI 자동 매칭</button>
+        <button class="btn btn-boss" onclick="startBossMode()" style="margin-top: 6px;">😈 보스 피하기 (이벤트 1주일)</button>
         <div style="display: flex; gap: 6px;">
-            <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 8px;">친구 플레이</button>
-            <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 8px;">👥 그룹</button>
+            <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 6px;">친구 플레이</button>
+            <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 6px;">👥 그룹</button>
         </div>
     </div>
 
@@ -579,7 +604,7 @@
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
     </div>
 
-    <!-- 2. 게임 화면 -->
+    <!-- 2. 대전 게임 화면 -->
     <div class="container hidden" id="game-screen">
         <div class="canvas-container">
             <canvas id="gameCanvas" width="340" height="340"></canvas>
@@ -604,14 +629,34 @@
         </div>
     </div>
 
+    <!-- 3. 보스 피하기 게임 화면 -->
+    <div class="container hidden" id="boss-screen">
+        <div class="canvas-container" style="margin-bottom: 5px;">
+            <canvas id="bossCanvas" width="340" height="340"></canvas>
+        </div>
+
+        <div class="label" style="color: #e67e22; text-align: center; font-size: 13px; margin-bottom: 6px;" id="boss-status-text">권루트(L)의 공격을 피하세요!</div>
+        
+        <!-- 조이스틱 패드 -->
+        <div class="joystick-pad">
+            <button class="joy-btn" onmousedown="startMove(-1)" onmouseup="stopMove()" ontouchstart="startMove(-1)" ontouchend="stopMove()">⬅️ 왼쪽</button>
+            <button class="joy-btn" onmousedown="startJump()" ontouchstart="startJump()">⬆️ 점프</button>
+            <button class="joy-btn" onmousedown="startMove(1)" onmouseup="stopMove()" ontouchstart="startMove(1)" ontouchend="stopMove()">➡️ 오른쪽</button>
+        </div>
+
+        <button class="btn btn-back" onclick="showLobby()" style="margin-top: 10px; padding: 12px;">🏠 로비로 가기</button>
+    </div>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        const bossCanvas = document.getElementById('bossCanvas');
+        const bossCtx = bossCanvas.getContext('2d');
+
         // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
 
-        // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
             "미친", "미친놈", "미친년", "바보", "멍청이", "꺼져", "닥쳐", "새끼", "쌍놈", "씨블",
@@ -643,13 +688,22 @@
         let pokeFallBlocks = [];
 
         let mailClaimed = false; 
-        // 유효 기간: 10월 13일 오후 9시 30분
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
 
         let peer = null;
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        // 보스 피하기 모드 변수
+        let bossGameActive = false;
+        let bossCountdown = 3;
+        let bossCountdownInterval = null;
+        let bossPlayer = { x: 170, y: 290, radius: 18, vx: 0, speed: 4, vy: 0, isJumping:false };
+        let bossProjectiles = [];
+        let bossAttackCount = 0;
+        let bossAttackTimer = null;
+        let bossGameOver = false;
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -904,7 +958,96 @@
             showCharacterSelect();
         }
 
-        // 그룹 버튼 클릭 시 점검 중 메시지 출력 및 진입 차단
+        // 보스 피하기 모드 시작
+        function startBossMode() {
+            if (!checkUserHasName()) return;
+
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('boss-screen').classList.remove('hidden');
+
+            bossPlayer.x = 170;
+            bossPlayer.y = 290;
+            bossPlayer.vx = 0;
+            bossPlayer.vy = 0;
+            bossPlayer.isJumping = false;
+            bossProjectiles = [];
+            bossAttackCount = 0;
+            bossGameOver = false;
+            bossGameActive = false;
+            bossCountdown = 3;
+
+            document.getElementById('boss-status-text').innerText = "권루트(L)의 공격을 피하세요!";
+
+            if (bossCountdownInterval) clearInterval(bossCountdownInterval);
+            bossCountdownInterval = setInterval(() => {
+                bossCountdown--;
+                if (bossCountdown <= 0) {
+                    clearInterval(bossCountdownInterval);
+                    bossGameActive = true;
+                    startBossAttacks();
+                }
+            }, 1000);
+        }
+
+        function startBossAttacks() {
+            if (bossAttackTimer) clearInterval(bossAttackTimer);
+
+            // 2초마다 패턴 실행 (오른쪽 L -> 왼쪽 L 총 4번 반복)
+            bossAttackTimer = setInterval(() => {
+                if (!bossGameActive || bossGameOver) {
+                    clearInterval(bossAttackTimer);
+                    return;
+                }
+
+                bossAttackCount++;
+                let isRight = (bossAttackCount % 2 === 1); // 홀수번은 오른쪽, 짝수번은 왼쪽
+
+                triggerBossLShapeAttack(isRight);
+
+                if (bossAttackCount >= 8) { // 4번 반복 (오른쪽 4번, 왼쪽 4번 = 총 8턴)
+                    clearInterval(bossAttackTimer);
+                    setTimeout(() => {
+                        if (!bossGameOver) {
+                            bossGameActive = false;
+                            bossGameOver = true;
+                            userCoins += 5;
+                            userTrophies += 2;
+                            updateCoinsUI();
+                            saveData();
+                            document.getElementById('boss-status-text').innerText = "🎉 승리! 5코인 & 2트로피 획득!";
+                        }
+                    }, 2500);
+                }
+            }, 2000);
+        }
+
+        function triggerBossLShapeAttack(isRight) {
+            let startX = isRight ? 260 : 80;
+            // 거대한 'L' 자 블록 폭격 생성
+            bossProjectiles.push({
+                x: startX,
+                y: -60,
+                width: 70,
+                height: 120,
+                speed: 4,
+                active: true
+            });
+        }
+
+        // 조이스틱 조작 함수
+        function startMove(dir) {
+            bossPlayer.vx = dir * bossPlayer.speed;
+        }
+        function stopMove() {
+            bossPlayer.vx = 0;
+        }
+        function startJump() {
+            if (!bossPlayer.isJumping && bossGameActive) {
+                bossPlayer.vy = -9;
+                bossPlayer.isJumping = true;
+            }
+        }
+
         function openGroupMenu() {
             const err = document.getElementById('lobby-error-msg');
             err.innerText = "🛠️ 현재 그룹 기능은 점검 중입니다!";
@@ -1145,9 +1288,14 @@
         function showLobby() {
             if (timerInterval) clearInterval(timerInterval);
             if (countdownInterval) clearInterval(countdownInterval);
+            if (bossCountdownInterval) clearInterval(bossCountdownInterval);
+            if (bossAttackTimer) clearInterval(bossAttackTimer);
+
             gameStarted = false;
             isCountingDown = false;
             gameOverState = null;
+            bossGameActive = false;
+
             if (peer) {
                 peer.destroy();
                 peer = null;
@@ -1160,6 +1308,7 @@
             checkMailRedDot();
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('boss-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
@@ -1490,6 +1639,41 @@
             }
         }
 
+        // 보스전 로직 업데이트
+        function updateBossGame() {
+            if (!bossGameActive || bossGameOver) return;
+
+            bossPlayer.x += bossPlayer.vx;
+            if (bossPlayer.x < bossPlayer.radius) bossPlayer.x = bossPlayer.radius;
+            if (bossPlayer.x > bossCanvas.width - bossPlayer.radius) bossPlayer.x = bossCanvas.width - bossPlayer.radius;
+
+            bossPlayer.y += bossPlayer.vy;
+            bossPlayer.vy += 0.5; // 중력
+            if (bossPlayer.y > 290) {
+                bossPlayer.y = 290;
+                bossPlayer.vy = 0;
+                bossPlayer.isJumping = false;
+            }
+
+            // L자 블록 업데이트 및 충돌 검사
+            for (let i = bossProjectiles.length - 1; i >= 0; i--) {
+                let block = bossProjectiles[i];
+                block.y += block.speed;
+
+                // 충돌 검사 (플레이어와 L자 블록)
+                if (bossPlayer.x > block.x && bossPlayer.x < block.x + block.width &&
+                    bossPlayer.y > block.y && bossPlayer.y < block.y + block.height) {
+                    bossGameOver = true;
+                    bossGameActive = false;
+                    document.getElementById('boss-status-text').innerText = "💥 피격 패배! 다시 도전하세요.";
+                }
+
+                if (block.y > bossCanvas.height) {
+                    bossProjectiles.splice(i, 1);
+                }
+            }
+        }
+
         function updateHpBars() {
             const p1HpEl = document.getElementById('p1-hp');
             const p1TextEl = document.getElementById('p1-hp-text');
@@ -1539,63 +1723,11 @@
         }
 
         function drawPlayer(p) {
-            if (p.type === 'pokemon') {
-                drawPokeballGraphic(p.x, p.y, p.radius);
-
-                if (p.skillGauge > 0) {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
-                    ctx.lineWidth = 4;
-                    ctx.strokeStyle = '#f1c40f';
-                    ctx.stroke();
-                }
-            } else {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-
-                if (p.type === 'ice') {
-                    ctx.fillStyle = '#0984e3';
-                    ctx.fill();
-                    ctx.lineWidth = 3;
-                    ctx.strokeStyle = '#74b9ff';
-                    ctx.stroke();
-
-                    if (p.skillGauge > 0) {
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = '#f1c40f';
-                        ctx.stroke();
-                    }
-                } else if (p.type === 'fire') {
-                    ctx.fillStyle = '#d35400';
-                    ctx.fill();
-                    ctx.lineWidth = 3;
-                    ctx.strokeStyle = '#e74c3c';
-                    ctx.stroke();
-
-                    if (p.skillGauge > 0) {
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = '#f1c40f';
-                        ctx.stroke();
-                    }
-                } else {
-                    ctx.fillStyle = p.color;
-                    ctx.fill();
-                }
-                ctx.closePath();
-            }
-
-            if (p.freezeTimer > 0) {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#00cec9';
-                ctx.stroke();
-                ctx.closePath();
-            }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+            ctx.closePath();
         }
 
         function draw() {
@@ -1694,9 +1826,61 @@
             }
         }
 
+        // 보스전 캔버스 드로우
+        function drawBossGame() {
+            bossCtx.clearRect(0, 0, bossCanvas.width, bossCanvas.height);
+
+            // 유튜버 L (권루트) 보스 캐릭터 상단 표시
+            bossCtx.fillStyle = "#8e44ad";
+            bossCtx.beginPath();
+            bossCtx.arc(170, 40, 25, 0, Math.PI * 2);
+            bossCtx.fill();
+            bossCtx.lineWidth = 2;
+            bossCtx.strokeStyle = "#f1c40f";
+            bossCtx.stroke();
+            bossCtx.closePath();
+
+            bossCtx.fillStyle = "#ffffff";
+            bossCtx.font = "bold 16px sans-serif";
+            bossCtx.textAlign = "center";
+            bossCtx.fillText("유튜버 L (권루트)", 170, 80);
+
+            // 플레이어 그리기
+            bossCtx.fillStyle = "#2980b9";
+            bossCtx.beginPath();
+            bossCtx.arc(bossPlayer.x, bossPlayer.y, bossPlayer.radius, 0, Math.PI * 2);
+            bossCtx.fill();
+            bossCtx.closePath();
+
+            // L 자 블록 폭격 그리기
+            bossProjectiles.forEach(block => {
+                bossCtx.fillStyle = "#e74c3c";
+                bossCtx.fillRect(block.x, block.y, block.width, block.height);
+                bossCtx.fillStyle = "#ffffff";
+                bossCtx.font = "bold 24px sans-serif";
+                bossCtx.fillText("L", block.x + block.width / 2, block.y + block.height / 2);
+            });
+
+            // 카운트다운 표시
+            if (bossCountdown > 0) {
+                bossCtx.save();
+                bossCtx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                bossCtx.fillRect(0, 0, bossCanvas.width, bossCanvas.height);
+
+                bossCtx.font = "900 64px sans-serif";
+                bossCtx.textAlign = "center";
+                bossCtx.textBaseline = "middle";
+                bossCtx.fillStyle = "#f1c40f";
+                bossCtx.fillText(bossCountdown, bossCanvas.width / 2, bossCanvas.height / 2);
+                bossCtx.restore();
+            }
+        }
+
         function loop() {
             update();
             draw();
+            updateBossGame();
+            drawBossGame();
             requestAnimationFrame(loop);
         }
 
