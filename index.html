@@ -379,17 +379,6 @@
         }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
-        
-        .result-box {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 8px;
-        }
-        .result-win { background: #d4edda; color: #155724; }
-        .result-lose { background: #f8d7da; color: #721c24; }
-        .result-draw { background: #e2e3e5; color: #383d41; }
     </style>
 </head>
 <body>
@@ -498,8 +487,6 @@
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
 
-        <div id="game-result-box" class="result-box hidden"></div>
-
         <button class="btn" id="lobby-back-btn" style="background:#d35400; margin-top:10px;">🏠 로비로 가기</button>
     </div>
 
@@ -508,6 +495,7 @@
         const ctx = canvas.getContext('2d');
 
         let gameStarted = false;
+        let gameOverState = null; // 'win', 'lose', 'draw' 또는 null
         let createdCode = null;
         let remainingTime = 10;
         let timerInterval = null;
@@ -525,7 +513,6 @@
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 9, 6, 0).getTime(); 
 
-        // 공 데이터 수정 (기본 볼 & 아이스 볼 스탯 및 상세 설명)
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 10, hp: 250, damage: 25, owned: false, equipped: false }
@@ -618,7 +605,6 @@
                     if (parsed.username !== undefined) document.getElementById('username').value = parsed.username;
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
-                        // 이름 및 기본 속성 동기화
                         parsed.balls.forEach(savedBall => {
                             let match = ballsData.find(b => b.id === savedBall.id);
                             if (match) {
@@ -863,6 +849,7 @@
         function showLobby() {
             if (timerInterval) clearInterval(timerInterval);
             gameStarted = false;
+            gameOverState = null;
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
@@ -896,7 +883,6 @@
         function resetGameState() {
             let equipped = getEquippedBall();
 
-            // P1 장착 공 체력 및 데미지 세팅
             p1.type = equipped.id;
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
@@ -906,7 +892,6 @@
             p1.lastIceAttackTime = Date.now();
             p1.freezeTimer = 0;
 
-            // P2 (상대방) 기본 볼 세팅 (체력 200, 충돌 데미지 10)
             p2.type = 'standard';
             p2.maxHp = 200;
             p2.hp = 200;
@@ -925,36 +910,26 @@
             btn.classList.remove('active');
 
             updateHpBars();
-            
-            const resBox = document.getElementById('game-result-box');
-            resBox.className = "result-box hidden";
-            resBox.innerText = "";
         }
 
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
-                const resBox = document.getElementById('game-result-box');
-                resBox.classList.remove('hidden');
 
                 if (p1.hp > 0 && p2.hp <= 0) {
+                    gameOverState = 'win';
                     userCoins += 1;
                     userTrophies += 1;
                     updateCoinsUI();
                     saveData();
-                    resBox.className = "result-box result-win";
-                    resBox.innerText = "🎉 WIN! (+1 코인 / +1 트로피)";
                 } else if (p1.hp <= 0 && p2.hp > 0) {
-                    resBox.className = "result-box result-lose";
-                    resBox.innerText = "💀 LOSE";
+                    gameOverState = 'lose';
                 } else {
-                    resBox.className = "result-box result-draw";
-                    resBox.innerText = "🤝 무승부!";
+                    gameOverState = 'draw';
                 }
             }
         }
 
-        // 아이스 볼 기술 : 5초마다 얼음 폭격 (개당 30데미지 + 2초 정지)
         function triggerIceUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 4; i++) {
@@ -966,7 +941,7 @@
                         y: -60,
                         size: 55,
                         speed: 5 * speedMultiplier,
-                        damage: 30, // 30 데미지
+                        damage: 30,
                         target: target
                     });
                 }, i * 350);
@@ -976,7 +951,6 @@
         function update() {
             if (!gameStarted) return;
 
-            // P1 정지(빙결) 타이머 처리
             if (p1.freezeTimer > 0) {
                 p1.freezeTimer -= speedMultiplier;
             } else {
@@ -986,7 +960,6 @@
                 if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
             }
 
-            // P2 정지(빙결) 타이머 처리
             if (p2.freezeTimer > 0) {
                 p2.freezeTimer -= speedMultiplier;
             } else {
@@ -996,7 +969,6 @@
                 if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
             }
 
-            // 아이스 볼 스킬 게이지 및 투사체 발사 (5초 = 300프레임)
             if (p1.type === 'ice') {
                 p1.iceSkillGauge += (1 / 300) * speedMultiplier;
                 if (p1.iceSkillGauge >= 1) {
@@ -1017,12 +989,11 @@
                         vy: (dy / dist) * 6 * speedMultiplier,
                         radius: 8,
                         target: p2,
-                        damage: 25 // 투사체 데미지 25
+                        damage: 25
                     });
                 }
             }
 
-            // 투사체 처리
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let proj = projectiles[i];
                 proj.x += proj.vx;
@@ -1044,7 +1015,6 @@
                 }
             }
 
-            // 얼음 폭격 처리 (30데미지 & 2초[120프레임] 정지)
             for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
                 let ice = iceFallBlocks[i];
                 ice.y += ice.speed;
@@ -1054,7 +1024,7 @@
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < ice.target.radius + ice.size / 2.5) {
                     ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
-                    ice.target.freezeTimer = 120; // 2초 정지 (60fps 기준 120)
+                    ice.target.freezeTimer = 120;
                     iceFallBlocks.splice(i, 1);
                     updateHpBars();
                     checkGameOver();
@@ -1066,7 +1036,6 @@
                 }
             }
 
-            // 두 볼 간의 직접 충돌 처리 (설정된 기본 데미지 적용)
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
@@ -1161,13 +1130,46 @@
                 ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
                 ctx.restore();
             });
+
+            // 게임 종료 시 경기장(캔버스) 중앙에 결과 텍스트 표시
+            if (gameOverState) {
+                ctx.save();
+                ctx.font = "bold 34px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                // 배경 가독성을 위한 은은한 검은색 음영 (그림자 효과)
+                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.fillText(
+                    gameOverState === 'win' ? "VICTORY!!" : (gameOverState === 'lose' ? "DEFEAT.." : "무승부 ㅠ"),
+                    canvas.width / 2 + 2,
+                    canvas.height / 2 + 2
+                );
+
+                // 글자 색상 지정
+                if (gameOverState === 'win') {
+                    ctx.fillStyle = "#27ae60"; // 초록색 (승리)
+                } else if (gameOverState === 'lose') {
+                    ctx.fillStyle = "#c0392b"; // 빨간색 (패배)
+                } else {
+                    ctx.fillStyle = "#7f8c8d"; // 회색 (무승부)
+                }
+
+                ctx.fillText(
+                    gameOverState === 'win' ? "VICTORY!!" : (gameOverState === 'lose' ? "DEFEAT.." : "무승부 ㅠ"),
+                    canvas.width / 2,
+                    canvas.height / 2
+                );
+                ctx.restore();
+            }
         }
 
         function loop() {
-            if (!gameStarted) return;
             update();
             draw();
-            requestAnimationFrame(loop);
+            if (gameStarted || gameOverState) {
+                requestAnimationFrame(loop);
+            }
         }
 
         let lastClickTime = 0;
@@ -1216,6 +1218,8 @@
 
         loadData();
         updateCoinsUI();
+        requestAnimationFrame(loop); // 대기 중에도 화면을 그릴 수 있도록 루프 실행
     </script>
 </body>
-    </html>
+</html>
+
