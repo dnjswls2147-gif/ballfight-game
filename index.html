@@ -1922,52 +1922,59 @@
             ctx.closePath();
         }
 
-        // 유튜버 동룡쓰 오리지널 프로필 그래픽 (검은 모자/헤어 + 살구색 피부 + 동룡쓰 시그니처 미소)
+        // 동룡쓰 채널 공식 프로필 그래픽 (빨간 바탕 + 민트 안경 어몽어스 + "쉿" 손가락)
         function drawDongryongGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            // 배경 (밝은 그레이/파스텔 배경)
-            ctx.fillStyle = "#34495e"; 
+            // 1. 빨간색 공식 배경
+            ctx.fillStyle = "#c0392b"; 
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            // 상의 (검은 옷)
-            ctx.fillStyle = "#1e272e";
-            ctx.fillRect(x - radius, y + radius * 0.3, radius * 2, radius * 0.7);
-
-            // 살구색 얼굴
-            ctx.fillStyle = "#f5cd79"; 
+            // 2. 어몽어스 상체 (빨간색)
+            ctx.fillStyle = "#a93226";
             ctx.beginPath();
-            ctx.arc(x, y + radius * 0.05, radius * 0.65, 0, Math.PI * 2);
+            ctx.arc(x, y + radius * 0.1, radius * 0.75, Math.PI, 0);
             ctx.fill();
 
-            // 검은 모자/머리 (동룡쓰 캐릭터 특징)
-            ctx.fillStyle = "#2f3542";
+            // 3. 민트색 고글 (글래스)
+            ctx.fillStyle = "#a2d9ce";
             ctx.beginPath();
-            ctx.arc(x, y - radius * 0.1, radius * 0.68, Math.PI, Math.PI * 2);
+            ctx.roundRect(x - radius * 0.55, y - radius * 0.35, radius * 1.1, radius * 0.45, 8);
             ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#16a085";
+            ctx.stroke();
 
-            // 눈 (동룡쓰 장난스런 점눈/웃는눈)
-            ctx.fillStyle = "#2f3542";
+            // 4. 동그란 안경 테
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(x - radius * 0.22, y + radius * 0.05, radius * 0.09, 0, Math.PI * 2);
-            ctx.arc(x + radius * 0.22, y + radius * 0.05, radius * 0.09, 0, Math.PI * 2);
+            ctx.arc(x - radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
+            ctx.stroke();
+            // 안경 알 빛 반사 하이라이트
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x - radius * 0.3, y - radius * 0.22, radius * 0.08, radius * 0.18);
+            ctx.fillRect(x + radius * 0.14, y - radius * 0.22, radius * 0.08, radius * 0.18);
+
+            // 5. "쉿!" 하는 빨간 손가락
+            ctx.fillStyle = "#922b21";
+            ctx.strokeStyle = "#641e16";
+            ctx.lineWidth = 1.5;
+
+            // 검지 손가락
+            ctx.beginPath();
+            ctx.roundRect(x - radius * 0.12, y - radius * 0.1, radius * 0.22, radius * 0.65, 5);
             ctx.fill();
+            ctx.stroke();
 
-            // 볼터치 (분홍빛)
-            ctx.fillStyle = "#ea8685";
+            // 접힌 손가락들 및 주먹
             ctx.beginPath();
-            ctx.arc(x - radius * 0.32, y + radius * 0.18, radius * 0.08, 0, Math.PI * 2);
-            ctx.arc(x + radius * 0.32, y + radius * 0.18, radius * 0.08, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.1, y + radius * 0.35, radius * 0.2, 0, Math.PI * 2);
             ctx.fill();
-
-            // 씨익 웃는 입
-            ctx.beginPath();
-            ctx.arc(x, y + radius * 0.15, radius * 0.22, 0.1, Math.PI - 0.1);
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#2f3542";
             ctx.stroke();
 
             ctx.restore();
@@ -1983,7 +1990,7 @@
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = p.hp <= 100 ? 5 : 2.5;
-            ctx.strokeStyle = p.hp <= 100 ? "#e74c3c" : "#2c3e50";
+            ctx.strokeStyle = p.hp <= 100 ? "#ff0000" : "#2c3e50";
             ctx.stroke();
             ctx.closePath();
         }
@@ -2133,4 +2140,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+            </html>
