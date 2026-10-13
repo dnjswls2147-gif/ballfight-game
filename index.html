@@ -832,7 +832,7 @@
         let iceFallBlocks = [];
         let fireFallBlocks = [];
         let pokeFallBlocks = [];
-        let amongusAttacks = []; // 동룡쓰 어몽어스 이펙트
+        let amongusAttacks = [];
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
@@ -1583,7 +1583,7 @@
         function triggerDongryongUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             let isEnraged = owner.hp <= 100;
-            let baseDamage = isEnraged ? 170 : 85; // 100피 이하 시 2배(170)
+            let baseDamage = isEnraged ? 170 : 85;
 
             amongusAttacks.push({
                 target: target,
@@ -1673,16 +1673,15 @@
                 if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
             }
 
-            // 스킬 게이지 및 공격 로직
             if (p1.type === 'dongryong') {
-                p1.skillGauge += (1 / 300) * speedMultiplier; // 5초(300프레임)
+                p1.skillGauge += (1 / 300) * speedMultiplier; // 5초
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerDongryongUltimate(p1);
                 }
 
                 let now = Date.now();
-                if (now - p1.lastShhTime >= 1000 / speedMultiplier) { // 1초마다 "쉿"
+                if (now - p1.lastShhTime >= 1000 / speedMultiplier) {
                     p1.lastShhTime = now;
                     let dx = p2.x - p1.x;
                     let dy = p2.y - p1.y;
@@ -1696,7 +1695,7 @@
                         radius: 12,
                         text: "쉿",
                         target: p2,
-                        damage: isEnraged ? 30 : 15 // 100피 이하 2배
+                        damage: isEnraged ? 30 : 15
                     });
                 }
             } else if (p1.type === 'ice') {
@@ -1736,11 +1735,10 @@
                 }
             }
 
-            // 어몽어스 칼찌르기 연출 업뎃
             for (let i = amongusAttacks.length - 1; i >= 0; i--) {
                 let atk = amongusAttacks[i];
                 atk.timer += speedMultiplier;
-                if (atk.timer >= 12) { // 매 12프레임마다 1번씩 찌름
+                if (atk.timer >= 12) {
                     atk.timer = 0;
                     atk.target.hp = Math.max(0, atk.target.hp - atk.damagePerStab);
                     atk.stabsLeft--;
@@ -1852,7 +1850,7 @@
                 p2.y += ny * overlap / 2;
 
                 let p1Dmg = p1.damage;
-                if (p1.type === 'dongryong' && p1.hp <= 100) p1Dmg *= 2; // 각성시 충돌 데미지 2배
+                if (p1.type === 'dongryong' && p1.hp <= 100) p1Dmg *= 2;
 
                 p1.hp = Math.max(0, p1.hp - p2.damage);
                 p2.hp = Math.max(0, p2.hp - p1Dmg);
@@ -1924,31 +1922,52 @@
             ctx.closePath();
         }
 
-        // 동룡쓰 로블록스 그래픽
+        // 유튜버 동룡쓰 오리지널 프로필 그래픽 (검은 모자/헤어 + 살구색 피부 + 동룡쓰 시그니처 미소)
         function drawDongryongGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            // 배경 및 유니폼 (민트 상의, 빨간 바지)
-            ctx.fillStyle = "#1abc9c"; 
+            // 배경 (밝은 그레이/파스텔 배경)
+            ctx.fillStyle = "#34495e"; 
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            // 로블록스 노란 피부 얼굴
-            ctx.fillStyle = "#f1c40f"; 
-            ctx.fillRect(x - radius * 0.7, y - radius * 0.7, radius * 1.4, radius * 1.1);
+            // 상의 (검은 옷)
+            ctx.fillStyle = "#1e272e";
+            ctx.fillRect(x - radius, y + radius * 0.3, radius * 2, radius * 0.7);
 
-            // 눈 (동룡쓰 특유 장난스러운 눈)
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(x - radius * 0.4, y - radius * 0.3, radius * 0.2, radius * 0.25);
-            ctx.fillRect(x + radius * 0.2, y - radius * 0.3, radius * 0.2, radius * 0.25);
-
-            // 미소 입
+            // 살구색 얼굴
+            ctx.fillStyle = "#f5cd79"; 
             ctx.beginPath();
-            ctx.arc(x, y, radius * 0.25, 0, Math.PI);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "#2c3e50";
+            ctx.arc(x, y + radius * 0.05, radius * 0.65, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 검은 모자/머리 (동룡쓰 캐릭터 특징)
+            ctx.fillStyle = "#2f3542";
+            ctx.beginPath();
+            ctx.arc(x, y - radius * 0.1, radius * 0.68, Math.PI, Math.PI * 2);
+            ctx.fill();
+
+            // 눈 (동룡쓰 장난스런 점눈/웃는눈)
+            ctx.fillStyle = "#2f3542";
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.22, y + radius * 0.05, radius * 0.09, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.22, y + radius * 0.05, radius * 0.09, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 볼터치 (분홍빛)
+            ctx.fillStyle = "#ea8685";
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.32, y + radius * 0.18, radius * 0.08, 0, Math.PI * 2);
+            ctx.arc(x + radius * 0.32, y + radius * 0.18, radius * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 씨익 웃는 입
+            ctx.beginPath();
+            ctx.arc(x, y + radius * 0.15, radius * 0.22, 0.1, Math.PI - 0.1);
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#2f3542";
             ctx.stroke();
 
             ctx.restore();
@@ -1987,10 +2006,8 @@
             drawPlayer(p1);
             drawPlayer(p2);
 
-            // 투사체 그리기
             projectiles.forEach(proj => {
                 if (proj.text) {
-                    // "쉿" 글자 투사체
                     ctx.save();
                     ctx.font = "bold 16px sans-serif";
                     ctx.fillStyle = "#e74c3c";
@@ -2010,22 +2027,19 @@
                 }
             });
 
-            // 어몽어스 벤트 칼찌르기 이펙트
             amongusAttacks.forEach(atk => {
                 let tx = atk.target.x + 25;
                 let ty = atk.target.y - 10;
 
-                // 벤트
                 ctx.fillStyle = "#7f8c8d";
                 ctx.fillRect(tx - 15, ty + 10, 30, 8);
 
-                // 어몽어스 레드 몸통
                 ctx.fillStyle = "#c0392b";
                 ctx.fillRect(tx - 10, ty - 15, 20, 25);
-                // 안경
+                
                 ctx.fillStyle = "#74b9ff";
                 ctx.fillRect(tx - 12, ty - 12, 8, 8);
-                // 단검
+                
                 ctx.fillStyle = "#bdc3c7";
                 ctx.fillRect(tx - 18, ty - 2, 10, 4);
             });
@@ -2119,4 +2133,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
