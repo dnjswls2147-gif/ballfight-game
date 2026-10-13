@@ -912,7 +912,6 @@
             document.getElementById('chat-modal').classList.add('hidden');
         }
 
-        // 로컬스토리지를 이용해 채팅을 즉시 불러오고 24시간 지난 메시지 자동 삭제
         function fetchAndRenderGlobalChat() {
             try {
                 let messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
@@ -1000,12 +999,16 @@
                 localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
 
                 renderChatBox(messages);
+
+                // 친구와 연결되어 있다면 채팅 데이터 전송
+                if (conn && conn.open) {
+                    conn.send({ type: 'CHAT_SYNC', message: newMsg });
+                }
             } catch (e) {
                 alert("채팅 전송에 실패했습니다. 다시 시도해주세요.");
             }
         }
 
-        // 다른 탭이나 창에서 채팅을 칠 때 실시간 반영
         window.addEventListener('storage', (event) => {
             if (event.key === CHAT_STORAGE_KEY) {
                 fetchAndRenderGlobalChat();
@@ -1215,6 +1218,15 @@
                 else btn.classList.remove('active');
             } else if (data.type === 'RETRY_GAME') {
                 startCountdownAndGame();
+            } else if (data.type === 'CHAT_SYNC') {
+                try {
+                    let messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
+                    messages.push(data.message);
+                    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+                    fetchAndRenderGlobalChat();
+                } catch (e) {
+                    console.error("채팅 동기화 오류:", e);
+                }
             }
         }
 
