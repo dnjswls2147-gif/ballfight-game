@@ -30,7 +30,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 우편함 상단 배치 버튼 (터치 영역 확장) */
+        /* 우편함 상단 배치 버튼 */
         .mailbox-top-bar {
             display: flex;
             justify-content: flex-end;
@@ -490,7 +490,8 @@
         let iceFallBlocks = [];
 
         let mailClaimed = false; 
-        const EXPIRY_TIME = new Date(2026, 9, 13, 9, 0, 0).getTime(); 
+        // 유효 기간: 2026년 10월 13일 오전 9시 6분까지
+        const EXPIRY_TIME = new Date(2026, 9, 13, 9, 6, 0).getTime(); 
 
         let ballsData = [
             { id: 'standard', name: '스탠다드 볼', desc: '기본 공 (기본 장착)', price: 0, owned: true, equipped: true },
@@ -514,14 +515,22 @@
         function renderMailbox() {
             const msgEl = document.getElementById('mail-status-msg');
             const contentEl = document.getElementById('mail-content-area');
+            const now = new Date().getTime();
+
+            if (!mailClaimed && now >= EXPIRY_TIME) {
+                msgEl.innerText = "받을 보상이 없습니다";
+                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">유효 기간이 지나 보상이 만료되었습니다.</div>`;
+                checkMailRedDot();
+                return;
+            }
 
             if (isMailValid()) {
-                msgEl.innerText = "위에 받을 보상이 있습니다!";
+                msgEl.innerText = "위의 받을 보상이 있습니다!";
                 contentEl.innerHTML = `
                     <div class="mail-item">
                         <div>
                             <div class="mail-info-title">🎁 선물: 10 코인</div>
-                            <div class="mail-info-time">유효 기간: 10월 13일 오전 9시까지</div>
+                            <div class="mail-info-time">유효 기간: 10월 13일 오전 9시 6분까지</div>
                         </div>
                         <button class="btn-claim" id="btn-claim-reward">보상 받기</button>
                     </div>
@@ -529,11 +538,19 @@
                 bindElementTouch(document.getElementById('btn-claim-reward'), claimMailReward);
             } else {
                 msgEl.innerText = "받을 보상이 없습니다";
-                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">도착한 선물이 없거나 유효 기간이 지났습니다.</div>`;
+                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">도착한 선물이 없거나 이미 수령한 보상입니다.</div>`;
             }
         }
 
         function claimMailReward() {
+            const now = new Date().getTime();
+            if (now >= EXPIRY_TIME) {
+                alert("보상을 받을수 없음니다");
+                renderMailbox();
+                checkMailRedDot();
+                return;
+            }
+
             if (isMailValid()) {
                 mailClaimed = true;
                 userCoins += 10;
@@ -542,6 +559,8 @@
                 checkMailRedDot();
                 renderMailbox();
                 alert("🎉 10코인을 받았습니다!");
+            } else {
+                alert("보상을 받을수 없음니다");
             }
         }
 
@@ -1111,7 +1130,6 @@
             requestAnimationFrame(loop);
         }
 
-        // 터치/클릭 즉시 반응하도록 강력하게 바인딩하는 함수
         function bindElementTouch(el, handler) {
             if (!el) return;
             let triggered = false;
