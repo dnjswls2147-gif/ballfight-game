@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -155,7 +156,7 @@
         .chat-msg .author.my-gold-name {
             color: #f39c12 !important;
             font-weight: 900 !important;
-            text-shadow: 0 0 3px rgba(241, 196, 15, 0.8);
+            text-shadow: 0 0 4px rgba(241, 196, 15, 0.9);
             text-decoration: none !important;
         }
         .chat-msg .time {
@@ -508,7 +509,9 @@
             <h2>👤 이름을 정하세요</h2>
             <div class="version-text">릴리 볼 파이트</div>
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
-                최대 10글자까지 입력할 수 있으며,<br>한 번 정하면 변경할 수 없습니다.
+                최대 10글자까지 입력할 수 있으며,<br>
+                한 번 정하면 변경할 수 없습니다.<br>
+                <span style="font-size: 11px; color: #c0392b;">(중복되는 이름은 쓸 수 없습니다)</span>
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
@@ -688,7 +691,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 영구 저장 키 고정 (앞으로 데이터가 초기화되지 않음)
+        // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
@@ -723,7 +726,8 @@
         let pokeFallBlocks = [];
 
         let mailClaimed = false; 
-        const EXPIRY_TIME = new Date(2026, 9, 13, 21, 0, 0).getTime(); 
+        // 유효 기간: 10월 13일 오후 9시 30분
+        const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
 
         let peer = null;
         let conn = null;
@@ -769,8 +773,8 @@
                 contentEl.innerHTML = `
                     <div class="mail-item">
                         <div>
-                            <div class="mail-info-title">🎁 선물: 300 코인</div>
-                            <div class="mail-info-time">유효 기간: 10월 13일 오후 9시까지</div>
+                            <div class="mail-info-title">🎁 선물: 500 코인</div>
+                            <div class="mail-info-time">유효 기간: 10월 13일 오후 9시 30분까지</div>
                         </div>
                         <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
                     </div>
@@ -792,12 +796,12 @@
 
             if (isMailValid()) {
                 mailClaimed = true;
-                userCoins += 300;
+                userCoins += 500;
                 updateCoinsUI();
                 saveData();
                 checkMailRedDot();
                 renderMailbox();
-                alert("🎉 300코인을 받았습니다!");
+                alert("🎉 500코인을 받았습니다!");
             } else {
                 alert("보상을 받을수 없음니다");
             }
@@ -897,7 +901,7 @@
             testPeer.on('error', (e) => {
                 testPeer.destroy();
                 err.style.color = "#e74c3c";
-                err.innerText = "중복되는 닉네임 입니다!";
+                err.innerText = "중복된 이름입니다!";
                 btn.disabled = false;
             });
         }
@@ -1904,4 +1908,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+                    </html>
