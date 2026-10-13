@@ -688,7 +688,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_reset_v10';
+        const STORAGE_KEY = 'lily_ball_fight_reset_v11';
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
@@ -719,9 +719,9 @@
         let projectiles = [];
         let iceFallBlocks = [];
         let fireFallBlocks = [];
+        let pokeFallBlocks = []; // 포켓몬 볼 폭격용 배열
 
         let mailClaimed = false; 
-        // 유효 기간: 10월 13일 오후 9시 00분 (21시)
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 0, 0).getTime(); 
 
         let peer = null;
@@ -768,7 +768,7 @@
                 contentEl.innerHTML = `
                     <div class="mail-item">
                         <div>
-                            <div class="mail-info-title">🎁 선물: 200 코인</div>
+                            <div class="mail-info-title">🎁 선물: 300 코인</div>
                             <div class="mail-info-time">유효 기간: 10월 13일 오후 9시까지</div>
                         </div>
                         <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
@@ -791,12 +791,12 @@
 
             if (isMailValid()) {
                 mailClaimed = true;
-                userCoins += 200; // 200 코인 지급
+                userCoins += 300;
                 updateCoinsUI();
                 saveData();
                 checkMailRedDot();
                 renderMailbox();
-                alert("🎉 200코인을 받았습니다!");
+                alert("🎉 300코인을 받았습니다!");
             } else {
                 alert("보상을 받을수 없음니다");
             }
@@ -805,7 +805,8 @@
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 왕관 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false }
+            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 5초마다 30데미지 얼음 폭격 (2초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 7초마다 5초간 100개 이상 폭풍 폭격 (개당 15데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -829,6 +830,7 @@
             localStorage.removeItem('lily_ball_fight_reset_v7');
             localStorage.removeItem('lily_ball_fight_reset_v8');
             localStorage.removeItem('lily_ball_fight_reset_v9');
+            localStorage.removeItem('lily_ball_fight_reset_v10');
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -1219,6 +1221,7 @@
                     projectiles = data.projectiles;
                     iceFallBlocks = data.iceFallBlocks;
                     fireFallBlocks = data.fireFallBlocks;
+                    pokeFallBlocks = data.pokeFallBlocks;
                     gameOverState = data.gameOverState;
                     updateHpBars();
                 }
@@ -1427,6 +1430,7 @@
             projectiles = [];
             iceFallBlocks = [];
             fireFallBlocks = [];
+            pokeFallBlocks = [];
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -1495,6 +1499,28 @@
             }
         }
 
+        // 포켓몬 볼 스킬 (5초간 100개 이상 폭풍 폭격)
+        function triggerPokemonUltimate(owner) {
+            let target = (owner === p1) ? p2 : p1;
+            let totalCount = 110; 
+            let delayInterval = 5000 / totalCount; // 5초 동안 110개 낙하
+
+            for (let i = 0; i < totalCount; i++) {
+                setTimeout(() => {
+                    if (!gameStarted) return;
+                    let startX = 20 + Math.random() * (canvas.width - 40);
+                    pokeFallBlocks.push({
+                        x: startX,
+                        y: -30,
+                        radius: 12,
+                        speed: (4 + Math.random() * 4) * speedMultiplier,
+                        damage: 15,
+                        target: target
+                    });
+                }, i * delayInterval);
+            }
+        }
+
         function update() {
             if (!gameStarted) return;
 
@@ -1546,6 +1572,12 @@
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerFireUltimate(p1);
+                }
+            } else if (p1.type === 'pokemon') {
+                p1.skillGauge += (1 / 420) * speedMultiplier; // 7초마다 스킬 충전
+                if (p1.skillGauge >= 1) {
+                    p1.skillGauge = 0;
+                    triggerPokemonUltimate(p1);
                 }
             }
 
@@ -1611,6 +1643,26 @@
                 }
             }
 
+            for (let i = pokeFallBlocks.length - 1; i >= 0; i--) {
+                let poke = pokeFallBlocks[i];
+                poke.y += poke.speed;
+
+                let dx = poke.target.x - poke.x;
+                let dy = poke.target.y - poke.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < poke.target.radius + poke.radius) {
+                    poke.target.hp = Math.max(0, poke.target.hp - poke.damage);
+                    pokeFallBlocks.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+
+                if (poke.y > canvas.height + 50) {
+                    pokeFallBlocks.splice(i, 1);
+                }
+            }
+
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
@@ -1643,6 +1695,7 @@
                     projectiles: projectiles,
                     iceFallBlocks: iceFallBlocks,
                     fireFallBlocks: fireFallBlocks,
+                    pokeFallBlocks: pokeFallBlocks,
                     gameOverState: gameOverState
                 });
             }
@@ -1661,30 +1714,50 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, p2.hp) + " / " + p2.maxHp;
         }
 
-        function drawPlayer(p) {
+        // 포켓몬 볼 그리기용 전용 함수
+        function drawPokeballGraphic(x, y, radius) {
+            ctx.save();
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.clip();
 
-            if (p.type === 'ice') {
-                ctx.fillStyle = '#0984e3';
-                ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#74b9ff';
-                ctx.stroke();
+            // 빨간색 상단
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius);
 
-                if (p.skillGauge > 0) {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
-                    ctx.lineWidth = 4;
-                    ctx.strokeStyle = '#f1c40f';
-                    ctx.stroke();
-                }
-            } else if (p.type === 'fire') {
-                ctx.fillStyle = '#d35400';
-                ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#e74c3c';
-                ctx.stroke();
+            // 흰색 하단
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x - radius, y, radius * 2, radius);
+
+            // 중앙 검은색 띠
+            ctx.fillStyle = "#2c3e50";
+            ctx.fillRect(x - radius, y - radius * 0.15, radius * 2, radius * 0.3);
+
+            // 중앙 하얀색 버튼
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.35, 0, Math.PI * 2);
+            ctx.fillStyle = "#2c3e50";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.22, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+
+            ctx.restore();
+
+            // 테두리 선
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#2c3e50";
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        function drawPlayer(p) {
+            if (p.type === 'pokemon') {
+                drawPokeballGraphic(p.x, p.y, p.radius);
 
                 if (p.skillGauge > 0) {
                     ctx.beginPath();
@@ -1694,10 +1767,43 @@
                     ctx.stroke();
                 }
             } else {
-                ctx.fillStyle = p.color;
-                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+
+                if (p.type === 'ice') {
+                    ctx.fillStyle = '#0984e3';
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#74b9ff';
+                    ctx.stroke();
+
+                    if (p.skillGauge > 0) {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = '#f1c40f';
+                        ctx.stroke();
+                    }
+                } else if (p.type === 'fire') {
+                    ctx.fillStyle = '#d35400';
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#e74c3c';
+                    ctx.stroke();
+
+                    if (p.skillGauge > 0) {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * p.skillGauge));
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = '#f1c40f';
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                }
+                ctx.closePath();
             }
-            ctx.closePath();
 
             if (p.freezeTimer > 0) {
                 ctx.beginPath();
@@ -1746,6 +1852,11 @@
                 ctx.strokeStyle = '#f39c12';
                 ctx.stroke();
                 ctx.closePath();
+            });
+
+            // 포켓몬 볼 폭격 드로잉
+            pokeFallBlocks.forEach(poke => {
+                drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
             if (isCountingDown) {
