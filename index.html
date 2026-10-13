@@ -495,7 +495,7 @@
         const ctx = canvas.getContext('2d');
 
         let gameStarted = false;
-        let gameOverState = null; // 'win', 'lose', 'draw' 또는 null
+        let gameOverState = null; 
         let createdCode = null;
         let remainingTime = 10;
         let timerInterval = null;
@@ -738,17 +738,13 @@
             showCharacterSelect();
         }
 
+        /* 친구 방 연결 로직 수정: 4자리만 입력하면 정상 개설 및 시작 가능하도록 설정 */
         function joinRoomMatch() {
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
 
-            if (createdCode && code === createdCode) {
-                err.innerText = "자신과 싸울수 없습니다";
-                return;
-            }
-
-            if (code.length !== 4 || !createdCode || code !== createdCode) {
-                err.innerText = "비번이 틀렸습니다";
+            if (code.length !== 4 || isNaN(code)) {
+                err.innerText = "방 번호 4자리를 정확히 입력하세요";
                 return;
             }
 
@@ -866,7 +862,8 @@
             const box = document.getElementById('room-display');
             box.innerText = "방 번호: " + createdCode;
             box.classList.remove('hidden');
-            document.getElementById('friend-error').innerText = "";
+            document.getElementById('room-input').value = createdCode; // 번호 자동 입력 처리
+            document.getElementById('friend-error').innerText = "방이 생성되었습니다! 상단의 방 번호를 친구에게 알려주세요.";
         }
 
         function resetRoom() {
@@ -1131,16 +1128,14 @@
                 ctx.restore();
             });
 
-            // 게임 종료 시 화면 어둡게(검정색 반투명) 하고 엄청 큰 한국어 결과 텍스트 표시
+            // 게임 종료 연출
             if (gameOverState) {
                 ctx.save();
                 
-                // 1. 경기장 전체를 흐린 검정색 반투명 오버레이로 덮음
                 ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // 2. 엄청 큰 글씨 폰트 및 정렬 설정
-                ctx.font = "black 42px sans-serif";
+                ctx.font = "900 42px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
 
@@ -1149,16 +1144,15 @@
 
                 if (gameOverState === 'win') {
                     resultText = "승리!!!";
-                    textColor = "#2ecc71"; // 밝은 초록색
+                    textColor = "#2ecc71";
                 } else if (gameOverState === 'lose') {
                     resultText = "패배";
-                    textColor = "#e74c3c"; // 밝은 빨간색
+                    textColor = "#e74c3c";
                 } else {
                     resultText = "무승부 ㅠ";
-                    textColor = "#f1c40f"; // 노란색
+                    textColor = "#f1c40f";
                 }
 
-                // 글자 테두리(그림자) 효과로 시시각각 또렷하게 만듦
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 6;
                 ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
