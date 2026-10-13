@@ -24,7 +24,7 @@
         }
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             background: #fff8e8;
             border: 3px solid #e67e22;
             border-radius: 12px;
@@ -275,13 +275,13 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 14px 15px;
-            font-size: 15px;
+            padding: 12px 15px;
+            font-size: 14px;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
             outline: none;
             text-align: left !important;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             box-sizing: border-box;
             background: #fff;
             user-select: auto;
@@ -292,11 +292,11 @@
         }
         
         .error {
-            min-height: 20px;
-            font-size: 13px;
+            min-height: 18px;
+            font-size: 12px;
             font-weight: bold;
             color: #e74c3c;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .btn {
             width: 100%;
@@ -317,6 +317,65 @@
         .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
         .btn-retry { background-color: #27ae60; font-size: 15px; padding: 14px; }
         
+        /* 브롤 스타일 클럽 가입 UI */
+        .club-layout {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .club-left-panel {
+            flex: 1;
+            background: #2980b9;
+            border: 2px solid #1c5980;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .club-right-panel {
+            flex: 1.3;
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 8px;
+            max-height: 240px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .club-card {
+            background: #ffffff;
+            border: 2px solid #d5dbdb;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .club-card-info {
+            font-size: 11px;
+            color: #2c3e50;
+        }
+        .club-card-name {
+            font-weight: bold;
+            font-size: 12px;
+            color: #d35400;
+        }
+        .club-join-sm-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .shop-list {
             display: flex;
             flex-direction: column;
@@ -566,29 +625,66 @@
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
-    <!-- 1-3. 그룹 메뉴 화면 -->
+    <!-- 1-3. 브롤스타즈 스타일 클럽(그룹) 메뉴 화면 -->
     <div class="container hidden" id="group-screen">
-        <h2>🌐 그룹 메뉴 🌐</h2>
+        <div class="header-row">
+            <h2>🛡️ 클럽 가입</h2>
+            <button class="btn-close-x" onclick="showLobby()">X</button>
+        </div>
         <div class="version-text">v1.2 버전</div>
-        <div class="currency-container">
-            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-group">0</span>개</div>
-            <div class="trophy-box">🏆 트로피:<span id="trophy-count-group">0</span>개</div>
-        </div>
-        <div class="desc">참여할 그룹이 없다면 그룹을 생성하세요!</div>
-        <div class="error" id="group-error"></div>
+        
+        <div class="club-layout">
+            <!-- 왼쪽 패널: 클럽 검색 및 생성 -->
+            <div class="club-left-panel">
+                <div>
+                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #ffe0b2;">클럽을 찾는 중이세요?</div>
+                    <input type="text" id="club-search-input" placeholder="클럽 이름 검색" style="margin-bottom: 6px; padding: 8px; font-size: 12px;">
+                    <button class="btn-claim" style="width: 100%; padding: 8px; font-size: 12px; background: #27ae60;" onclick="searchClub()">검색</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #ffe0b2;">직접 만드는 건 어때요?</div>
+                    <button class="btn-claim" style="width: 100%; padding: 10px; font-size: 12px; background: #8e44ad;" onclick="createClub()">+ 클럽 생성</button>
+                </div>
+            </div>
 
-        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createGroup()">그룹 생성하기 (랜덤 4자리)</button>
-            <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" onclick="resetGroup()">X</button>
+            <!-- 오른쪽 패널: 추천 클럽 목록 -->
+            <div class="club-right-panel" id="recommended-clubs-container">
+                <div style="font-size: 11px; font-weight: bold; color: #7f8c8d; text-align: center; margin-bottom: 2px;">추천 클럽</div>
+                <div class="club-card">
+                    <div class="club-card-info">
+                        <div class="club-card-name">릴리 파이터즈</div>
+                        <div>멤버 9/30 | 🏆 313,557</div>
+                    </div>
+                    <button class="club-join-sm-btn" onclick="joinClubByName('릴리 파이터즈')">가입</button>
+                </div>
+                <div class="club-card">
+                    <div class="club-card-info">
+                        <div class="club-card-name">Seoul 클럽</div>
+                        <div>멤버 29/30 | 🏆 797,133</div>
+                    </div>
+                    <button class="club-join-sm-btn" onclick="joinClubByName('Seoul 클럽')">가입</button>
+                </div>
+                <div class="club-card">
+                    <div class="club-card-info">
+                        <div class="club-card-name">찐빵단</div>
+                        <div>멤버 17/30 | 🏆 348,621</div>
+                    </div>
+                    <button class="club-join-sm-btn" onclick="joinClubByName('찐빵단')">가입</button>
+                </div>
+                <div class="club-card">
+                    <div class="club-card-info">
+                        <div class="club-card-name">Breeze</div>
+                        <div>멤버 20/30 | 🏆 364,968</div>
+                    </div>
+                    <button class="club-join-sm-btn" onclick="joinClubByName('Breeze')">가입</button>
+                </div>
+            </div>
         </div>
-        <div class="room-box hidden" id="group-display">----</div>
 
-        <div id="group-join-container">
-            <input type="text" id="group-input" placeholder="그룹 번호 4자리 입력" maxlength="4">
-            <button class="btn btn-join" onclick="joinGroup()">그룹 참여하기</button>
-        </div>
+        <div class="room-box hidden" id="group-display" style="font-size: 14px; margin-bottom: 8px;">----</div>
+        <div class="error" id="group-error" style="text-align: center;"></div>
 
-        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+        <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
     <!-- 1-2. 캐릭터 선택 화면 -->
@@ -658,6 +754,8 @@
         
         let userCoins = 0; 
         let userTrophies = 0;
+        
+        let myClubName = null;
         
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
@@ -755,7 +853,8 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 balls: ballsData,
-                mailClaimed: mailClaimed
+                mailClaimed: mailClaimed,
+                myClubName: myClubName
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
         }
@@ -771,6 +870,7 @@
                         savedUsername = parsed.username;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
+                    if (parsed.myClubName !== undefined) myClubName = parsed.myClubName;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
                             let match = ballsData.find(b => b.id === savedBall.id);
@@ -824,7 +924,8 @@
         }
 
         function openProfileModal() {
-            document.getElementById('profile-modal-title').innerText = "👤 내 프로필";
+            let clubDisplay = myClubName ? ` (클럽: ${myClubName})` : "";
+            document.getElementById('profile-modal-title').innerText = "👤 내 프로필" + clubDisplay;
             document.getElementById('profile-modal-name').innerText = savedUsername || "미설정";
             document.getElementById('profile-modal-coin').innerText = userCoins + "개";
             document.getElementById('profile-modal-trophy').innerText = userTrophies + "개";
@@ -848,11 +949,9 @@
         function updateCoinsUI() {
             document.getElementById('coin-count').innerText = userCoins;
             document.getElementById('coin-count-friend').innerText = userCoins;
-            document.getElementById('coin-count-group').innerText = userCoins;
             document.getElementById('coin-count-shop').innerText = userCoins;
             document.getElementById('trophy-count').innerText = userTrophies;
             document.getElementById('trophy-count-friend').innerText = userTrophies;
-            document.getElementById('trophy-count-group').innerText = userTrophies;
             document.getElementById('trophy-count-shop').innerText = userTrophies;
         }
 
@@ -1018,112 +1117,69 @@
             });
         }
 
-        // 그룹 기능 구현 (참여할 그룹이 없으면 그룹 생성 유도)
+        // 브롤스타즈 스타일 클럽(그룹) 기능 구현
         function openGroupMenu() {
             if (!checkUserHasName()) return;
-            resetGroup();
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('group-screen').classList.remove('hidden');
-        }
-
-        function resetGroup() {
-            createdGroupCode = null;
-            if (peer) peer.destroy();
-            document.getElementById('group-display').classList.add('hidden');
-            document.getElementById('group-join-container').classList.remove('hidden');
-            document.getElementById('group-input').value = "";
-            const err = document.getElementById('group-error');
-            err.style.color = "#e74c3c";
-            err.innerText = "";
-        }
-
-        function joinGroup() {
-            if (!checkUserHasName()) return;
-
-            const code = document.getElementById('group-input').value.trim();
-            const err = document.getElementById('group-error');
-
-            if (!code) {
-                err.innerText = "참여할 그룹이 없다면 '그룹 생성하기'를 눌러주세요!";
-                return;
-            }
-
-            if (code.length !== 4 || isNaN(code)) {
-                err.innerText = "그룹 번호 4자리를 정확히 입력하세요";
-                return;
-            }
-
-            err.innerText = "그룹에 연결 중입니다...";
-
-            if (peer) peer.destroy();
-            peer = new Peer();
-            
-            peer.on('open', () => {
-                const targetPeerId = 'lily-ball-group-' + code;
-                conn = peer.connect(targetPeerId);
-                isHost = false;
-
-                conn.on('open', () => {
-                    err.style.color = "#27ae60";
-                    err.innerText = "그룹에 성공적으로 참여했습니다!";
-                    nextGameMode = 'friend';
-                    conn.send({
-                        type: 'JOIN_INFO',
-                        name: savedUsername,
-                        ball: getEquippedBall()
-                    });
-                    setTimeout(showCharacterSelect, 1000);
-                });
-
-                conn.on('data', handleNetworkData);
-
-                conn.on('error', (e) => {
-                    err.style.color = "#e74c3c";
-                    err.innerText = "그룹을 찾을 수 없습니다. 번호를 확인하거나 새로 생성하세요.";
-                });
-            });
-
-            peer.on('error', (e) => {
-                err.innerText = "그룹 연결 실패. 다시 시도해주세요.";
-            });
-        }
-
-        function createGroup() {
-            if (!checkUserHasName()) return;
 
             const err = document.getElementById('group-error');
-            createdGroupCode = Math.floor(1000 + Math.random() * 9000).toString();
-            
             const box = document.getElementById('group-display');
-            box.innerText = "그룹 번호: " + createdGroupCode;
-            box.classList.remove('hidden');
 
-            document.getElementById('group-join-container').classList.add('hidden');
-            err.style.color = "#27ae60";
-            err.innerText = "그룹 생성 완료! 팀원의 참여를 기다리는 중...";
+            if (myClubName) {
+                err.style.color = "#27ae60";
+                err.innerText = `현재 가입된 클럽: [ ${myClubName} ]`;
+                box.innerText = "클럽원과 함께 플레이하세요!";
+                box.classList.remove('hidden');
+            } else {
+                err.innerText = "참여할 클럽이 없다면 직접 클럽을 생성하세요!";
+                box.classList.add('hidden');
+            }
+        }
 
-            if (peer) peer.destroy();
-            peer = new Peer('lily-ball-group-' + createdGroupCode);
-            isHost = true;
-
-            peer.on('open', (id) => {
-                console.log("그룹 개설 완료 Peer ID:", id);
-            });
-
-            peer.on('connection', (c) => {
-                conn = c;
-                conn.on('open', () => {
-                    err.innerText = "팀원이 그룹에 참여했습니다!";
-                    nextGameMode = 'friend';
-                    setTimeout(showCharacterSelect, 1000);
-                });
-                conn.on('data', handleNetworkData);
-            });
-
-            peer.on('error', (e) => {
+        function searchClub() {
+            const query = document.getElementById('club-search-input').value.trim().toLowerCase();
+            const err = document.getElementById('group-error');
+            if (!query) {
                 err.style.color = "#e74c3c";
-                err.innerText = "그룹 생성 오류. 다시 시도해주세요.";
-            });
+                err.innerText = "검색할 클럽 이름을 입력하세요.";
+                return;
+            }
+            err.style.color = "#2980b9";
+            err.innerText = `'${query}' 클럽 검색 완료! (추천 목록에서 가입 가능)`;
+        }
+
+        function joinClubByName(clubName) {
+            myClubName = clubName;
+            saveData();
+            const err = document.getElementById('group-error');
+            const box = document.getElementById('group-display');
+            err.style.color = "#27ae60";
+            err.innerText = `🎉 [ ${clubName} ] 클럽 가입 완료!`;
+            box.innerText = `내 클럽: ${clubName}`;
+            box.classList.remove('hidden');
+            alert(`축하합니다! '${clubName}' 클럽에 가입되었습니다.`);
+        }
+
+        function createClub() {
+            const clubNamePrompt = prompt("생성할 클럽 이름을 입력하세요 (최대 12글자):");
+            if (!clubNamePrompt) return;
+            const trimmed = clubNamePrompt.trim();
+            if (trimmed.length > 12) {
+                alert("클럽 이름은 12글자 이내로 입력해주세요.");
+                return;
+            }
+
+            myClubName = trimmed;
+            saveData();
+
+            const err = document.getElementById('group-error');
+            const box = document.getElementById('group-display');
+            err.style.color = "#27ae60";
+            err.innerText = `🛡️ [ ${myClubName} ] 클럽 생성 및 가입 완료!`;
+            box.innerText = `내 클럽: ${myClubName}`;
+            box.classList.remove('hidden');
+            alert(`클럽 '${myClubName}'이(가) 성공적으로 생성되었습니다!`);
         }
 
         function handleNetworkData(data) {
