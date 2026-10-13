@@ -958,80 +958,13 @@
             showCharacterSelect();
         }
 
-        // 보스 피하기 모드 시작
+        // 보스 피하기 버튼 클릭 시 점검 중 메시지 출력 및 진입 차단
         function startBossMode() {
-            if (!checkUserHasName()) return;
-
-            document.getElementById('lobby-screen').classList.add('hidden');
-            document.getElementById('boss-screen').classList.remove('hidden');
-
-            bossPlayer.x = 170;
-            bossPlayer.y = 290;
-            bossPlayer.vx = 0;
-            bossPlayer.vy = 0;
-            bossPlayer.isJumping = false;
-            bossProjectiles = [];
-            bossAttackCount = 0;
-            bossGameOver = false;
-            bossGameActive = false;
-            bossCountdown = 3;
-
-            document.getElementById('boss-status-text').innerText = "권루트(L)의 공격을 피하세요!";
-
-            if (bossCountdownInterval) clearInterval(bossCountdownInterval);
-            bossCountdownInterval = setInterval(() => {
-                bossCountdown--;
-                if (bossCountdown <= 0) {
-                    clearInterval(bossCountdownInterval);
-                    bossGameActive = true;
-                    startBossAttacks();
-                }
-            }, 1000);
-        }
-
-        function startBossAttacks() {
-            if (bossAttackTimer) clearInterval(bossAttackTimer);
-
-            // 2초마다 패턴 실행 (오른쪽 L -> 왼쪽 L 총 4번 반복)
-            bossAttackTimer = setInterval(() => {
-                if (!bossGameActive || bossGameOver) {
-                    clearInterval(bossAttackTimer);
-                    return;
-                }
-
-                bossAttackCount++;
-                let isRight = (bossAttackCount % 2 === 1); // 홀수번은 오른쪽, 짝수번은 왼쪽
-
-                triggerBossLShapeAttack(isRight);
-
-                if (bossAttackCount >= 8) { // 4번 반복 (오른쪽 4번, 왼쪽 4번 = 총 8턴)
-                    clearInterval(bossAttackTimer);
-                    setTimeout(() => {
-                        if (!bossGameOver) {
-                            bossGameActive = false;
-                            bossGameOver = true;
-                            userCoins += 5;
-                            userTrophies += 2;
-                            updateCoinsUI();
-                            saveData();
-                            document.getElementById('boss-status-text').innerText = "🎉 승리! 5코인 & 2트로피 획득!";
-                        }
-                    }, 2500);
-                }
-            }, 2000);
-        }
-
-        function triggerBossLShapeAttack(isRight) {
-            let startX = isRight ? 260 : 80;
-            // 거대한 'L' 자 블록 폭격 생성
-            bossProjectiles.push({
-                x: startX,
-                y: -60,
-                width: 70,
-                height: 120,
-                speed: 4,
-                active: true
-            });
+            const err = document.getElementById('lobby-error-msg');
+            err.innerText = "🛠️ 현재 보스 피하기 기능은 점검 중입니다!";
+            setTimeout(() => {
+                err.innerText = "";
+            }, 3000);
         }
 
         // 조이스틱 조작 함수
@@ -1639,41 +1572,6 @@
             }
         }
 
-        // 보스전 로직 업데이트
-        function updateBossGame() {
-            if (!bossGameActive || bossGameOver) return;
-
-            bossPlayer.x += bossPlayer.vx;
-            if (bossPlayer.x < bossPlayer.radius) bossPlayer.x = bossPlayer.radius;
-            if (bossPlayer.x > bossCanvas.width - bossPlayer.radius) bossPlayer.x = bossCanvas.width - bossPlayer.radius;
-
-            bossPlayer.y += bossPlayer.vy;
-            bossPlayer.vy += 0.5; // 중력
-            if (bossPlayer.y > 290) {
-                bossPlayer.y = 290;
-                bossPlayer.vy = 0;
-                bossPlayer.isJumping = false;
-            }
-
-            // L자 블록 업데이트 및 충돌 검사
-            for (let i = bossProjectiles.length - 1; i >= 0; i--) {
-                let block = bossProjectiles[i];
-                block.y += block.speed;
-
-                // 충돌 검사 (플레이어와 L자 블록)
-                if (bossPlayer.x > block.x && bossPlayer.x < block.x + block.width &&
-                    bossPlayer.y > block.y && bossPlayer.y < block.y + block.height) {
-                    bossGameOver = true;
-                    bossGameActive = false;
-                    document.getElementById('boss-status-text').innerText = "💥 피격 패배! 다시 도전하세요.";
-                }
-
-                if (block.y > bossCanvas.height) {
-                    bossProjectiles.splice(i, 1);
-                }
-            }
-        }
-
         function updateHpBars() {
             const p1HpEl = document.getElementById('p1-hp');
             const p1TextEl = document.getElementById('p1-hp-text');
@@ -1826,61 +1724,9 @@
             }
         }
 
-        // 보스전 캔버스 드로우
-        function drawBossGame() {
-            bossCtx.clearRect(0, 0, bossCanvas.width, bossCanvas.height);
-
-            // 유튜버 L (권루트) 보스 캐릭터 상단 표시
-            bossCtx.fillStyle = "#8e44ad";
-            bossCtx.beginPath();
-            bossCtx.arc(170, 40, 25, 0, Math.PI * 2);
-            bossCtx.fill();
-            bossCtx.lineWidth = 2;
-            bossCtx.strokeStyle = "#f1c40f";
-            bossCtx.stroke();
-            bossCtx.closePath();
-
-            bossCtx.fillStyle = "#ffffff";
-            bossCtx.font = "bold 16px sans-serif";
-            bossCtx.textAlign = "center";
-            bossCtx.fillText("유튜버 L (권루트)", 170, 80);
-
-            // 플레이어 그리기
-            bossCtx.fillStyle = "#2980b9";
-            bossCtx.beginPath();
-            bossCtx.arc(bossPlayer.x, bossPlayer.y, bossPlayer.radius, 0, Math.PI * 2);
-            bossCtx.fill();
-            bossCtx.closePath();
-
-            // L 자 블록 폭격 그리기
-            bossProjectiles.forEach(block => {
-                bossCtx.fillStyle = "#e74c3c";
-                bossCtx.fillRect(block.x, block.y, block.width, block.height);
-                bossCtx.fillStyle = "#ffffff";
-                bossCtx.font = "bold 24px sans-serif";
-                bossCtx.fillText("L", block.x + block.width / 2, block.y + block.height / 2);
-            });
-
-            // 카운트다운 표시
-            if (bossCountdown > 0) {
-                bossCtx.save();
-                bossCtx.fillStyle = "rgba(0, 0, 0, 0.4)";
-                bossCtx.fillRect(0, 0, bossCanvas.width, bossCanvas.height);
-
-                bossCtx.font = "900 64px sans-serif";
-                bossCtx.textAlign = "center";
-                bossCtx.textBaseline = "middle";
-                bossCtx.fillStyle = "#f1c40f";
-                bossCtx.fillText(bossCountdown, bossCanvas.width / 2, bossCanvas.height / 2);
-                bossCtx.restore();
-            }
-        }
-
         function loop() {
             update();
             draw();
-            updateBossGame();
-            drawBossGame();
             requestAnimationFrame(loop);
         }
 
