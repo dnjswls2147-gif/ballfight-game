@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>릴리 볼 파이트</title>
+    <!-- 실시간 P2P 멀티플레이 라이브러리 -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body {
             background-color: #2c163a;
@@ -486,8 +488,6 @@
             <div class="hp-fill p2" id="p2-hp"></div>
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
-
-        <button class="btn" id="lobby-back-btn" style="background:#d35400; margin-top:10px;">🏠 로비로 가기</button>
     </div>
 
     <script>
@@ -496,6 +496,7 @@
 
         let gameStarted = false;
         let gameOverState = null; 
+        let createdCode = null;
         let remainingTime = 10;
         let timerInterval = null;
         let nextGameMode = 'ai';
@@ -511,6 +512,11 @@
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 9, 6, 0).getTime(); 
+
+        let peer = null;
+        let conn = null;
+        let isHost = false; 
+        let friendName = "친구";
 
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
@@ -737,19 +743,110 @@
             showCharacterSelect();
         }
 
-        /* [수정됨] 4자리 숫자만 입력하면 어떤 번호든 곧바로 친구 플레이(출전 준비)로 진입 */
         function joinRoomMatch() {
             const code = document.getElementById('room-input').value.trim();
             const err = document.getElementById('friend-error');
+
+            if (!validateName()) return;
+
+            if (createdCode && code === createdCode) {
+                err.innerText = "자신과 싸울수 없습니다";
+                return;
+            }
 
             if (code.length !== 4 || isNaN(code)) {
                 err.innerText = "방 번호 4자리를 정확히 입력하세요";
                 return;
             }
 
-            err.innerText = "";
-            nextGameMode = 'friend';
-            showCharacterSelect();
+            err.innerText = "친구 방에 연결 중입니다...";
+
+            if (peer) peer.destroy();
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                const targetPeerId = 'lily-ball-room-' + code;
+                conn = peer.connect(targetPeerId);
+                isHost = false;
+
+                conn.on('open', () => {
+                    err.innerText = "";
+                    nextGameMode = 'friend';
+                    conn.send({
+                        type: 'JOIN_INFO',
+                        name: document.getElementById('username').value.trim(),
+                        ball: getEquippedBall()
+                    });
+                    showCharacterSelect();
+                });
+
+                conn.on('data', handleNetworkData);
+
+                conn.on('error', (e) => {
+                    err.innerText = "방을 찾을 수 없습니다! 방 번호를 확인하세요.";
+                });
+            });
+
+            peer.on('error', (e) => {
+                err.innerText = "네트워크 연결 실패. 다시 시도해주세요.";
+            });
+        }
+
+        function createRoom() {
+            if (!validateName()) return;
+
+            const err = document.getElementById('friend-error');
+            createdCode = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            const box = document.getElementById('room-display');
+            box.innerText = "방 번호: " + createdCode;
+            box.classList.remove('hidden');
+            document.getElementById('room-input').value = ""; 
+            err.innerText = "친구의 접속을 기다리는 중입니다...";
+
+            if (peer) peer.destroy();
+            peer = new Peer('lily-ball-room-' + createdCode);
+            isHost = true;
+
+            peer.on('open', (id) => {
+                console.log("방 개설 완료 Peer ID:", id);
+            });
+
+            peer.on('connection', (c) => {
+                conn = c;
+                conn.on('open', () => {
+                    err.innerText = "친구가 접속했습니다!";
+                    nextGameMode = 'friend';
+                    showCharacterSelect();
+                });
+                conn.on('data', handleNetworkData);
+            });
+
+            peer.on('error', (e) => {
+                err.innerText = "방 생성 오류. 다시 '방 생성하기'를 눌러주세요.";
+            });
+        }
+
+        function handleNetworkData(data) {
+            if (data.type === 'JOIN_INFO') {
+                friendName = data.name;
+            } else if (data.type === 'GAME_SYNC') {
+                if (!isHost) {
+                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp;
+                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp;
+                    projectiles = data.projectiles;
+                    iceFallBlocks = data.iceFallBlocks;
+                    gameOverState = data.gameOverState;
+                    updateHpBars();
+                }
+            } else if (data.type === 'SPEED_TOGGLE') {
+                isDoubleSpeed = data.isDoubleSpeed;
+                speedMultiplier = isDoubleSpeed ? 2 : 1;
+                const btn = document.getElementById('speed-toggle-btn');
+                btn.innerText = isDoubleSpeed ? "⚡ 2X 온 (ON)" : "⚡ 2X 배속";
+                if (isDoubleSpeed) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
         }
 
         function showCharacterSelect() {
@@ -788,7 +885,7 @@
             if (nextGameMode === 'ai') {
                 document.getElementById('p2-label').innerText = "AI 봇 (기본 볼) (레드)";
             } else {
-                document.getElementById('p2-label').innerText = "친구 (기본 볼) (레드)";
+                document.getElementById('p2-label').innerText = `${friendName} (기본 볼) (레드)`;
             }
 
             resetGameState();
@@ -808,16 +905,19 @@
             }
 
             isDoubleSpeed = !isDoubleSpeed;
+            speedMultiplier = isDoubleSpeed ? 2 : 1;
             const btn = document.getElementById('speed-toggle-btn');
 
             if (isDoubleSpeed) {
-                speedMultiplier = 2;
                 btn.innerText = "⚡ 2X 온 (ON)";
                 btn.classList.add('active');
             } else {
-                speedMultiplier = 1;
                 btn.innerText = "⚡ 2X 배속";
                 btn.classList.remove('active');
+            }
+
+            if (conn && conn.open) {
+                conn.send({ type: 'SPEED_TOGGLE', isDoubleSpeed: isDoubleSpeed });
             }
         }
 
@@ -845,6 +945,13 @@
             if (timerInterval) clearInterval(timerInterval);
             gameStarted = false;
             gameOverState = null;
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+            createdCode = null;
+
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
@@ -856,16 +963,9 @@
             document.getElementById('lobby-screen').classList.remove('hidden');
         }
 
-        function createRoom() {
-            const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            const box = document.getElementById('room-display');
-            box.innerText = "방 번호: " + randomCode;
-            box.classList.remove('hidden');
-            document.getElementById('room-input').value = randomCode; 
-            document.getElementById('friend-error').innerText = "방이 생성되었습니다!";
-        }
-
         function resetRoom() {
+            createdCode = null;
+            if (peer) peer.destroy();
             document.getElementById('room-display').classList.add('hidden');
             document.getElementById('room-input').value = "";
             document.getElementById('friend-error').innerText = "방이 초기화되었습니다.";
@@ -945,6 +1045,8 @@
 
         function update() {
             if (!gameStarted) return;
+
+            if (nextGameMode === 'friend' && !isHost) return;
 
             if (p1.freezeTimer > 0) {
                 p1.freezeTimer -= speedMultiplier;
@@ -1053,6 +1155,17 @@
 
                 updateHpBars();
                 checkGameOver();
+            }
+
+            if (nextGameMode === 'friend' && isHost && conn && conn.open) {
+                conn.send({
+                    type: 'GAME_SYNC',
+                    p1: { x: p1.x, y: p1.y, hp: p1.hp },
+                    p2: { x: p2.x, y: p2.y, hp: p2.hp },
+                    projectiles: projectiles,
+                    iceFallBlocks: iceFallBlocks,
+                    gameOverState: gameOverState
+                });
             }
         }
 
@@ -1169,33 +1282,18 @@
             }
         }
 
-        let lastClickTime = 0;
         function bindElementTouch(el, handler) {
             if (!el) return;
             
-            function handleAction(e) {
-                const now = Date.now();
-                if (now - lastClickTime < 500) {
-                    return; 
-                }
-                lastClickTime = now;
-                handler();
-            }
-
-            let triggered = false;
-            el.addEventListener('pointerdown', (e) => {
-                triggered = true;
-                handleAction(e);
-                e.stopPropagation();
-            }, { passive: true });
-
             el.addEventListener('click', (e) => {
-                if (!triggered) {
-                    handleAction(e);
-                }
-                triggered = false;
-                e.stopPropagation();
+                e.preventDefault();
+                handler();
             });
+
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handler();
+            }, { passive: false });
         }
 
         bindElementTouch(document.getElementById('btn-ai-match'), startAI);
@@ -1211,11 +1309,10 @@
         bindElementTouch(document.getElementById('btn-back-lobby'), showLobby);
         bindElementTouch(document.getElementById('btn-confirm-char'), confirmCharacterSelection);
         bindElementTouch(document.getElementById('speed-toggle-btn'), toggleSpeed);
-        bindElementTouch(document.getElementById('lobby-back-btn'), showLobby);
 
         loadData();
         updateCoinsUI();
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
