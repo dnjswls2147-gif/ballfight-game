@@ -66,8 +66,8 @@
             border-radius: 50%;
         }
 
-        /* 우편함 헤더 (타이틀 + 큰 X 버튼) */
-        .mailbox-header-row {
+        /* 공통 헤더 (타이틀 + 큰 X 버튼) */
+        .header-row {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -418,7 +418,7 @@
 
     <!-- 1-0-1. 우편함 화면 -->
     <div class="container hidden" id="mailbox-screen">
-        <div class="mailbox-header-row">
+        <div class="header-row">
             <h2>📬 우편함 📬</h2>
             <button type="button" class="btn-close-x" id="btn-close-mailbox">X</button>
         </div>
@@ -469,7 +469,10 @@
 
     <!-- 1-2. 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
-        <h2>⚔️ 출전 준비 ⚔️</h2>
+        <div class="header-row">
+            <h2>⚔️ 출전 준비 ⚔️</h2>
+            <button type="button" class="btn-close-x" id="btn-close-char">X</button>
+        </div>
         <div class="version-text">v1.1 버전</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
@@ -831,7 +834,7 @@
 
         function showFriendMenu() {
             const name = validateName();
-            if (!name) return; // 이름이 없으면 친구 창으로 안 넘어가고 멈춤
+            if (!name) return;
 
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.remove('hidden');
@@ -1148,7 +1151,6 @@
             requestAnimationFrame(loop);
         }
 
-        // 0.5초(500ms) 딜레이(쿨타임) 적용 함수
         let lastClickTime = 0;
         function bindElementTouch(el, handler) {
             if (!el) return;
@@ -1184,6 +1186,7 @@
         bindElementTouch(document.getElementById('btn-close-myball'), showLobby);
         bindElementTouch(document.getElementById('btn-open-mailbox'), showMailbox);
         bindElementTouch(document.getElementById('btn-close-mailbox'), showLobby);
+        bindElementTouch(document.getElementById('btn-close-char'), showLobby); // 출전 준비 화면 X 버튼
         bindElementTouch(document.getElementById('btn-create-room'), createRoom);
         bindElementTouch(document.getElementById('btn-reset-room'), resetRoom);
         bindElementTouch(document.getElementById('btn-join-room'), joinRoom);
