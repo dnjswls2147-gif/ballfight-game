@@ -906,6 +906,7 @@
 
         function closeProfileModal() {
             document.getElementById('profile-modal').classList.add('hidden');
+            showLobby();
         }
 
         function openChatModal() {
@@ -1382,6 +1383,7 @@
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
+            document.getElementById('profile-modal').classList.add('hidden');
             document.getElementById('lobby-screen').classList.remove('hidden');
         }
 
