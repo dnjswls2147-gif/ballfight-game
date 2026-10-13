@@ -692,7 +692,10 @@
 
         // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
-        const CHAT_STORAGE_KEY = 'lily_global_chat_messages_v1';
+
+        // 온라인 공용 무료 API (JSONBin)
+        const BIN_ID = '670be839ad19ca34f8b80b2d';
+        const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
@@ -733,6 +736,8 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        let chatPollInterval = null;
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -906,22 +911,41 @@
             if (!checkUserHasName()) return;
             document.getElementById('chat-modal').classList.remove('hidden');
             fetchAndRenderGlobalChat();
+            if (!chatPollInterval) {
+                chatPollInterval = setInterval(fetchAndRenderGlobalChat, 3000);
+            }
         }
 
         function closeChatModal() {
             document.getElementById('chat-modal').classList.add('hidden');
+            if (chatPollInterval) {
+                clearInterval(chatPollInterval);
+                chatPollInterval = null;
+            }
         }
 
-        function fetchAndRenderGlobalChat() {
+        // 공용 서버 API에서 전체 채팅 목록을 불러오고 24시간 지난 메시지 자동 삭제
+        async function fetchAndRenderGlobalChat() {
             try {
-                let messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
+                const res = await fetch(BIN_URL + '/latest');
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const record = data.record || {};
+                let messages = record.messages || [];
+
                 const now = Date.now();
                 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
                 const validMessages = messages.filter(m => (now - (m.timestamp || 0)) < ONE_DAY_MS);
 
                 if (validMessages.length !== messages.length) {
-                    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(validMessages));
+                    record.messages = validMessages;
+                    await fetch(BIN_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(record)
+                    });
                 }
 
                 renderChatBox(validMessages);
@@ -943,7 +967,7 @@
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'chat-msg';
 
-                const authorName = msg.author || "익명";
+                const authorName = msg.author || msg.name || "익명";
                 const isMe = (authorName === savedUsername);
                 
                 // 내가 쓴 채팅은 '나', 다른 사람은 그 사람의 이름으로 표시
@@ -962,7 +986,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function sendGlobalChatMessage() {
+        async function sendGlobalChatMessage() {
             const input = document.getElementById('global-chat-input');
             const text = input.value.trim();
 
@@ -991,29 +1015,30 @@
             };
 
             try {
-                let messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
-                const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-                messages = messages.filter(m => (timestamp - (m.timestamp || 0)) < ONE_DAY_MS);
+                const res = await fetch(BIN_URL + '/latest');
+                if (res.ok) {
+                    const data = await res.json();
+                    const record = data.record || {};
+                    let messages = record.messages || [];
 
-                messages.push(newMsg);
-                localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+                    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+                    messages = messages.filter(m => (timestamp - (m.timestamp || 0)) < ONE_DAY_MS);
 
-                renderChatBox(messages);
+                    messages.push(newMsg);
+                    record.messages = messages;
 
-                // 친구와 연결되어 있다면 채팅 데이터 전송
-                if (conn && conn.open) {
-                    conn.send({ type: 'CHAT_SYNC', message: newMsg });
+                    await fetch(BIN_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(record)
+                    });
+
+                    renderChatBox(messages);
                 }
             } catch (e) {
                 alert("채팅 전송에 실패했습니다. 다시 시도해주세요.");
             }
         }
-
-        window.addEventListener('storage', (event) => {
-            if (event.key === CHAT_STORAGE_KEY) {
-                fetchAndRenderGlobalChat();
-            }
-        });
 
         let p1 = { 
             x: 85, y: 170, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
@@ -1218,15 +1243,6 @@
                 else btn.classList.remove('active');
             } else if (data.type === 'RETRY_GAME') {
                 startCountdownAndGame();
-            } else if (data.type === 'CHAT_SYNC') {
-                try {
-                    let messages = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
-                    messages.push(data.message);
-                    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
-                    fetchAndRenderGlobalChat();
-                } catch (e) {
-                    console.error("채팅 동기화 오류:", e);
-                }
             }
         }
 
