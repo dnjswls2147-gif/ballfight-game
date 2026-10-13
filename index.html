@@ -498,7 +498,8 @@
         let fireFallBlocks = [];
 
         let mailClaimed = false; 
-        const EXPIRY_TIME = new Date(2026, 9, 13, 9, 6, 0).getTime(); 
+        // 유효기간: 2026년 10월 13일 오후 3시 45분 (15:45)
+        const EXPIRY_TIME = new Date(2026, 9, 13, 15, 45, 0).getTime(); 
 
         let peer = null;
         let conn = null;
@@ -537,8 +538,8 @@
                 contentEl.innerHTML = `
                     <div class="mail-item">
                         <div>
-                            <div class="mail-info-title">🎁 선물: 10 코인</div>
-                            <div class="mail-info-time">유효 기간: 10월 13일 오전 9시 6분까지</div>
+                            <div class="mail-info-title">🎁 선물: 100 코인</div>
+                            <div class="mail-info-time">유효 기간: 10월 13일 오후 3시 45분까지</div>
                         </div>
                         <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
                     </div>
@@ -560,12 +561,12 @@
 
             if (isMailValid()) {
                 mailClaimed = true;
-                userCoins += 10;
+                userCoins += 100;
                 updateCoinsUI();
                 saveData();
                 checkMailRedDot();
                 renderMailbox();
-                alert("🎉 10코인을 받았습니다!");
+                alert("🎉 100코인을 받았습니다!");
             } else {
                 alert("보상을 받을수 없음니다");
             }
@@ -986,12 +987,10 @@
         }
 
         function getRandomVelocity() {
-            // 완전 랜덤 속도 및 방향 설정 (속도 크기 2.0 ~ 3.2 사이, 각도 랜덤)
             let angle = Math.random() * Math.PI * 2;
             let speed = 2.0 + Math.random() * 1.2;
             let vx = Math.cos(angle) * speed;
             let vy = Math.sin(angle) * speed;
-            // 너무 수평/수직으로 가지 않게 최소 속도 보장
             if (Math.abs(vx) < 1.0) vx = vx > 0 ? 1.5 : -1.5;
             if (Math.abs(vy) < 1.0) vy = vy > 0 ? 1.5 : -1.5;
             return { vx, vy };
@@ -1083,7 +1082,7 @@
                     fireFallBlocks.push({
                         x: startX,
                         y: -80,
-                        radius: 40, // 기존 크기의 2배 (20 -> 40)
+                        radius: 40,
                         speed: 6 * speedMultiplier,
                         damage: 25,
                         target: target
@@ -1139,7 +1138,7 @@
                     });
                 }
             } else if (p1.type === 'fire') {
-                p1.skillGauge += (1 / 180) * speedMultiplier; // 3초마다 발동
+                p1.skillGauge += (1 / 180) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerFireUltimate(p1);
@@ -1345,7 +1344,6 @@
                 ctx.closePath();
             });
 
-            // 3초 카운트다운 화면 표시
             if (isCountingDown) {
                 ctx.save();
                 ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
