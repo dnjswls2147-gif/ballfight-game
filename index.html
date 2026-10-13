@@ -35,36 +35,21 @@
         }
         .hidden { display: none !important; }
 
-        /* 상단 네비게이션 바 (프로필 & 전체채팅 & 우편함) */
+        /* 상단 네비게이션 바 (프로필 & 우편함) */
         .top-nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
-            gap: 4px;
+            gap: 6px;
         }
         .profile-btn {
             background: #2980b9;
             color: #fff;
             border: 2px solid #1c5980;
             border-radius: 8px;
-            padding: 8px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            flex: 1;
-            justify-content: center;
-        }
-        .chat-btn {
-            background: #27ae60;
-            color: #fff;
-            border: 2px solid #1e8449;
-            border-radius: 8px;
-            padding: 8px 10px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
@@ -79,8 +64,8 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 8px 10px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
@@ -124,52 +109,6 @@
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             position: relative;
-        }
-
-        /* 전체 채팅 디자인 */
-        .chat-box {
-            background: #ffffff;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            height: 250px;
-            overflow-y: auto;
-            padding: 10px;
-            text-align: left;
-            margin: 10px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .chat-msg {
-            font-size: 13px;
-            line-height: 1.4;
-            word-break: break-all;
-        }
-        .chat-msg .author {
-            font-weight: bold;
-            color: #2980b9;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        /* 내 이름 스타일 (황금색 강조) */
-        .chat-msg .author.my-gold-name {
-            color: #f39c12 !important;
-            font-weight: 900 !important;
-            text-shadow: 0 0 4px rgba(241, 196, 15, 0.9);
-            text-decoration: none !important;
-        }
-        .chat-msg .time {
-            font-size: 10px;
-            color: #95a5a6;
-            margin-left: 4px;
-        }
-        .chat-msg .text {
-            color: #2c3e50;
-            margin-top: 2px;
-        }
-        .chat-input-container {
-            display: flex;
-            gap: 6px;
         }
 
         /* 갈색 네모 모달 */
@@ -546,37 +485,11 @@
         </div>
     </div>
 
-    <!-- 0-2. 전체 채팅 팝업 모달 -->
-    <div class="modal-overlay hidden" id="chat-modal">
-        <div class="modal-box">
-            <div class="header-row">
-                <h2>💬 전체 채팅</h2>
-                <button class="btn-close-x" onclick="closeChatModal()">X</button>
-            </div>
-            <div class="version-text">이름을 누르면 그 유저의 프로필을 볼 수 있습니다!</div>
-
-            <div class="chat-box" id="global-chat-box">
-                <div class="chat-msg">
-                    <span class="author">[알림]</span>
-                    <span class="text">전체 채팅방에 오신 것을 환영합니다!</span>
-                </div>
-            </div>
-
-            <div class="chat-input-container">
-                <input type="text" id="global-chat-input" placeholder="메시지 입력..." maxlength="50" style="margin-bottom: 0;" onkeyup="if(event.keyCode===13) sendGlobalChatMessage()">
-                <button class="btn btn-ai" style="margin-top: 0; width: 80px; padding: 14px 0;" onclick="sendGlobalChatMessage()">전송</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 1. 메인 로비 -->
     <div class="container" id="lobby-screen">
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">
                 👤 프로필
-            </button>
-            <button class="chat-btn" onclick="openChatModal()">
-                💬 전체 채팅
             </button>
             <button class="mailbox-btn" onclick="showMailbox()">
                 📬 우편함
@@ -693,10 +606,6 @@
         // 영구 데이터 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v1';
 
-        // 온라인 공용 무료 API (JSONBin)
-        const BIN_ID = '670be839ad19ca34f8b80b2d';
-        const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-
         // 금지된 욕설 / 비속어 / 19금 단어 리스트
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -736,8 +645,6 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
-
-        let chatPollInterval = null;
 
         function isMailValid() {
             const now = new Date().getTime();
@@ -894,150 +801,9 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        function openOtherUserProfileModal(username, coins, trophies) {
-            document.getElementById('profile-modal-title').innerText = "👤 유저 프로필";
-            document.getElementById('profile-modal-name').innerText = username;
-            document.getElementById('profile-modal-coin').innerText = (coins !== undefined ? coins : 0) + "개";
-            document.getElementById('profile-modal-trophy').innerText = (trophies !== undefined ? trophies : 0) + "개";
-            document.getElementById('profile-modal').classList.remove('hidden');
-        }
-
         function closeProfileModal() {
             document.getElementById('profile-modal').classList.add('hidden');
             showLobby();
-        }
-
-        function openChatModal() {
-            if (!checkUserHasName()) return;
-            document.getElementById('chat-modal').classList.remove('hidden');
-            fetchAndRenderGlobalChat();
-            if (!chatPollInterval) {
-                chatPollInterval = setInterval(fetchAndRenderGlobalChat, 3000);
-            }
-        }
-
-        function closeChatModal() {
-            document.getElementById('chat-modal').classList.add('hidden');
-            if (chatPollInterval) {
-                clearInterval(chatPollInterval);
-                chatPollInterval = null;
-            }
-        }
-
-        // 공용 서버 API에서 전체 채팅 목록을 불러오고 24시간 지난 메시지 자동 삭제
-        async function fetchAndRenderGlobalChat() {
-            try {
-                const res = await fetch(BIN_URL + '/latest');
-                if (!res.ok) return;
-
-                const data = await res.json();
-                const record = data.record || {};
-                let messages = record.messages || [];
-
-                const now = Date.now();
-                const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-                const validMessages = messages.filter(m => (now - (m.timestamp || 0)) < ONE_DAY_MS);
-
-                if (validMessages.length !== messages.length) {
-                    record.messages = validMessages;
-                    await fetch(BIN_URL, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(record)
-                    });
-                }
-
-                renderChatBox(validMessages);
-            } catch (e) {
-                console.error("채팅 로드 중 오류 발생:", e);
-            }
-        }
-
-        function renderChatBox(messages) {
-            const chatBox = document.getElementById('global-chat-box');
-            chatBox.innerHTML = `
-                <div class="chat-msg">
-                    <span class="author">[알림]</span>
-                    <span class="text">전체 채팅방에 오신 것을 환영합니다!</span>
-                </div>
-            `;
-
-            messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg';
-
-                const authorName = msg.author || msg.name || "익명";
-                const isMe = (authorName === savedUsername);
-                
-                // 내가 쓴 채팅은 '나', 다른 사람은 그 사람의 이름으로 표시
-                let nameDisplay = isMe ? "나" : authorName;
-                let goldClass = isMe ? 'my-gold-name' : '';
-
-                msgDiv.innerHTML = `
-                    <span class="author ${goldClass}" onclick="openOtherUserProfileModal('${authorName.replace(/'/g, "\\'")}', ${msg.coins || 0}, ${msg.trophies || 0})">${nameDisplay}</span>
-                    <span class="time">${msg.time || ""}</span>
-                    <div class="text">${msg.text || ""}</div>
-                `;
-
-                chatBox.appendChild(msgDiv);
-            });
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        async function sendGlobalChatMessage() {
-            const input = document.getElementById('global-chat-input');
-            const text = input.value.trim();
-
-            if (!text) return;
-
-            const isBadWord = badWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
-            if (isBadWord) {
-                alert("욕설이나 비속어는 사용할 수 없습니다!");
-                input.value = "";
-                return;
-            }
-
-            input.value = "";
-
-            const now = new Date();
-            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            const timestamp = now.getTime();
-
-            const newMsg = {
-                author: savedUsername,
-                text: text,
-                time: timeStr,
-                timestamp: timestamp,
-                coins: userCoins,
-                trophies: userTrophies
-            };
-
-            try {
-                const res = await fetch(BIN_URL + '/latest');
-                if (res.ok) {
-                    const data = await res.json();
-                    const record = data.record || {};
-                    let messages = record.messages || [];
-
-                    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-                    messages = messages.filter(m => (timestamp - (m.timestamp || 0)) < ONE_DAY_MS);
-
-                    messages.push(newMsg);
-                    record.messages = messages;
-
-                    await fetch(BIN_URL, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(record)
-                    });
-
-                    renderChatBox(messages);
-                }
-            } catch (e) {
-                alert("채팅 전송에 실패했습니다. 다시 시도해주세요.");
-            }
         }
 
         let p1 = { 
@@ -1924,4 +1690,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
