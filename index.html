@@ -209,8 +209,8 @@
         }
         
         .error {
-            height: 20px;
-            font-size: 12px;
+            min-height: 20px;
+            font-size: 13px;
             font-weight: bold;
             color: #e74c3c;
             margin-bottom: 10px;
@@ -426,8 +426,12 @@
         </div>
         <div class="room-box hidden" id="room-display">----</div>
 
-        <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
-        <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
+        <!-- 방장이 생성 시 숨겨지는 영역 -->
+        <div id="join-container">
+            <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
+            <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
+        </div>
+
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
@@ -776,7 +780,10 @@
             const box = document.getElementById('room-display');
             box.innerText = "방 번호: " + createdCode;
             box.classList.remove('hidden');
-            document.getElementById('room-input').value = ""; 
+
+            // 내가 방을 만들면 비밀번호 입력창/시작버튼 숨기기
+            document.getElementById('join-container').classList.add('hidden');
+            err.style.color = "#27ae60";
             err.innerText = "친구의 접속을 기다리는 중입니다...";
 
             if (peer) peer.destroy();
@@ -798,6 +805,7 @@
             });
 
             peer.on('error', (e) => {
+                err.style.color = "#e74c3c";
                 err.innerText = "방 생성 오류. 다시 '방 생성하기'를 눌러주세요.";
             });
         }
@@ -928,6 +936,7 @@
             const name = validateName();
             if (!name) return;
 
+            resetRoom();
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.remove('hidden');
         }
@@ -973,8 +982,11 @@
             createdCode = null;
             if (peer) peer.destroy();
             document.getElementById('room-display').classList.add('hidden');
+            document.getElementById('join-container').classList.remove('hidden');
             document.getElementById('room-input').value = "";
-            document.getElementById('friend-error').innerText = "방이 초기화되었습니다.";
+            const err = document.getElementById('friend-error');
+            err.style.color = "#e74c3c";
+            err.innerText = "";
         }
 
         function joinRoom() {
