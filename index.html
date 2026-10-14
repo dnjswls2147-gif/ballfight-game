@@ -1967,22 +1967,25 @@
             ctx.closePath();
         }
 
+        // 🔥 고퀄리티 미스터 비스트 볼 공식 디자인 렌더링 🔥
         function drawMrBeastGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
+            // 1. 파란 그라데이션 원형 배경
             let gradBg = ctx.createRadialGradient(x, y, 2, x, y, radius);
             gradBg.addColorStop(0, '#74b9ff');
-            gradBg.addColorStop(0.6, '#0984e3');
-            gradBg.addColorStop(1, '#01a3a4');
+            gradBg.addColorStop(0.7, '#0984e3');
+            gradBg.addColorStop(1, '#0056b3');
             ctx.fillStyle = gradBg;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
             let s = radius / 22; 
             ctx.translate(x, y);
 
+            // 2. 맹수 블루 두상
             ctx.beginPath();
             ctx.moveTo(-16 * s, -14 * s);
             ctx.lineTo(-6 * s, -10 * s);
@@ -2004,16 +2007,61 @@
             beastFill.addColorStop(1, '#10ac84');
             ctx.fillStyle = beastFill;
             ctx.fill();
-            ctx.lineWidth = 1.6 * s;
-            ctx.strokeStyle = '#0a3d62';
+            ctx.lineWidth = 1.8 * s;
+            ctx.strokeStyle = '#051923';
             ctx.stroke();
+
+            // 3. 붉은 입 & 흰색 이빨 
+            ctx.beginPath();
+            ctx.moveTo(3 * s, 3 * s);
+            ctx.lineTo(13 * s, 5 * s);
+            ctx.lineTo(8 * s, 11 * s);
+            ctx.lineTo(1 * s, 7 * s);
+            ctx.closePath();
+            ctx.fillStyle = '#ff2a2a';
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.moveTo(3 * s, 3 * s); ctx.lineTo(5 * s, 6 * s); ctx.lineTo(6 * s, 3 * s); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(8 * s, 3 * s); ctx.lineTo(10 * s, 6 * s); ctx.lineTo(11 * s, 3 * s); ctx.fill();
+
+            // 4. 핫핑크 벼락 안경 ⚡
+            ctx.beginPath();
+            ctx.moveTo(-20 * s, -7 * s);
+            ctx.lineTo(-2 * s, -6 * s);
+            ctx.lineTo(-5 * s, -1 * s);
+            ctx.lineTo(14 * s, -3 * s);
+            ctx.lineTo(3 * s, 3 * s);
+            ctx.lineTo(6 * s, 1 * s);
+            ctx.lineTo(-8 * s, 0 * s);
+            ctx.lineTo(-6 * s, -4 * s);
+            ctx.closePath();
+
+            let thunderGrad = ctx.createLinearGradient(-15 * s, -5 * s, 10 * s, -1 * s);
+            thunderGrad.addColorStop(0, '#ff007f');
+            thunderGrad.addColorStop(1, '#ff66c4');
+            ctx.fillStyle = thunderGrad;
+            ctx.fill();
+            ctx.lineWidth = 1.2 * s;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // 5. 눈동자
+            ctx.beginPath();
+            ctx.moveTo(6 * s, -7 * s);
+            ctx.lineTo(11 * s, -5 * s);
+            ctx.lineTo(7 * s, -3 * s);
+            ctx.closePath();
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
 
             ctx.restore();
 
+            // 6. 선명한 테두리
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#0a3d62";
+            ctx.strokeStyle = "#002b5b";
             ctx.stroke();
             ctx.closePath();
         }
@@ -2114,7 +2162,6 @@
                 }
             });
 
-            // 🕺 안전한 미스터 비스트 댄스 스킬 렌더링 🪩
             mrBeastAttacks.forEach(mb => {
                 let stageX = canvas.width / 2;
                 let stageY = 55;
@@ -2122,7 +2169,6 @@
 
                 ctx.save();
                 
-                // 1. 디스코 핑크 조명 레이저 효과
                 ctx.fillStyle = "rgba(255, 0, 128, 0.25)";
                 ctx.beginPath();
                 ctx.moveTo(stageX, 0);
@@ -2131,10 +2177,8 @@
                 ctx.closePath();
                 ctx.fill();
 
-                // 2. 미스터 비스트 패거리 댄스 무대 연출
                 ctx.translate(stageX, stageY + danceOffset);
 
-                // 검은색 옷 댄서들
                 ctx.fillStyle = "#1e272e";
                 [-35, -20, 20, 35].forEach(dx => {
                     ctx.beginPath();
@@ -2143,13 +2187,11 @@
                     ctx.fillRect(dx - 4, 0, 8, 16);
                 });
 
-                // 중앙 미스터 비스트 
                 ctx.fillStyle = "#f5cd79";
-                ctx.beginPath(); ctx.arc(0, -10, 10, 0, Math.PI * 2); ctx.fill(); // 얼굴
+                ctx.beginPath(); ctx.arc(0, -10, 10, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = "#1e272e";
-                ctx.fillRect(-8, 0, 16, 22); // 상체
+                ctx.fillRect(-8, 0, 16, 22);
 
-                // "MR. RIZZ!" 텍스트
                 ctx.font = "900 14px sans-serif";
                 ctx.fillStyle = "#f1c40f";
                 ctx.textAlign = "center";
@@ -2160,7 +2202,6 @@
 
                 ctx.restore();
 
-                // 3. 상대 공 내려찍기 이펙트
                 ctx.beginPath();
                 ctx.arc(mb.target.x, mb.target.y, mb.target.radius + 8, 0, Math.PI * 2);
                 ctx.strokeStyle = "rgba(231, 76, 60, 0.8)";
@@ -2275,4 +2316,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                                             </html>
+    </html>
