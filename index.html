@@ -581,7 +581,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 전체 화면 차단막 -->
+    <!-- 점검 중 전체 화면 차단막 (다른 사람에게만 표시됨) -->
     <div class="hidden" id="maintenance-screen">
         <h1>점검 중입니다</h1>
         <p>지금 들어갈 수 없습니다.</p>
@@ -828,7 +828,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v6';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v7';
         const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
@@ -840,7 +840,7 @@
         let savedUsername = "";
         let registeredUsers = []; 
         let isServerUnderMaintenance = false;
-        let isAdminLoggedIn = false; // 관리자 로그인 여부 (본인 인증 확인용)
+        let isAdminLoggedIn = false; // 관리자 로그인 여부
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -921,12 +921,12 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (관리자인 당신은 계속 입장 가능합니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다. (일반 유저들은 차단되고 관리자인 당신은 입장 가능합니다)" : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 점검 모드가 켜져 있더라도 '관리자 로그인(isAdminLoggedIn)' 상태라면 차단 화면을 숨김
+            // 점검 모드가 켜져 있더라도 '관리자 로그인(isAdminLoggedIn)'이 되어 있다면 나는 차단 화면을 숨김 (다른 사람들은 차단됨)
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
@@ -2391,7 +2391,7 @@
                 ctx.closePath();
             });
 
-            pokeFallBlocks.forEach(poke => {
+.pokeFallBlocks.forEach(poke => {
                 drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
@@ -2457,4 +2457,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                </html>
+                                                                                               </html>
