@@ -35,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 (일반 유저 차단용) */
+        /* 점검 중 풀스크린 화면 */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -48,20 +48,21 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 99999;
+            z-index: 999999;
             text-align: center;
             padding: 20px;
         }
         #maintenance-screen.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         #maintenance-screen h1 {
             color: #e74c3c;
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 15px;
         }
         #maintenance-screen p {
-            font-size: 16px;
+            font-size: 18px;
             color: #bdc3c7;
             line-height: 1.5;
         }
@@ -127,10 +128,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100000; /* 최상단 배치 */
+            z-index: 100000;
             padding: 20px;
         }
         .modal-overlay.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         .modal-box {
@@ -203,15 +205,17 @@
             background: #5d4037;
             border: 3px solid #3e2723;
             border-radius: 10px;
-            padding: 20px 15px;
+            padding: 15px;
             color: #ffffff;
             margin: 15px 0;
             width: 100%;
             box-sizing: border-box;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            max-height: 250px;
+            overflow-y: auto;
         }
         .mail-status-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             margin-bottom: 12px;
             color: #ffe0b2;
@@ -220,14 +224,18 @@
             background: #795548;
             border: 2px solid #4e342e;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-align: left;
+            margin-bottom: 8px;
+        }
+        .mail-item:last-child {
+            margin-bottom: 0;
         }
         .mail-info-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #fff;
         }
@@ -240,11 +248,12 @@
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -307,10 +316,10 @@
             color: #fff;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="number"], select {
             width: 100%;
-            padding: 12px 15px;
-            font-size: 14px;
+            padding: 10px 12px;
+            font-size: 13px;
             border: 2px solid #bdc3c7;
             border-radius: 8px;
             outline: none;
@@ -321,7 +330,7 @@
             user-select: auto;
             -webkit-user-select: auto;
         }
-        input[type="text"]:focus, input[type="password"]:focus { 
+        input[type="text"]:focus, input[type="password"]:focus, select:focus { 
             border-color: #e67e22; 
         }
         
@@ -492,9 +501,10 @@
             padding: 15px;
             color: #ffffff;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            z-index: 100000;
+            z-index: 1000000;
         }
         .admin-window.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         .admin-header {
@@ -548,7 +558,7 @@
         .admin-content {
             flex: 1;
             font-size: 12px;
-            max-height: 260px;
+            max-height: 280px;
             overflow-y: auto;
         }
         .admin-section-title {
@@ -574,6 +584,10 @@
             flex: 1;
             min-width: 45px;
         }
+        .admin-small-btn.active-type {
+            background: #e91e63 !important;
+            border-color: #ff4081 !important;
+        }
         .admin-small-btn:active {
             background: #e91e63;
         }
@@ -590,7 +604,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 전체 화면 차단막 (다른 유저 차단용) -->
+    <!-- 점검 중 전체 화면 차단막 -->
     <div class="hidden" id="maintenance-screen">
         <h1>점검 중입니다</h1>
         <p>지금 들어갈 수 없습니다.</p>
@@ -642,19 +656,37 @@
                 </div>
                 <!-- 재화 탭 -->
                 <div id="admin-tab-currency" class="hidden">
-                    <div class="admin-section-title">코인 조절</div>
+                    <div class="admin-section-title">내 재화 즉시 조절</div>
+                    <div class="admin-section-title" style="color:#aaa;">코인 조절</div>
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" onclick="adminAddCoins(1000)">+1000</button>
                         <button class="admin-small-btn" onclick="adminAddCoins(-1000)">-1000</button>
                         <button class="admin-small-btn" onclick="adminAddCoins(100)">+100</button>
                         <button class="admin-small-btn" onclick="adminAddCoins(-100)">-100</button>
                     </div>
-                    <div class="admin-section-title">트로피 조절</div>
+                    <div class="admin-section-title" style="color:#aaa;">트로피 조절</div>
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" onclick="adminAddTrophies(100)">+100</button>
                         <button class="admin-small-btn" onclick="adminAddTrophies(-100)">-100</button>
                         <button class="admin-small-btn" onclick="adminAddTrophies(10)">+10</button>
                         <button class="admin-small-btn" onclick="adminAddTrophies(-10)">-10</button>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px dashed #3a354d; margin: 12px 0;">
+
+                    <div class="admin-section-title" style="color: #f1c40f;">🎁 유저에게 선물 보내기 (우편함)</div>
+                    <select id="admin-gift-target-user" style="padding: 6px; font-size: 11px; margin-bottom: 6px; background: #2d2a3e; color: #fff; border-color: #4a4463;">
+                        <!-- JS로 유저 리스트 동적 로드 -->
+                    </select>
+
+                    <div class="admin-btn-row" style="margin-bottom: 6px;">
+                        <button class="admin-small-btn active-type" id="gift-type-coin-btn" onclick="selectGiftType('coin')">코인</button>
+                        <button class="admin-small-btn" id="gift-type-trophy-btn" onclick="selectGiftType('trophy')">트로피</button>
+                    </div>
+
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <input type="number" id="admin-gift-amount" placeholder="개수 입력" min="1" style="margin-bottom: 0; padding: 6px; font-size: 11px; background: #2d2a3e; color: #fff; border-color: #4a4463; flex: 2;">
+                        <button class="admin-small-btn" style="background: #e67e22; border-color: #d35400; padding: 6px; font-weight: bold; flex: 1;" onclick="sendAdminGift()">보내기</button>
                     </div>
                 </div>
                 <!-- 설정 탭 -->
@@ -751,7 +783,7 @@
         <div class="version-text">v1.2 버전</div>
         
         <div class="mail-brown-box">
-            <div class="mail-status-title" id="mail-status-msg">위의 받을 보상이 있습니다!</div>
+            <div class="mail-status-title" id="mail-status-msg">도착한 우편이 있습니다!</div>
             <div id="mail-content-area"></div>
         </div>
     </div>
@@ -837,8 +869,8 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v10';
-        const ADMIN_PASSWORD = "123kpq"; // 요구하신 어드민 비밀번호
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v12';
+        const ADMIN_PASSWORD = "123kpq";
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -848,8 +880,10 @@
 
         let savedUsername = "";
         let registeredUsers = []; 
+        let userMails = []; // 각 유저별 우편함 선물 데이터
         let isServerUnderMaintenance = false;
-        let isAdminLoggedIn = false; // 기본적으로 인증 미완료 상태
+        let isAdminLoggedIn = false;
+        let selectedGiftType = 'coin'; // 어드민에서 선택된 선물 종류 ('coin' 또는 'trophy')
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -883,7 +917,7 @@
         let isHost = false; 
         let friendName = "친구";
 
-        // 어드민 패널 드래그 이동 기능 구현
+        // 어드민 패널 드래그 이동 기능
         const adminPanel = document.getElementById('admin-panel');
         const adminHeaderDrag = document.getElementById('admin-header-drag');
         let isDragging = false;
@@ -930,12 +964,11 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 검은 화면으로 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 점검 중이라도 관리자 인증 완료자(isAdminLoggedIn)는 차단 화면을 우회하여 게임 가능
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
@@ -943,10 +976,10 @@
             }
         }
 
-        // 비밀번호 입력 모달 열기
         function openAdminAuth() {
             if (isAdminLoggedIn) {
                 renderAdminUserList();
+                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
                 return;
             }
@@ -959,16 +992,16 @@
             document.getElementById('admin-auth-modal').classList.add('hidden');
         }
 
-        // 비밀번호(123kpq) 검증
         function checkAdminPassword() {
             const input = document.getElementById('admin-password-input').value.trim();
             const err = document.getElementById('admin-auth-error');
 
             if (input === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true; // 인증 성공
+                isAdminLoggedIn = true;
                 closeAdminAuth();
-                applyMaintenanceUI(); // 점검 중이어도 본인 화면 차단 해제
+                applyMaintenanceUI();
                 renderAdminUserList();
+                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
                 err.innerText = "비밀번호가 올바르지 않습니다!";
@@ -1001,6 +1034,7 @@
             } else if (tabName === 'currency') {
                 document.getElementById('admin-tab-currency').classList.remove('hidden');
                 tabs[1].classList.add('active');
+                renderAdminGiftUserSelect();
             } else if (tabName === 'screen') {
                 document.getElementById('admin-tab-screen').classList.remove('hidden');
                 tabs[2].classList.add('active');
@@ -1033,6 +1067,65 @@
                 `;
                 container.appendChild(row);
             });
+        }
+
+        function renderAdminGiftUserSelect() {
+            const selectEl = document.getElementById('admin-gift-target-user');
+            selectEl.innerHTML = '';
+
+            if (registeredUsers.length === 0) {
+                selectEl.innerHTML = `<option value="">등록된 유저 없음</option>`;
+                return;
+            }
+
+            registeredUsers.forEach(u => {
+                let opt = document.createElement('option');
+                opt.value = u.name;
+                opt.innerText = u.name;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function selectGiftType(type) {
+            selectedGiftType = type;
+            const coinBtn = document.getElementById('gift-type-coin-btn');
+            const trophyBtn = document.getElementById('gift-type-trophy-btn');
+
+            if (type === 'coin') {
+                coinBtn.classList.add('active-type');
+                trophyBtn.classList.remove('active-type');
+            } else {
+                trophyBtn.classList.add('active-type');
+                coinBtn.classList.remove('active-type');
+            }
+        }
+
+        function sendAdminGift() {
+            const targetName = document.getElementById('admin-gift-target-user').value;
+            const amountVal = parseInt(document.getElementById('admin-gift-amount').value);
+
+            if (!targetName) {
+                alert("선물을 받을 유저를 선택하세요.");
+                return;
+            }
+            if (isNaN(amountVal) || amountVal <= 0) {
+                alert("올바른 개수를 입력하세요.");
+                return;
+            }
+
+            userMails.push({
+                id: Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+                targetUser: targetName,
+                type: selectedGiftType, // 'coin' 또는 'trophy'
+                amount: amountVal,
+                claimed: false
+            });
+
+            saveData();
+            checkMailRedDot();
+            
+            document.getElementById('admin-gift-amount').value = '';
+            alert(`[${targetName}] 님에게 ${selectedGiftType === 'coin' ? '코인' : '트로피'} ${amountVal}개 선물을 발송했습니다!`);
         }
 
         function banUser(index) {
@@ -1092,7 +1185,9 @@
 
         function isMailValid() {
             const now = new Date().getTime();
-            return !mailClaimed && (now < EXPIRY_TIME);
+            const hasDefaultMail = !mailClaimed && (now < EXPIRY_TIME);
+            const myUnclaimedGifts = userMails.some(m => m.targetUser === savedUsername && !m.claimed);
+            return hasDefaultMail || myUnclaimedGifts;
         }
 
         function checkMailRedDot() {
@@ -1110,27 +1205,49 @@
             const contentEl = document.getElementById('mail-content-area');
             const now = new Date().getTime();
 
-            if (!mailClaimed && now >= EXPIRY_TIME) {
-                msgEl.innerText = "받을 보상이 없습니다";
-                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">유효 기간이 지나 보상이 만료되었습니다.</div>`;
-                checkMailRedDot();
-                return;
-            }
+            contentEl.innerHTML = '';
+            let itemCount = 0;
 
-            if (isMailValid()) {
-                msgEl.innerText = "위의 받을 보상이 있습니다!";
-                contentEl.innerHTML = `
-                    <div class="mail-item">
+            // 1. 기본 이벤트 우편
+            if (!mailClaimed) {
+                if (now < EXPIRY_TIME) {
+                    itemCount++;
+                    let itemDiv = document.createElement('div');
+                    itemDiv.className = 'mail-item';
+                    itemDiv.innerHTML = `
                         <div>
-                            <div class="mail-info-title">🎁 선물: 500 코인</div>
+                            <div class="mail-info-title">🎁 이벤트 선물: 500 코인</div>
                             <div class="mail-info-time">유효 기간: 10월 14일 오후 7시 40분까지</div>
                         </div>
                         <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
+                    `;
+                    contentEl.appendChild(itemDiv);
+                }
+            }
+
+            // 2. 관리자가 보낸 개인 선물 (유효기간 없음)
+            const myGifts = userMails.filter(m => m.targetUser === savedUsername && !m.claimed);
+            myGifts.forEach(gift => {
+                itemCount++;
+                let itemDiv = document.createElement('div');
+                itemDiv.className = 'mail-item';
+                let typeText = gift.type === 'coin' ? '코인' : '트로피';
+                let icon = gift.type === 'coin' ? '🪙' : '🏆';
+                itemDiv.innerHTML = `
+                    <div>
+                        <div class="mail-info-title">🎁 관리자 선물: ${typeText} ${gift.amount}개</div>
+                        <div class="mail-info-time" style="color: #a29bfe;">유효 기간: 없음</div>
                     </div>
+                    <button class="btn-claim" onclick="claimUserGift('${gift.id}')">받기 ${icon}</button>
                 `;
+                contentEl.appendChild(itemDiv);
+            });
+
+            if (itemCount > 0) {
+                msgEl.innerText = "도착한 우편이 있습니다!";
             } else {
                 msgEl.innerText = "받을 보상이 없습니다";
-                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0;">도착한 선물이 없거나 이미 수령한 보상입니다.</div>`;
+                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0; text-align:center;">도착한 우편이 없거나 이미 수령했습니다.</div>`;
             }
         }
 
@@ -1143,7 +1260,7 @@
                 return;
             }
 
-            if (isMailValid()) {
+            if (!mailClaimed) {
                 mailClaimed = true;
                 userCoins += 500;
                 updateCoinsUI();
@@ -1151,8 +1268,23 @@
                 checkMailRedDot();
                 renderMailbox();
                 alert("🎉 500코인을 받았습니다!");
-            } else {
-                alert("보상을 받을수 없음니다");
+            }
+        }
+
+        function claimUserGift(giftId) {
+            let gift = userMails.find(m => m.id === giftId);
+            if (gift && !gift.claimed) {
+                gift.claimed = true;
+                if (gift.type === 'coin') {
+                    userCoins += gift.amount;
+                } else {
+                    userTrophies += gift.amount;
+                }
+                updateCoinsUI();
+                saveData();
+                checkMailRedDot();
+                renderMailbox();
+                alert(`🎉 선물로 ${gift.type === 'coin' ? '코인' : '트로피'} ${gift.amount}개를 받았습니다!`);
             }
         }
 
@@ -1171,6 +1303,7 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 registeredUsers: registeredUsers,
+                userMails: userMails,
                 isServerUnderMaintenance: isServerUnderMaintenance,
                 balls: ballsData,
                 mailClaimed: mailClaimed
@@ -1190,6 +1323,9 @@
                     }
                     if (parsed.registeredUsers !== undefined && Array.isArray(parsed.registeredUsers)) {
                         registeredUsers = parsed.registeredUsers;
+                    }
+                    if (parsed.userMails !== undefined && Array.isArray(parsed.userMails)) {
+                        userMails = parsed.userMails;
                     }
                     if (parsed.isServerUnderMaintenance !== undefined) {
                         isServerUnderMaintenance = parsed.isServerUnderMaintenance;
