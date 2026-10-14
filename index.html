@@ -473,7 +473,7 @@
             pointer-events: none;
         }
 
-        /* 어드민 패널 스타일 (드래그 가능하도록 수정) */
+        /* 어드민 패널 스타일 */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -495,7 +495,7 @@
             border-bottom: 1px solid #3a354d;
             padding-bottom: 8px;
             margin-bottom: 12px;
-            cursor: grab; /* 손 모양 마우스 커서 */
+            cursor: grab;
         }
         .admin-header:active {
             cursor: grabbing;
@@ -601,7 +601,7 @@
         </div>
     </div>
 
-    <!-- 어드민 패널 모달 창 (드래그 가능 적용) -->
+    <!-- 어드민 패널 모달 창 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
@@ -631,7 +631,7 @@
                     <div class="admin-section-title" style="margin-top: 12px;">🚫 유저 밴 / 정지 관리</div>
                     <div id="admin-user-list-container"></div>
                 </div>
-                <!-- 재화 탭 (+1000, -1000 및 +100, -100 추가) -->
+                <!-- 재화 탭 -->
                 <div id="admin-tab-currency" class="hidden">
                     <div class="admin-section-title">코인 조절</div>
                     <div class="admin-btn-row">
@@ -828,7 +828,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v5';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v6';
         const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
@@ -840,6 +840,7 @@
         let savedUsername = "";
         let registeredUsers = []; 
         let isServerUnderMaintenance = false;
+        let isAdminLoggedIn = false; // 관리자 로그인 여부 (본인 인증 확인용)
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -884,7 +885,7 @@
             isDragging = true;
             dragOffsetX = e.clientX - adminPanel.offsetLeft;
             dragOffsetY = e.clientY - adminPanel.offsetTop;
-            adminPanel.style.transform = 'none'; // 중앙 정렬 해제
+            adminPanel.style.transform = 'none';
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -897,7 +898,6 @@
             isDragging = false;
         });
 
-        // 모바일 터치 드래그 지원
         adminHeaderDrag.addEventListener('touchstart', (e) => {
             isDragging = true;
             let touch = e.touches[0];
@@ -921,12 +921,13 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다." : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다. (관리자인 당신은 계속 입장 가능합니다)" : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            if (isServerUnderMaintenance) {
+            // 점검 모드가 켜져 있더라도 '관리자 로그인(isAdminLoggedIn)' 상태라면 차단 화면을 숨김
+            if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
                 screen.classList.add('hidden');
@@ -948,7 +949,9 @@
             const err = document.getElementById('admin-auth-error');
 
             if (input === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true; // 관리자 인증 완료!
                 closeAdminAuth();
+                applyMaintenanceUI(); // 점검 중이어도 관리자는 차단 화면 해제
                 renderAdminUserList();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
@@ -2454,4 +2457,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-        </html>
+                </html>
