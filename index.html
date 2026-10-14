@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -474,7 +473,7 @@
             pointer-events: none;
         }
 
-        /* 어드민 패널 스타일 */
+        /* 어드민 패널 스타일 (드래그 가능하도록 수정) */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -496,6 +495,10 @@
             border-bottom: 1px solid #3a354d;
             padding-bottom: 8px;
             margin-bottom: 12px;
+            cursor: grab; /* 손 모양 마우스 커서 */
+        }
+        .admin-header:active {
+            cursor: grabbing;
         }
         .admin-title {
             font-size: 14px;
@@ -504,6 +507,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            pointer-events: none;
         }
         .admin-body {
             display: flex;
@@ -548,16 +552,18 @@
             display: flex;
             gap: 6px;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
         .admin-small-btn {
             background: #2d2a3e;
             border: 1px solid #4a4463;
             color: #fff;
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 6px 8px;
             font-size: 11px;
             cursor: pointer;
             flex: 1;
+            min-width: 45px;
         }
         .admin-small-btn:active {
             background: #e91e63;
@@ -595,11 +601,11 @@
         </div>
     </div>
 
-    <!-- 어드민 패널 모달 창 -->
+    <!-- 어드민 패널 모달 창 (드래그 가능 적용) -->
     <div class="admin-window hidden" id="admin-panel">
-        <div class="admin-header">
-            <div class="admin-title">⚙️ 어드민 패널</div>
-            <button class="btn-close-x" style="width:24px; height:24px; font-size:12px;" onclick="closeAdminPanel()">X</button>
+        <div class="admin-header" id="admin-header-drag">
+            <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
+            <button class="btn-close-x" style="width:24px; height:24px; font-size:12px; position:static;" onclick="closeAdminPanel()">X</button>
         </div>
         <div class="admin-body">
             <div class="admin-sidebar">
@@ -625,15 +631,19 @@
                     <div class="admin-section-title" style="margin-top: 12px;">🚫 유저 밴 / 정지 관리</div>
                     <div id="admin-user-list-container"></div>
                 </div>
-                <!-- 재화 탭 -->
+                <!-- 재화 탭 (+1000, -1000 및 +100, -100 추가) -->
                 <div id="admin-tab-currency" class="hidden">
                     <div class="admin-section-title">코인 조절</div>
                     <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminAddCoins(1000)">+1000</button>
+                        <button class="admin-small-btn" onclick="adminAddCoins(-1000)">-1000</button>
                         <button class="admin-small-btn" onclick="adminAddCoins(100)">+100</button>
                         <button class="admin-small-btn" onclick="adminAddCoins(-100)">-100</button>
                     </div>
                     <div class="admin-section-title">트로피 조절</div>
                     <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminAddTrophies(100)">+100</button>
+                        <button class="admin-small-btn" onclick="adminAddTrophies(-100)">-100</button>
                         <button class="admin-small-btn" onclick="adminAddTrophies(10)">+10</button>
                         <button class="admin-small-btn" onclick="adminAddTrophies(-10)">-10</button>
                     </div>
@@ -818,7 +828,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v4';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v5';
         const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
@@ -856,13 +866,56 @@
         let mrBeastAttacks = []; 
 
         let mailClaimed = false; 
-        // 🎯 우편함 만료 시간: 10월 14일 오후 7시 40분
         const EXPIRY_TIME = new Date(2026, 9, 14, 19, 40, 0).getTime(); 
 
         let peer = null;
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        // 어드민 패널 드래그 이동 기능 구현
+        const adminPanel = document.getElementById('admin-panel');
+        const adminHeaderDrag = document.getElementById('admin-header-drag');
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        adminHeaderDrag.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragOffsetX = e.clientX - adminPanel.offsetLeft;
+            dragOffsetY = e.clientY - adminPanel.offsetTop;
+            adminPanel.style.transform = 'none'; // 중앙 정렬 해제
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            adminPanel.style.left = (e.clientX - dragOffsetX) + 'px';
+            adminPanel.style.top = (e.clientY - dragOffsetY) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // 모바일 터치 드래그 지원
+        adminHeaderDrag.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            let touch = e.touches[0];
+            dragOffsetX = touch.clientX - adminPanel.offsetLeft;
+            dragOffsetY = touch.clientY - adminPanel.offsetTop;
+            adminPanel.style.transform = 'none';
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            let touch = e.touches[0];
+            adminPanel.style.left = (touch.clientX - dragOffsetX) + 'px';
+            adminPanel.style.top = (touch.clientY - dragOffsetY) + 'px';
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
 
         function toggleMaintenance(status) {
             isServerUnderMaintenance = status;
@@ -2401,4 +2454,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+        </html>
