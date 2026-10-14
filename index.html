@@ -35,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 */
+        /* 점검 중 풀스크린 화면 (개발자 비밀번호 진입 가능) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -48,7 +48,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 999999;
+            z-index: 9999999;
             text-align: center;
             padding: 20px;
         }
@@ -128,7 +128,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100000;
+            z-index: 1000000;
             padding: 20px;
         }
         .modal-overlay.hidden {
@@ -501,7 +501,7 @@
             padding: 15px;
             color: #ffffff;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            z-index: 1000000;
+            z-index: 10000000;
         }
         .admin-window.hidden {
             display: none !important;
@@ -604,10 +604,10 @@
 </head>
 <body>
 
-    <!-- 점검 중 전체 화면 차단막 -->
-    <div class="hidden" id="maintenance-screen">
-        <h1>점검 중입니다</h1>
-        <p>지금 들어갈 수 없습니다.</p>
+    <!-- 점검 중 전체 화면 차단막 (터치 5번 시 인증창 조작 가능) -->
+    <div class="hidden" id="maintenance-screen" onclick="handleDevTripleClick()">
+        <h1>🚨 지금 점검 중입니다!</h1>
+        <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
     </div>
 
     <!-- 어드민 비밀번호 입력 모달 -->
@@ -617,7 +617,7 @@
                 <h2>🔒 관리자 인증</h2>
                 <button class="btn-close-x" onclick="closeAdminAuth()">X</button>
             </div>
-            <div class="version-text">비밀번호를 입력하세요</div>
+            <div class="version-text">개발자 비밀번호를 입력하세요</div>
             <div class="error" id="admin-auth-error"></div>
             <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkAdminPassword()">
             <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
@@ -676,7 +676,7 @@
 
                     <div class="admin-section-title" style="color: #f1c40f;">🎁 유저에게 선물 보내기 (우편함)</div>
                     <select id="admin-gift-target-user" style="padding: 6px; font-size: 11px; margin-bottom: 6px; background: #2d2a3e; color: #fff; border-color: #4a4463;">
-                        <!-- JS로 유저 리스트 동적 로드 -->
+                        <!-- JS로 온라인 유저 동적 로드 -->
                     </select>
 
                     <div class="admin-btn-row" style="margin-bottom: 6px;">
@@ -869,9 +869,12 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v14';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v14';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v14';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v15';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v15';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v15';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v15';
+        const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v15';
+        
         const ADMIN_PASSWORD = "123kpq";
 
         const badWords = [
@@ -882,8 +885,8 @@
 
         let savedUsername = "";
         let registeredUsers = []; 
-        let globalMails = []; // 전체 온라인 공개 우편함 목록
-        let claimedMailIds = []; // 유저가 수령 완료한 선물 ID 리스트
+        let globalMails = []; 
+        let claimedMailIds = []; 
         let isServerUnderMaintenance = false;
         let isAdminLoggedIn = false;
         let selectedGiftType = 'coin';
@@ -919,6 +922,23 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        // 개발자 터치 5번 클릭 감지
+        let devClickCount = 0;
+        let devClickTimer = null;
+
+        function handleDevTripleClick() {
+            devClickCount++;
+            if (devClickTimer) clearTimeout(devClickTimer);
+            devClickTimer = setTimeout(() => {
+                devClickCount = 0;
+            }, 1500);
+
+            if (devClickCount >= 5) {
+                devClickCount = 0;
+                openAdminAuth();
+            }
+        }
 
         // 어드민 패널 드래그 이동 기능
         const adminPanel = document.getElementById('admin-panel');
@@ -965,17 +985,23 @@
 
         function toggleMaintenance(status) {
             isServerUnderMaintenance = status;
+            localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(status));
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 검은 화면으로 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "🚨 점검 모드가 켜졌습니다. (일반 접속자는 '지금 점검 중입니다!' 창만 뜨며 진입 차단됩니다)" : "🟢 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
+                // 이름 입력 창 숨기기
+                document.getElementById('name-modal').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
+                if (!savedUsername) {
+                    document.getElementById('name-modal').classList.remove('hidden');
+                }
             }
         }
 
@@ -1044,7 +1070,22 @@
             }
         }
 
+        function syncGlobalUsers() {
+            let savedGlobalUsers = localStorage.getItem(GLOBAL_USERS_KEY);
+            if (savedGlobalUsers) {
+                try {
+                    let parsedUsers = JSON.parse(savedGlobalUsers);
+                    parsedUsers.forEach(u => {
+                        if (!registeredUsers.some(localU => localU.name === u.name)) {
+                            registeredUsers.push(u);
+                        }
+                    });
+                } catch(e){}
+            }
+        }
+
         function renderAdminUserList() {
+            syncGlobalUsers();
             const container = document.getElementById('admin-user-list-container');
             container.innerHTML = '';
 
@@ -1073,10 +1114,10 @@
         }
 
         function renderAdminGiftUserSelect() {
+            syncGlobalUsers();
             const selectEl = document.getElementById('admin-gift-target-user');
             selectEl.innerHTML = '';
 
-            // 드롭다운 맨 위에 전체 발송 옵션 추가
             let allOpt = document.createElement('option');
             allOpt.value = "ALL_USERS";
             allOpt.innerText = "🌐 [전체] 모두에게 보내기";
@@ -1120,7 +1161,7 @@
             let typeName = selectedGiftType === 'coin' ? '코인' : '트로피';
             let newGift = {
                 id: "gift_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
-                targetUser: targetVal, // "ALL_USERS" 또는 특정 유저 닉네임
+                targetUser: targetVal,
                 type: selectedGiftType,
                 amount: amountVal
             };
@@ -1133,7 +1174,7 @@
             document.getElementById('admin-gift-amount').value = '';
 
             if (targetVal === "ALL_USERS") {
-                alert(`🌐 전 유저 대상 ${typeName} ${amountVal}개 선물이 우편함에 등록되었습니다!`);
+                alert(`🌐 전체 유저 대상 ${typeName} ${amountVal}개 선물이 발송되었습니다!`);
             } else {
                 alert(`[${targetVal}] 님 대상 ${typeName} ${amountVal}개 선물이 발송되었습니다!`);
             }
@@ -1147,6 +1188,7 @@
             }
             registeredUsers[index].banTimeStr = inputVal;
             registeredUsers[index].banUntil = Date.now() + 7 * 24 * 3600 * 1000; 
+            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             saveData();
             renderAdminUserList();
             alert(`${registeredUsers[index].name}님에게 ${inputVal} 정지가 적용되었습니다.`);
@@ -1155,6 +1197,7 @@
         function unbanUser(index) {
             registeredUsers[index].banUntil = 0;
             registeredUsers[index].banTimeStr = "";
+            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             saveData();
             renderAdminUserList();
             alert(`${registeredUsers[index].name}님의 정지가 풀렸습니다.`);
@@ -1198,7 +1241,6 @@
             const now = new Date().getTime();
             const hasDefaultMail = !mailClaimed && (now < EXPIRY_TIME);
             
-            // 전역 선물 중 수령 안 한 항목 체크
             const hasUnclaimedGlobalGifts = globalMails.some(m => 
                 (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
                 !claimedMailIds.includes(m.id)
@@ -1225,7 +1267,6 @@
             contentEl.innerHTML = '';
             let itemCount = 0;
 
-            // 1. 이벤트 우편
             if (!mailClaimed && now < EXPIRY_TIME) {
                 itemCount++;
                 let itemDiv = document.createElement('div');
@@ -1240,7 +1281,6 @@
                 contentEl.appendChild(itemDiv);
             }
 
-            // 2. 전체 선물 및 나에게 온 우편
             const availableGifts = globalMails.filter(m => 
                 (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
                 !claimedMailIds.includes(m.id)
@@ -1326,8 +1366,6 @@
                 coins: userCoins,
                 trophies: userTrophies,
                 username: savedUsername,
-                registeredUsers: registeredUsers,
-                isServerUnderMaintenance: isServerUnderMaintenance,
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
@@ -1343,12 +1381,6 @@
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
                     if (parsed.username !== undefined && parsed.username.trim() !== "") {
                         savedUsername = parsed.username;
-                    }
-                    if (parsed.registeredUsers !== undefined && Array.isArray(parsed.registeredUsers)) {
-                        registeredUsers = parsed.registeredUsers;
-                    }
-                    if (parsed.isServerUnderMaintenance !== undefined) {
-                        isServerUnderMaintenance = parsed.isServerUnderMaintenance;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
@@ -1367,31 +1399,28 @@
 
             const savedGlobalGifts = localStorage.getItem(GLOBAL_GIFT_KEY);
             if (savedGlobalGifts) {
-                try {
-                    globalMails = JSON.parse(savedGlobalGifts);
-                } catch(e) {}
+                try { globalMails = JSON.parse(savedGlobalGifts); } catch(e) {}
             }
 
             const savedClaimedIds = localStorage.getItem(CLAIMED_GIFT_KEY);
             if (savedClaimedIds) {
-                try {
-                    claimedMailIds = JSON.parse(savedClaimedIds);
-                } catch(e) {}
+                try { claimedMailIds = JSON.parse(savedClaimedIds); } catch(e) {}
             }
 
+            const savedMaint = localStorage.getItem(GLOBAL_MAINTENANCE_KEY);
+            if (savedMaint) {
+                try { isServerUnderMaintenance = JSON.parse(savedMaint); } catch(e) {}
+            }
+
+            syncGlobalUsers();
             applyMaintenanceUI();
 
             if (savedUsername && !registeredUsers.some(u => u.name === savedUsername)) {
                 registeredUsers.push({ name: savedUsername, banUntil: 0, banTimeStr: "" });
+                localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             }
 
             checkUserBanStatus(savedUsername);
-
-            if (!savedUsername) {
-                document.getElementById('name-modal').classList.remove('hidden');
-            } else {
-                document.getElementById('name-modal').classList.add('hidden');
-            }
 
             checkMailRedDot();
             updateCoinsUI();
@@ -1429,6 +1458,8 @@
                 return;
             }
 
+            syncGlobalUsers();
+
             let existing = registeredUsers.find(u => u.name === val);
             if (existing && existing.banUntil && existing.banUntil > Date.now()) {
                 let timeStr = existing.banTimeStr || "지정된 시간";
@@ -1438,9 +1469,10 @@
 
             savedUsername = val;
             
-            // 이름 저장 즉시 유저 목록에 반영
+            // 이름 정하자마자 글로벌 유저 명단에 자동 등록 및 동기화
             if (!registeredUsers.some(u => u.name === val)) {
                 registeredUsers.push({ name: val, banUntil: 0, banTimeStr: "" });
+                localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             }
 
             saveData();
@@ -2646,4 +2678,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
