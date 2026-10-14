@@ -615,7 +615,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 풀스크린 화면 -->
+    <!-- 점검 중 풀스크린 화면 (검은 배경, 문구, 플레이 하기 버튼) -->
     <div class="hidden" id="maintenance-screen">
         <h1>🚨 지금 점검 중입니다!</h1>
         <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
@@ -631,12 +631,12 @@
             </div>
             <div class="version-text">비밀번호를 입력하세요</div>
             <div class="error" id="maintenance-pass-error"></div>
-            <input type="password" id="maintenance-pass-input" placeholder="비밀번호 입력 (1234pq)" onkeyup="if(event.key==='Enter') checkMaintenancePassword()">
+            <input type="password" id="maintenance-pass-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkMaintenancePassword()">
             <button class="btn btn-ai" onclick="checkMaintenancePassword()">확인</button>
         </div>
     </div>
 
-    <!-- 어드민 비밀번호 입력 모달 -->
+    <!-- 어드민 비밀번호 입력 모달 (F2 혹은 점검창 터치 5번) -->
     <div class="modal-overlay hidden" id="admin-auth-modal">
         <div class="modal-box" style="max-width: 300px;">
             <div class="header-row">
@@ -727,7 +727,7 @@
         </div>
     </div>
 
-    <!-- 0. 최초 1회 이름 설정 및 플레이하기 팝업 -->
+    <!-- 0. 최초 1회 이름 설정 팝업 -->
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
@@ -739,8 +739,7 @@
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
-            <button class="btn btn-ai" id="btn-save-name" onclick="saveInitialUsername()">이름으로 쓰기</button>
-            <button class="btn btn-friend hidden" id="btn-play-after-name" onclick="closeNameModalAndPlay()">플레이 하기</button>
+            <button class="btn btn-ai" id="btn-save-name" onclick="saveInitialUsername()">이름 정하기</button>
         </div>
     </div>
 
@@ -897,11 +896,11 @@
         const ctx = canvas.getContext('2d');
 
         // 데이터 영구 저장 키
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v20';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v20';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v20';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v20';
-        const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v20';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v18';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v18';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v18';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v18';
+        const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v18';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "1234pq";
@@ -918,7 +917,7 @@
         let claimedMailIds = []; 
         let isServerUnderMaintenance = false;
         let isAdminLoggedIn = false;
-        let isBypassedByPassword = false;
+        let isBypassedByPassword = false; // 점검 중 비밀번호로 우회한 상태
         let selectedGiftType = 'coin';
 
         let gameStarted = false;
@@ -953,6 +952,7 @@
         let isHost = false; 
         let friendName = "친구";
 
+        // 실시간 브라우저 간 통신 채널 (이름 등록 및 점검 상태 동기화)
         const syncChannel = new BroadcastChannel('lily_ball_fight_sync_channel');
         syncChannel.onmessage = (event) => {
             const data = event.data;
@@ -963,7 +963,7 @@
             } else if (data.type === 'SYNC_MAINTENANCE') {
                 isServerUnderMaintenance = data.status;
                 if (!isServerUnderMaintenance) {
-                    isBypassedByPassword = false;
+                    isBypassedByPassword = false; // 점검 해제 시 우회 인증 초기화
                 }
                 applyMaintenanceUI();
             }
@@ -973,6 +973,7 @@
             syncChannel.postMessage({ type: 'SYNC_USERS', users: registeredUsers });
         }
 
+        // 개발자 화면 터치 5번 클릭 감지 (점검 중 진입용)
         let devClickCount = 0;
         let devClickTimer = null;
 
@@ -990,6 +991,7 @@
         }
         document.getElementById('maintenance-screen').addEventListener('click', handleMaintenanceTouch);
 
+        // 어드민 패널 드래그 이동 기능
         const adminPanel = document.getElementById('admin-panel');
         const adminHeaderDrag = document.getElementById('admin-header-drag');
         let isDragging = false;
@@ -1504,19 +1506,13 @@
                 try { isServerUnderMaintenance = JSON.parse(savedMaint); } catch(e) {}
             }
 
-            // 게임에 접속(로드)하는 순간 기본 게스트 이름으로 자동 등록 및 목록에 반영
-            if (!savedUsername) {
-                let tempName = "유저_" + Math.floor(1000 + Math.random() * 9000);
-                savedUsername = tempName;
-            }
-
             syncGlobalUsers();
             applyMaintenanceUI();
 
-            if (!localStorage.getItem(STORAGE_KEY) || !JSON.parse(localStorage.getItem(STORAGE_KEY)).username) {
-                document.getElementById('name-modal').classList.remove('hidden');
-            } else {
+            if (savedUsername) {
                 document.getElementById('name-modal').classList.add('hidden');
+            } else if (!isServerUnderMaintenance) {
+                document.getElementById('name-modal').classList.remove('hidden');
             }
 
             checkUserBanStatus(savedUsername);
@@ -1538,6 +1534,7 @@
         function saveInitialUsername() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
+            const btn = document.getElementById('btn-save-name');
             const val = input.value.trim();
 
             if (!val) {
@@ -1574,15 +1571,11 @@
 
             saveData();
             err.innerText = "";
-            document.getElementById('btn-save-name').classList.add('hidden');
-            document.getElementById('btn-play-after-name').classList.remove('hidden');
+            btn.disabled = false;
+            document.getElementById('name-modal').classList.add('hidden');
             renderAdminGiftUserSelect();
             checkMailRedDot();
-            alert(`이름 [ ${val} ]이(가) 등록되었습니다! 아래 '플레이 하기' 버튼을 누르세요.`);
-        }
-
-        function closeNameModalAndPlay() {
-            document.getElementById('name-modal').classList.add('hidden');
+            alert(`환영합니다, ${val}님! 이름이 영구 등록되었습니다.`);
         }
 
         function openProfileModal() {
@@ -2785,4 +2778,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+            </html>
