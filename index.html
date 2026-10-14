@@ -35,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 (화면 상단 터치 5번 시 개발자 인증창 열림) */
+        /* 점검 중 풀스크린 화면 (화면 상단 터치 5번 시 개발자 인증창 오픈) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -604,7 +604,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 풀스크린 화면 (개발자 터치 5번 시 인증창 오픈) -->
+    <!-- 점검 중 풀스크린 화면 (화면 상단 터치 5번 시 개발자 인증창 오픈) -->
     <div class="hidden" id="maintenance-screen" onclick="handleDevTripleClick()">
         <h1>🚨 지금 점검 중입니다!</h1>
         <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
@@ -869,7 +869,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 데이터 키 고정 (초기화 방지)
+        // 데이터 영구 저장 키
         const STORAGE_KEY = 'lily_ball_fight_permanent_v16';
         const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v16';
         const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v16';
@@ -970,7 +970,7 @@
             isDragging = true;
             let touch = e.touches[0];
             dragOffsetX = touch.clientX - adminPanel.offsetLeft;
-            dragOffsetY = touch.clientY - adminPanel.offsetTop;
+            dragOffsetY = touch.offsetTop ? (touch.clientY - adminPanel.offsetTop) : 0;
             adminPanel.style.transform = 'none';
         });
 
@@ -1272,7 +1272,6 @@
             contentEl.innerHTML = '';
             let itemCount = 0;
 
-            // 500코인 이벤트 우편함 (10월 14일 밤 10시까지 유효)
             if (!mailClaimed && now < EXPIRY_TIME) {
                 itemCount++;
                 let itemDiv = document.createElement('div');
@@ -1475,7 +1474,6 @@
 
             savedUsername = val;
             
-            // 글로벌 유저 명단에 자동 등록 (중복 방지 및 영구 저장)
             if (!registeredUsers.some(u => u.name === val)) {
                 registeredUsers.push({ name: val, banUntil: 0, banTimeStr: "" });
             }
@@ -1705,6 +1703,11 @@
         function handleNetworkData(data) {
             if (data.type === 'JOIN_INFO') {
                 friendName = data.name;
+                // 친구가 접속할 때 보낸 이름을 내 명단에도 자동 추가하여 동기화
+                if (friendName && !registeredUsers.some(u => u.name === friendName)) {
+                    registeredUsers.push({ name: friendName, banUntil: 0, banTimeStr: "" });
+                    localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
+                }
             } else if (data.type === 'GAME_SYNC') {
                 if (!isHost) {
                     p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp; p1.skillGauge = data.p1.skillGauge;
@@ -2685,4 +2688,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                        </html>
+    </html>
