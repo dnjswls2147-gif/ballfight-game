@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 (클릭 방해 방지용 pointer-events 처리) */
+        /* 점검 중 풀스크린 화면 (일반 유저 차단용) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -128,7 +127,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 100000; /* 최상단 배치 */
             padding: 20px;
         }
         .modal-overlay.hidden {
@@ -493,7 +492,7 @@
             padding: 15px;
             color: #ffffff;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            z-index: 10000;
+            z-index: 100000;
         }
         .admin-window.hidden {
             pointer-events: none !important;
@@ -606,7 +605,7 @@
             </div>
             <div class="version-text">비밀번호를 입력하세요</div>
             <div class="error" id="admin-auth-error"></div>
-            <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.keyCode===13) checkAdminPassword()">
+            <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkAdminPassword()">
             <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
         </div>
     </div>
@@ -838,8 +837,8 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v9';
-        const ADMIN_PASSWORD = "123kpq"; // 어드민 비밀번호 지정
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v10';
+        const ADMIN_PASSWORD = "123kpq"; // 요구하신 어드민 비밀번호
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -931,12 +930,12 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (비인증 다른 유저는 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 점검 중이라도 관리자 인증 완료자(isAdminLoggedIn)는 들어갈 수 있음
+            // 점검 중이라도 관리자 인증 완료자(isAdminLoggedIn)는 차단 화면을 우회하여 게임 가능
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
@@ -944,7 +943,7 @@
             }
         }
 
-        // 비밀번호 인증 모달 열기
+        // 비밀번호 입력 모달 열기
         function openAdminAuth() {
             if (isAdminLoggedIn) {
                 renderAdminUserList();
@@ -962,13 +961,13 @@
 
         // 비밀번호(123kpq) 검증
         function checkAdminPassword() {
-            const input = document.getElementById('admin-password-input').value;
+            const input = document.getElementById('admin-password-input').value.trim();
             const err = document.getElementById('admin-auth-error');
 
             if (input === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true; // 비밀번호 통과로 관리자 인증 성공
+                isAdminLoggedIn = true; // 인증 성공
                 closeAdminAuth();
-                applyMaintenanceUI(); // 점검 중이어도 나에게는 차단 화면 제거
+                applyMaintenanceUI(); // 점검 중이어도 본인 화면 차단 해제
                 renderAdminUserList();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
@@ -2474,4 +2473,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
