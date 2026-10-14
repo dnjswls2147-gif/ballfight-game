@@ -562,9 +562,6 @@
 </head>
 <body>
 
-    <!-- 미스터 비스트 실물 댄스 이미지 사전 로딩 -->
-    <img id="mrbeast-real-img" src="11876.jpg" class="hidden" alt="MrBeast Rizz Dance">
-
     <!-- 어드민 비밀번호 입력 모달 -->
     <div class="modal-overlay hidden" id="admin-auth-modal">
         <div class="modal-box" style="max-width: 300px;">
@@ -850,9 +847,6 @@
         let isHost = false; 
         let friendName = "친구";
 
-        // 미스터 비스트 실물 사진 불러오기
-        const mrBeastRealImg = document.getElementById('mrbeast-real-img');
-
         function adminSetNotice() {
             const input = document.getElementById('admin-notice-input').value.trim();
             if (input) {
@@ -1041,7 +1035,7 @@
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 8초마다 30데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 10초마다 2초간 300개 이상 폭풍 폭격 (개당 10데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false },
             { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 1초마다 "쉿" 발사. 5초마다 어몽어스 벤트 습격(85데미지). HP 100 이하 시 붉어지며 2배 각성!', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 경기장 맨 위에서 진짜 미스터비스트 실물 춤 사진이 나타나 상대를 아래로 내려찍어 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false }
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 경기장 맨 위에서 미스터비스트 밈 댄스를 추며 상대를 아래로 내려찍어 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -1986,18 +1980,6 @@
             ctx.fillStyle = gradBg;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-            for (let i = 0; i < 6; i++) {
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                let a1 = (i * Math.PI) / 3 - 0.2;
-                let a2 = (i * Math.PI) / 3 + 0.2;
-                ctx.lineTo(x + Math.cos(a1) * radius * 1.5, y + Math.sin(a1) * radius * 1.5);
-                ctx.lineTo(x + Math.cos(a2) * radius * 1.5, y + Math.sin(a2) * radius * 1.5);
-                ctx.closePath();
-                ctx.fill();
-            }
-
             let s = radius / 22; 
             ctx.translate(x, y);
 
@@ -2025,47 +2007,6 @@
             ctx.lineWidth = 1.6 * s;
             ctx.strokeStyle = '#0a3d62';
             ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(3 * s, 3 * s);
-            ctx.lineTo(13 * s, 5 * s);
-            ctx.lineTo(8 * s, 11 * s);
-            ctx.lineTo(1 * s, 7 * s);
-            ctx.closePath();
-            ctx.fillStyle = '#ff3838';
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.moveTo(3 * s, 3 * s); ctx.lineTo(5 * s, 6 * s); ctx.lineTo(6 * s, 3 * s); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(8 * s, 3 * s); ctx.lineTo(10 * s, 6 * s); ctx.lineTo(11 * s, 3 * s); ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(-20 * s, -7 * s);
-            ctx.lineTo(-2 * s, -6 * s);
-            ctx.lineTo(-5 * s, -1 * s);
-            ctx.lineTo(14 * s, -3 * s);
-            ctx.lineTo(3 * s, 3 * s);
-            ctx.lineTo(6 * s, 1 * s);
-            ctx.lineTo(-8 * s, 0 * s);
-            ctx.lineTo(-6 * s, -4 * s);
-            ctx.closePath();
-
-            let thunderGrad = ctx.createLinearGradient(-15 * s, -5 * s, 10 * s, -1 * s);
-            thunderGrad.addColorStop(0, '#ff4d4d');
-            thunderGrad.addColorStop(1, '#ff9ff3');
-            ctx.fillStyle = thunderGrad;
-            ctx.fill();
-            ctx.lineWidth = 1.2 * s;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(6 * s, -7 * s);
-            ctx.lineTo(11 * s, -5 * s);
-            ctx.lineTo(7 * s, -3 * s);
-            ctx.closePath();
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
 
             ctx.restore();
 
@@ -2097,31 +2038,6 @@
             ctx.fill();
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#16a085";
-            ctx.stroke();
-
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(x - radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
-            ctx.arc(x + radius * 0.22, y - radius * 0.13, radius * 0.18, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x - radius * 0.3, y - radius * 0.22, radius * 0.08, radius * 0.18);
-            ctx.fillRect(x + radius * 0.14, y - radius * 0.22, radius * 0.08, radius * 0.18);
-
-            ctx.fillStyle = "#922b21";
-            ctx.strokeStyle = "#641e16";
-            ctx.lineWidth = 1.5;
-
-            ctx.beginPath();
-            ctx.roundRect(x - radius * 0.12, y - radius * 0.1, radius * 0.22, radius * 0.65, 5);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(x + radius * 0.1, y + radius * 0.35, radius * 0.2, 0, Math.PI * 2);
-            ctx.fill();
             ctx.stroke();
 
             ctx.restore();
@@ -2198,7 +2114,7 @@
                 }
             });
 
-            // 🕺 진짜 미스터 비스트 실물 사진 댄스 스킬 렌더링 🪩
+            // 🕺 안전한 미스터 비스트 댄스 스킬 렌더링 🪩
             mrBeastAttacks.forEach(mb => {
                 let stageX = canvas.width / 2;
                 let stageY = 55;
@@ -2206,8 +2122,8 @@
 
                 ctx.save();
                 
-                // 1. 뒤쪽 조명 빛 연출
-                ctx.fillStyle = "rgba(255, 0, 128, 0.2)";
+                // 1. 디스코 핑크 조명 레이저 효과
+                ctx.fillStyle = "rgba(255, 0, 128, 0.25)";
                 ctx.beginPath();
                 ctx.moveTo(stageX, 0);
                 ctx.lineTo(stageX - 120, canvas.height);
@@ -2215,29 +2131,23 @@
                 ctx.closePath();
                 ctx.fill();
 
-                // 2. 미스터 비스트 실물 사진 춤추기
+                // 2. 미스터 비스트 패거리 댄스 무대 연출
                 ctx.translate(stageX, stageY + danceOffset);
 
-                // 사진 라운드 테두리 효과
-                let imgWidth = 110;
-                let imgHeight = 110;
+                // 검은색 옷 댄서들
+                ctx.fillStyle = "#1e272e";
+                [-35, -20, 20, 35].forEach(dx => {
+                    ctx.beginPath();
+                    ctx.arc(dx, -5, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillRect(dx - 4, 0, 8, 16);
+                });
 
-                ctx.shadowColor = "#f1c40f";
-                ctx.shadowBlur = 12;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(0, 0, 50, 0, Math.PI * 2);
-                ctx.clip();
-                ctx.drawImage(mrBeastRealImg, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-                ctx.restore();
-
-                // 테두리 선
-                ctx.beginPath();
-                ctx.arc(0, 0, 50, 0, Math.PI * 2);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = "#f1c40f";
-                ctx.stroke();
+                // 중앙 미스터 비스트 
+                ctx.fillStyle = "#f5cd79";
+                ctx.beginPath(); ctx.arc(0, -10, 10, 0, Math.PI * 2); ctx.fill(); // 얼굴
+                ctx.fillStyle = "#1e272e";
+                ctx.fillRect(-8, 0, 16, 22); // 상체
 
                 // "MR. RIZZ!" 텍스트
                 ctx.font = "900 14px sans-serif";
@@ -2245,8 +2155,8 @@
                 ctx.textAlign = "center";
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 3.5;
-                ctx.strokeText("MR. RIZZ!! 💥150", 0, -58);
-                ctx.fillText("MR. RIZZ!! 💥150", 0, -58);
+                ctx.strokeText("MR. RIZZ!! 💥150", 0, -25);
+                ctx.fillText("MR. RIZZ!! 💥150", 0, -25);
 
                 ctx.restore();
 
@@ -2365,4 +2275,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-            </html>
+                                             </html>
