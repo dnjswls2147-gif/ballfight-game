@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -817,7 +818,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v3';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v4';
         const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
@@ -828,7 +829,7 @@
 
         let savedUsername = "";
         let registeredUsers = []; 
-        let isServerUnderMaintenance = false; // 점검 모드 상태
+        let isServerUnderMaintenance = false;
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -855,7 +856,8 @@
         let mrBeastAttacks = []; 
 
         let mailClaimed = false; 
-        const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
+        // 🎯 우편함 만료 시간: 10월 14일 오후 7시 40분
+        const EXPIRY_TIME = new Date(2026, 9, 14, 19, 40, 0).getTime(); 
 
         let peer = null;
         let conn = null;
@@ -1049,7 +1051,7 @@
                     <div class="mail-item">
                         <div>
                             <div class="mail-info-title">🎁 선물: 500 코인</div>
-                            <div class="mail-info-time">유효 기간: 10월 13일 오후 9시 30분까지</div>
+                            <div class="mail-info-time">유효 기간: 10월 14일 오후 7시 40분까지</div>
                         </div>
                         <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
                     </div>
@@ -2399,4 +2401,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-        </html>
+</html>
