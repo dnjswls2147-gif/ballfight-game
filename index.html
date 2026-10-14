@@ -35,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 (일반 유저 차단용) */
+        /* 점검 중 풀스크린 화면 (일반 유저 차단용 검은 화면) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -48,20 +48,21 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 99999;
+            z-index: 999999;
             text-align: center;
             padding: 20px;
         }
         #maintenance-screen.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         #maintenance-screen h1 {
             color: #e74c3c;
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 15px;
         }
         #maintenance-screen p {
-            font-size: 16px;
+            font-size: 18px;
             color: #bdc3c7;
             line-height: 1.5;
         }
@@ -127,10 +128,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100000; /* 최상단 배치 */
+            z-index: 100000;
             padding: 20px;
         }
         .modal-overlay.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         .modal-box {
@@ -492,9 +494,10 @@
             padding: 15px;
             color: #ffffff;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            z-index: 100000;
+            z-index: 1000000;
         }
         .admin-window.hidden {
+            display: none !important;
             pointer-events: none !important;
         }
         .admin-header {
@@ -590,7 +593,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 전체 화면 차단막 (다른 유저 차단용) -->
+    <!-- 점검 중 전체 화면 차단막 (다른 유저 차단용 검은 화면) -->
     <div class="hidden" id="maintenance-screen">
         <h1>점검 중입니다</h1>
         <p>지금 들어갈 수 없습니다.</p>
@@ -837,8 +840,9 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v10';
-        const ADMIN_PASSWORD = "123kpq"; // 요구하신 어드민 비밀번호
+        // 기존 저장 데이터 유지를 위한 고정 키값 사용 (초기화 방지)
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v11';
+        const ADMIN_PASSWORD = "123kpq"; // 요구하신 개발자(어드민) 비밀번호
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -849,7 +853,7 @@
         let savedUsername = "";
         let registeredUsers = []; 
         let isServerUnderMaintenance = false;
-        let isAdminLoggedIn = false; // 기본적으로 인증 미완료 상태
+        let isAdminLoggedIn = false; // 기본적으로 일반 유저는 미인증 상태
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -930,12 +934,12 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다. (다른 일반 유저는 검은 화면으로 차단됩니다)" : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 점검 중이라도 관리자 인증 완료자(isAdminLoggedIn)는 차단 화면을 우회하여 게임 가능
+            // 점검 모드가 켜져있고, 관리자 비밀번호를 통과한 사람(isAdminLoggedIn)이 아니라면 무조건 검은 화면 차단
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
@@ -965,9 +969,9 @@
             const err = document.getElementById('admin-auth-error');
 
             if (input === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true; // 인증 성공
+                isAdminLoggedIn = true; // 개발자(관리자) 인증 성공
                 closeAdminAuth();
-                applyMaintenanceUI(); // 점검 중이어도 본인 화면 차단 해제
+                applyMaintenanceUI(); // 본인 화면 차단 즉시 해제
                 renderAdminUserList();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
@@ -1217,6 +1221,7 @@
 
             checkUserBanStatus(savedUsername);
 
+            // 이름이 이미 한 번 저장되어 있다면 이름 설정 모달을 절대 띄우지 않음
             if (!savedUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
             } else {
@@ -2473,4 +2478,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
