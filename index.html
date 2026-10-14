@@ -1971,34 +1971,126 @@
             ctx.closePath();
         }
 
+        // 🔥 고퀄리티 미스터 비스트 로고 벡터 렌더링 🔥
         function drawMrBeastGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            ctx.fillStyle = "#00cec9";
+            // 1. 배경: 밝은 파란색/하늘색 번개 빛 줄기 배경
+            let gradBg = ctx.createRadialGradient(x, y, 2, x, y, radius);
+            gradBg.addColorStop(0, '#74b9ff');
+            gradBg.addColorStop(0.7, '#0984e3');
+            gradBg.addColorStop(1, '#00cec9');
+            ctx.fillStyle = gradBg;
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            ctx.fillStyle = "#e84393";
+            // 흰색 폭발 광선
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                let angle1 = (i * Math.PI) / 4 - 0.2;
+                let angle2 = (i * Math.PI) / 4 + 0.2;
+                ctx.lineTo(x + Math.cos(angle1) * radius * 1.5, y + Math.sin(angle1) * radius * 1.5);
+                ctx.lineTo(x + Math.cos(angle2) * radius * 1.5, y + Math.sin(angle2) * radius * 1.5);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // 2. 미스터비스트 맹수 두상 (공식 로고 그리기)
+            let s = radius / 24; // 스케일 비율
+            ctx.translate(x, y);
+
+            // 맹수 파란색 몸통/얼굴
+            let beastGrad = ctx.createLinearGradient(-15 * s, -15 * s, 15 * s, 15 * s);
+            beastGrad.addColorStop(0, '#00d2d3');
+            beastGrad.addColorStop(0.5, '#01a3a4');
+            beastGrad.addColorStop(1, '#2e86de');
+
+            // 입 내부 (분홍색)
             ctx.beginPath();
-            ctx.moveTo(x - radius * 0.2, y - radius * 0.8);
-            ctx.lineTo(x + radius * 0.4, y - radius * 0.1);
-            ctx.lineTo(x, y);
-            ctx.lineTo(x + radius * 0.5, y + radius * 0.8);
-            ctx.lineTo(x - radius * 0.3, y + radius * 0.1);
-            ctx.lineTo(x + radius * 0.1, y);
+            ctx.moveTo(3 * s, 2 * s);
+            ctx.lineTo(14 * s, 4 * s);
+            ctx.lineTo(8 * s, 10 * s);
+            ctx.lineTo(1 * s, 6 * s);
             ctx.closePath();
+            ctx.fillStyle = '#ff4d4d';
             ctx.fill();
 
-            ctx.font = "900 18px sans-serif";
-            ctx.fillStyle = "#ffffff";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("MR", x, y - 5);
+            // 이빨 (흰색)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(3 * s, 2 * s); ctx.lineTo(5 * s, 5 * s); ctx.lineTo(6 * s, 2 * s); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(8 * s, 2 * s); ctx.lineTo(10 * s, 5 * s); ctx.lineTo(11 * s, 2 * s); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(4 * s, 8 * s); ctx.lineTo(6 * s, 5 * s); ctx.lineTo(8 * s, 8 * s); ctx.fill();
+
+            // 맹수 머리 전체 셰이프
+            ctx.beginPath();
+            // 귀 부분
+            ctx.moveTo(-16 * s, -14 * s);
+            ctx.lineTo(-6 * s, -12 * s);
+            ctx.lineTo(2 * s, -18 * s);
+            ctx.lineTo(8 * s, -12 * s);
+            // 주둥이 / 코
+            ctx.lineTo(18 * s, -4 * s);
+            ctx.lineTo(20 * s, -1 * s);
+            ctx.lineTo(16 * s, 2 * s);
+            // 아랫턱
+            ctx.lineTo(11 * s, 12 * s);
+            ctx.lineTo(6 * s, 14 * s);
+            ctx.lineTo(3 * s, 8 * s);
+            ctx.lineTo(-4 * s, 16 * s);
+            ctx.lineTo(-10 * s, 18 * s);
+            // 갈기 / 목선
+            ctx.lineTo(-8 * s, 8 * s);
+            ctx.lineTo(-18 * s, 4 * s);
+            ctx.lineTo(-12 * s, -4 * s);
+            ctx.closePath();
+
+            ctx.fillStyle = beastGrad;
+            ctx.fill();
+            ctx.lineWidth = 1.8 * s;
+            ctx.strokeStyle = '#0f2027';
+            ctx.stroke();
+
+            // 3. 미스터비스트 상징 핑크/붉은 번개 아이라인 ⚡
+            let lightningGrad = ctx.createLinearGradient(-18 * s, -6 * s, 12 * s, -2 * s);
+            lightningGrad.addColorStop(0, '#ff007f');
+            lightningGrad.addColorStop(1, '#ff4757');
+
+            ctx.beginPath();
+            ctx.moveTo(-22 * s, -6 * s);
+            ctx.lineTo(0 * s, -5 * s);
+            ctx.lineTo(-3 * s, -1 * s);
+            ctx.lineTo(12 * s, -2 * s);
+            ctx.lineTo(2 * s, 3 * s);
+            ctx.lineTo(5 * s, 1 * s);
+            ctx.lineTo(-10 * s, 0 * s);
+            ctx.lineTo(-8 * s, -3 * s);
+            ctx.closePath();
+
+            ctx.fillStyle = lightningGrad;
+            ctx.fill();
+            ctx.lineWidth = 1.2 * s;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // 눈동자 (흰색 사선)
+            ctx.beginPath();
+            ctx.moveTo(5 * s, -8 * s);
+            ctx.lineTo(10 * s, -6 * s);
+            ctx.lineTo(6 * s, -4 * s);
+            ctx.closePath();
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
 
             ctx.restore();
 
+            // 4. 외곽선 마무리
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
@@ -2262,4 +2354,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
