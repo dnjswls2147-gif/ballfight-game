@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -16,7 +17,7 @@
             background-color: #2c163a;
             font-family: sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,11 +25,11 @@
         }
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 380px;
             background: #fff8e8;
             border: 3px solid #e67e22;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
             text-align: center;
             position: relative;
@@ -390,11 +391,12 @@
             letter-spacing: 3px;
         }
         
-        /* 캔버스 세팅 보정 (경기장 레이아웃 정상화) */
+        /* 🔥 세로 모드 완벽 대응 캔버스 레이아웃 🔥 */
         .canvas-container {
             position: relative;
-            width: 340px;
-            height: 340px;
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1 / 1;
             margin: 0 auto 12px auto;
             border: 3px solid #2c3e50;
             border-radius: 8px;
@@ -415,8 +417,8 @@
             color: white;
             border: 2px solid #a04000;
             border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 12px;
+            padding: 6px 10px;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
             z-index: 20;
@@ -2185,7 +2187,6 @@
                 drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
-            // 카운트다운 그래픽 (경기장 내부 정밀 출력)
             if (isCountingDown) {
                 ctx.save();
                 ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
@@ -2204,7 +2205,6 @@
                 ctx.restore();
             }
 
-            // 승패 결과 그래픽
             if (gameOverState) {
                 ctx.save();
                 ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
@@ -2249,4 +2249,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
