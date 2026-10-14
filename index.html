@@ -869,7 +869,9 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v13';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v14';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v14';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v14';
         const ADMIN_PASSWORD = "123kpq";
 
         const badWords = [
@@ -880,7 +882,8 @@
 
         let savedUsername = "";
         let registeredUsers = []; 
-        let userMails = [];
+        let globalMails = []; // 전체 온라인 공개 우편함 목록
+        let claimedMailIds = []; // 유저가 수령 완료한 선물 ID 리스트
         let isServerUnderMaintenance = false;
         let isAdminLoggedIn = false;
         let selectedGiftType = 'coin';
@@ -1073,7 +1076,7 @@
             const selectEl = document.getElementById('admin-gift-target-user');
             selectEl.innerHTML = '';
 
-            // 맨 위에 [전체] 모두에게 옵션 추가
+            // 드롭다운 맨 위에 전체 발송 옵션 추가
             let allOpt = document.createElement('option');
             allOpt.value = "ALL_USERS";
             allOpt.innerText = "🌐 [전체] 모두에게 보내기";
@@ -1115,36 +1118,25 @@
             }
 
             let typeName = selectedGiftType === 'coin' ? '코인' : '트로피';
+            let newGift = {
+                id: "gift_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+                targetUser: targetVal, // "ALL_USERS" 또는 특정 유저 닉네임
+                type: selectedGiftType,
+                amount: amountVal
+            };
 
-            if (targetVal === "ALL_USERS") {
-                if (registeredUsers.length === 0) {
-                    alert("등록된 유저가 없습니다.");
-                    return;
-                }
-                registeredUsers.forEach(u => {
-                    userMails.push({
-                        id: Date.now() + "_" + Math.random().toString(36).substring(2, 7),
-                        targetUser: u.name,
-                        type: selectedGiftType,
-                        amount: amountVal,
-                        claimed: false
-                    });
-                });
-                alert(`🌐 등록된 모든 유저 (${registeredUsers.length}명)에게 ${typeName} ${amountVal}개 선물을 발송했습니다!`);
-            } else {
-                userMails.push({
-                    id: Date.now() + "_" + Math.random().toString(36).substring(2, 7),
-                    targetUser: targetVal,
-                    type: selectedGiftType,
-                    amount: amountVal,
-                    claimed: false
-                });
-                alert(`[${targetVal}] 님에게 ${typeName} ${amountVal}개 선물을 발송했습니다!`);
-            }
+            globalMails.push(newGift);
+            localStorage.setItem(GLOBAL_GIFT_KEY, JSON.stringify(globalMails));
 
             saveData();
             checkMailRedDot();
             document.getElementById('admin-gift-amount').value = '';
+
+            if (targetVal === "ALL_USERS") {
+                alert(`🌐 전 유저 대상 ${typeName} ${amountVal}개 선물이 우편함에 등록되었습니다!`);
+            } else {
+                alert(`[${targetVal}] 님 대상 ${typeName} ${amountVal}개 선물이 발송되었습니다!`);
+            }
         }
 
         function banUser(index) {
@@ -1205,8 +1197,14 @@
         function isMailValid() {
             const now = new Date().getTime();
             const hasDefaultMail = !mailClaimed && (now < EXPIRY_TIME);
-            const myUnclaimedGifts = userMails.some(m => m.targetUser === savedUsername && !m.claimed);
-            return hasDefaultMail || myUnclaimedGifts;
+            
+            // 전역 선물 중 수령 안 한 항목 체크
+            const hasUnclaimedGlobalGifts = globalMails.some(m => 
+                (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
+                !claimedMailIds.includes(m.id)
+            );
+
+            return hasDefaultMail || hasUnclaimedGlobalGifts;
         }
 
         function checkMailRedDot() {
@@ -1227,6 +1225,7 @@
             contentEl.innerHTML = '';
             let itemCount = 0;
 
+            // 1. 이벤트 우편
             if (!mailClaimed && now < EXPIRY_TIME) {
                 itemCount++;
                 let itemDiv = document.createElement('div');
@@ -1241,19 +1240,26 @@
                 contentEl.appendChild(itemDiv);
             }
 
-            const myGifts = userMails.filter(m => m.targetUser === savedUsername && !m.claimed);
-            myGifts.forEach(gift => {
+            // 2. 전체 선물 및 나에게 온 우편
+            const availableGifts = globalMails.filter(m => 
+                (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
+                !claimedMailIds.includes(m.id)
+            );
+
+            availableGifts.forEach(gift => {
                 itemCount++;
                 let itemDiv = document.createElement('div');
                 itemDiv.className = 'mail-item';
                 let typeText = gift.type === 'coin' ? '코인' : '트로피';
                 let icon = gift.type === 'coin' ? '🪙' : '🏆';
+                let tag = gift.targetUser === "ALL_USERS" ? "[전체 선물]" : "[개별 선물]";
+
                 itemDiv.innerHTML = `
                     <div>
-                        <div class="mail-info-title">🎁 선물: ${typeText} ${gift.amount}개</div>
+                        <div class="mail-info-title">🎁 ${tag} ${typeText} ${gift.amount}개</div>
                         <div class="mail-info-time" style="color: #a29bfe;">유효 기간: 없음</div>
                     </div>
-                    <button class="btn-claim" onclick="claimUserGift('${gift.id}')">받기 ${icon}</button>
+                    <button class="btn-claim" onclick="claimGlobalGift('${gift.id}')">받기 ${icon}</button>
                 `;
                 contentEl.appendChild(itemDiv);
             });
@@ -1286,20 +1292,23 @@
             }
         }
 
-        function claimUserGift(giftId) {
-            let gift = userMails.find(m => m.id === giftId);
-            if (gift && !gift.claimed) {
-                gift.claimed = true;
+        function claimGlobalGift(giftId) {
+            let gift = globalMails.find(m => m.id === giftId);
+            if (gift && !claimedMailIds.includes(giftId)) {
+                claimedMailIds.push(giftId);
+                localStorage.setItem(CLAIMED_GIFT_KEY, JSON.stringify(claimedMailIds));
+
                 if (gift.type === 'coin') {
                     userCoins += gift.amount;
                 } else {
                     userTrophies += gift.amount;
                 }
+
                 updateCoinsUI();
                 saveData();
                 checkMailRedDot();
                 renderMailbox();
-                alert(`🎉 선물로 ${gift.type === 'coin' ? '코인' : '트로피'} ${gift.amount}개를 받았습니다!`);
+                alert(`🎉 선물로 ${gift.type === 'coin' ? '코인' : '트로피'} ${gift.amount}개를 수령했습니다!`);
             }
         }
 
@@ -1318,7 +1327,6 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 registeredUsers: registeredUsers,
-                userMails: userMails,
                 isServerUnderMaintenance: isServerUnderMaintenance,
                 balls: ballsData,
                 mailClaimed: mailClaimed
@@ -1339,9 +1347,6 @@
                     if (parsed.registeredUsers !== undefined && Array.isArray(parsed.registeredUsers)) {
                         registeredUsers = parsed.registeredUsers;
                     }
-                    if (parsed.userMails !== undefined && Array.isArray(parsed.userMails)) {
-                        userMails = parsed.userMails;
-                    }
                     if (parsed.isServerUnderMaintenance !== undefined) {
                         isServerUnderMaintenance = parsed.isServerUnderMaintenance;
                     }
@@ -1358,6 +1363,20 @@
                 } catch (e) {
                     console.error("데이터 로드 실패:", e);
                 }
+            }
+
+            const savedGlobalGifts = localStorage.getItem(GLOBAL_GIFT_KEY);
+            if (savedGlobalGifts) {
+                try {
+                    globalMails = JSON.parse(savedGlobalGifts);
+                } catch(e) {}
+            }
+
+            const savedClaimedIds = localStorage.getItem(CLAIMED_GIFT_KEY);
+            if (savedClaimedIds) {
+                try {
+                    claimedMailIds = JSON.parse(savedClaimedIds);
+                } catch(e) {}
             }
 
             applyMaintenanceUI();
@@ -1419,7 +1438,7 @@
 
             savedUsername = val;
             
-            // 등록된 유저 목록에 자동 추가
+            // 이름 저장 즉시 유저 목록에 반영
             if (!registeredUsers.some(u => u.name === val)) {
                 registeredUsers.push({ name: val, banUntil: 0, banTimeStr: "" });
             }
@@ -1429,6 +1448,7 @@
             btn.disabled = false;
             document.getElementById('name-modal').classList.add('hidden');
             renderAdminGiftUserSelect();
+            checkMailRedDot();
         }
 
         function openProfileModal() {
@@ -2626,4 +2646,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
