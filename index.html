@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -35,7 +36,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 */
+        /* 점검 중 풀스크린 화면 (클릭 방해 방지용 pointer-events 처리) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -51,6 +52,9 @@
             z-index: 99999;
             text-align: center;
             padding: 20px;
+        }
+        #maintenance-screen.hidden {
+            pointer-events: none !important;
         }
         #maintenance-screen h1 {
             color: #e74c3c;
@@ -126,6 +130,9 @@
             align-items: center;
             z-index: 9999;
             padding: 20px;
+        }
+        .modal-overlay.hidden {
+            pointer-events: none !important;
         }
         .modal-box {
             width: 100%;
@@ -488,6 +495,9 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             z-index: 10000;
         }
+        .admin-window.hidden {
+            pointer-events: none !important;
+        }
         .admin-header {
             display: flex;
             justify-content: space-between;
@@ -581,24 +591,10 @@
 </head>
 <body>
 
-    <!-- 점검 중 전체 화면 차단막 (다른 사람에게만 표시됨) -->
+    <!-- 점검 중 전체 화면 차단막 -->
     <div class="hidden" id="maintenance-screen">
         <h1>점검 중입니다</h1>
         <p>지금 들어갈 수 없습니다.</p>
-    </div>
-
-    <!-- 어드민 비밀번호 입력 모달 -->
-    <div class="modal-overlay hidden" id="admin-auth-modal">
-        <div class="modal-box" style="max-width: 300px;">
-            <div class="header-row">
-                <h2>🔒 관리자 인증</h2>
-                <button class="btn-close-x" onclick="closeAdminAuth()">X</button>
-            </div>
-            <div class="version-text">비밀번호를 입력하세요</div>
-            <div class="error" id="admin-auth-error"></div>
-            <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.keyCode===13) checkAdminPassword()">
-            <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
-        </div>
     </div>
 
     <!-- 어드민 패널 모달 창 -->
@@ -730,7 +726,7 @@
             <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 6px;">친구 플레이</button>
             <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 6px;">👥 그룹</button>
         </div>
-        <button class="btn btn-admin" onclick="openAdminAuth()" style="margin-top: 12px;">⚙️ 어드민 패널 (F2)</button>
+        <button class="btn btn-admin" onclick="directOpenAdminPanel()" style="margin-top: 12px;">⚙️ 어드민 패널 (F2)</button>
     </div>
 
     <!-- 1-0-1. 우편함 화면 -->
@@ -828,8 +824,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v7';
-        const ADMIN_PASSWORD = "777pqm";
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v8';
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -840,7 +835,7 @@
         let savedUsername = "";
         let registeredUsers = []; 
         let isServerUnderMaintenance = false;
-        let isAdminLoggedIn = false; // 관리자 로그인 여부
+        let isAdminLoggedIn = true; // 바로 이용 가능하도록 관리자 권한 활성화
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -921,12 +916,11 @@
             isServerUnderMaintenance = status;
             saveData();
             applyMaintenanceUI();
-            alert(status ? "서버 점검 모드가 켜졌습니다. (일반 유저들은 차단되고 관리자인 당신은 입장 가능합니다)" : "서버 점검 모드가 꺼졌습니다.");
+            alert(status ? "서버 점검 모드가 켜졌습니다." : "서버 점검 모드가 꺼졌습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 점검 모드가 켜져 있더라도 '관리자 로그인(isAdminLoggedIn)'이 되어 있다면 나는 차단 화면을 숨김 (다른 사람들은 차단됨)
             if (isServerUnderMaintenance && !isAdminLoggedIn) {
                 screen.classList.remove('hidden');
             } else {
@@ -934,29 +928,12 @@
             }
         }
 
-        function openAdminAuth() {
-            document.getElementById('admin-password-input').value = "";
-            document.getElementById('admin-auth-error').innerText = "";
-            document.getElementById('admin-auth-modal').classList.remove('hidden');
-        }
-
-        function closeAdminAuth() {
-            document.getElementById('admin-auth-modal').classList.add('hidden');
-        }
-
-        function checkAdminPassword() {
-            const input = document.getElementById('admin-password-input').value;
-            const err = document.getElementById('admin-auth-error');
-
-            if (input === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true; // 관리자 인증 완료!
-                closeAdminAuth();
-                applyMaintenanceUI(); // 점검 중이어도 관리자는 차단 화면 해제
-                renderAdminUserList();
-                document.getElementById('admin-panel').classList.remove('hidden');
-            } else {
-                err.innerText = "비밀번호가 올바르지 않습니다!";
-            }
+        // 비밀번호 확인 없이 즉시 어드민 패널 오픈
+        function directOpenAdminPanel() {
+            isAdminLoggedIn = true;
+            applyMaintenanceUI();
+            renderAdminUserList();
+            document.getElementById('admin-panel').classList.remove('hidden');
         }
 
         function closeAdminPanel() {
@@ -966,7 +943,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F2') {
                 e.preventDefault();
-                openAdminAuth();
+                directOpenAdminPanel();
             }
         });
 
@@ -2391,7 +2368,7 @@
                 ctx.closePath();
             });
 
-.pokeFallBlocks.forEach(poke => {
+            pokeFallBlocks.forEach(poke => {
                 drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
@@ -2457,4 +2434,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                                                                                               </html>
+                </html>
