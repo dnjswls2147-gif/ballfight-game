@@ -953,6 +953,43 @@
         let isHost = false; 
         let friendName = "친구";
 
+        // 서버 점검 실시간 동기화를 위한 글로벌 메인 피어 서비스
+        let serverSyncPeer = null;
+        let serverSyncConnections = [];
+
+        function initGlobalServerSync() {
+            serverSyncPeer = new Peer('lily-ball-global-server-channel');
+
+            serverSyncPeer.on('open', (id) => {
+                console.log("글로벌 점검 제어 서버 노드 오픈됨");
+            });
+
+            // 다른 일반 유저들이 연결을 시도할 때
+            serverSyncPeer.on('connection', (c) => {
+                serverSyncConnections.push(c);
+                c.on('open', () => {
+                    c.send({ type: 'MAINTENANCE_STATUS', status: isServerUnderMaintenance });
+                });
+            });
+
+            serverSyncPeer.on('error', (err) => {
+                // 이미 메인 노드가 열려 있는 유저(클라이언트)인 경우
+                if (err.type === 'unavailable-id') {
+                    let clientPeer = new Peer();
+                    clientPeer.on('open', () => {
+                        let connToServer = clientPeer.connect('lily-ball-global-server-channel');
+                        connToServer.on('data', (data) => {
+                            if (data.type === 'MAINTENANCE_STATUS') {
+                                isServerUnderMaintenance = data.status;
+                                localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(data.status));
+                                applyMaintenanceUI();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
         const syncChannel = new BroadcastChannel('lily_ball_fight_sync_channel');
         syncChannel.onmessage = (event) => {
             const data = event.data;
@@ -1018,10 +1055,20 @@
         function toggleMaintenance(status) {
             isServerUnderMaintenance = status;
             localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(status));
+            
+            // 로컬 탭 동기화
             syncChannel.postMessage({ type: 'SYNC_MAINTENANCE', status: status });
+            
+            // 모든 실시간 접속자 네트워크 동기화
+            serverSyncConnections.forEach(c => {
+                if (c && c.open) {
+                    c.send({ type: 'MAINTENANCE_STATUS', status: status });
+                }
+            });
+
             saveData();
             applyMaintenanceUI();
-            alert(status ? "🚨 점검 모드가 켜졌습니다. 모든 유저 화면에 점검 창이 적용됩니다." : "🟢 점검 모드가 해제되었습니다.");
+            alert(status ? "🚨 점검 모드가 켜졌습니다. 현재 접속한 모든 유저 화면에 점검 창이 출력됩니다!" : "🟢 점검 모드가 해제되었습니다.");
         }
 
         function applyMaintenanceUI() {
@@ -1494,6 +1541,7 @@
             }
 
             syncGlobalUsers();
+            initGlobalServerSync();
             applyMaintenanceUI();
 
             if (!localStorage.getItem(STORAGE_KEY) || !JSON.parse(localStorage.getItem(STORAGE_KEY)).username) {
@@ -2768,4 +2816,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
