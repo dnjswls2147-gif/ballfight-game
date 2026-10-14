@@ -390,16 +390,22 @@
             letter-spacing: 3px;
         }
         
+        /* 캔버스 세팅 보정 (경기장 레이아웃 정상화) */
         .canvas-container {
             position: relative;
             width: 340px;
-            margin: 0 auto 5px auto;
-        }
-        canvas {
-            background: #ffffff;
+            height: 340px;
+            margin: 0 auto 12px auto;
             border: 3px solid #2c3e50;
             border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
             display: block;
+            background: #ffffff;
         }
         .speed-btn {
             position: absolute;
@@ -833,7 +839,7 @@
         let fireFallBlocks = [];
         let pokeFallBlocks = [];
         let amongusAttacks = [];
-        let mrBeastAttacks = []; // 미스터 비스트 댄스 스킬 이펙트
+        let mrBeastAttacks = []; 
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 13, 21, 30, 0).getTime(); 
@@ -1601,8 +1607,8 @@
             let target = (owner === p1) ? p2 : p1;
             mrBeastAttacks.push({
                 target: target,
-                duration: 180, // 3초 (60fps 기준 180프레임)
-                damagePerFrame: 150 / 180, // 총 150 데미지
+                duration: 180,
+                damagePerFrame: 150 / 180,
                 danceAngle: 0
             });
         }
@@ -1687,15 +1693,14 @@
                 if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
             }
 
-            // 미스터 비스트 스킬 제어 (9초마다 150데미지 3초 댄스)
             if (p1.type === 'mrbeast') {
-                p1.skillGauge += (1 / 540) * speedMultiplier; // 9초 (540프레임)
+                p1.skillGauge += (1 / 540) * speedMultiplier; 
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerMrBeastUltimate(p1);
                 }
             } else if (p1.type === 'dongryong') {
-                p1.skillGauge += (1 / 300) * speedMultiplier; // 5초
+                p1.skillGauge += (1 / 300) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerDongryongUltimate(p1);
@@ -1712,6 +1717,7 @@
                         x: p1.x,
                         y: p1.y,
                         vx: (dx / dist) * 6 * speedMultiplier,
+                        vy: (dy / dist) * 6 * speedMultiplier,
                         radius: 12,
                         text: "쉿",
                         target: p2,
@@ -1755,13 +1761,11 @@
                 }
             }
 
-            // 미스터 비스트 댄스 기술 로직 (상대를 3초간 아래로 누르며 데미지)
             for (let i = mrBeastAttacks.length - 1; i >= 0; i--) {
                 let mb = mrBeastAttacks[i];
                 mb.duration -= speedMultiplier;
                 mb.danceAngle += 0.2 * speedMultiplier;
                 
-                // 상대방을 화면 아래쪽으로 밀어붙임
                 mb.target.y = Math.min(canvas.height - mb.target.radius, mb.target.y + 3 * speedMultiplier);
                 mb.target.hp = Math.max(0, mb.target.hp - mb.damagePerFrame * speedMultiplier);
 
@@ -1961,18 +1965,15 @@
             ctx.closePath();
         }
 
-        // 미스터 비스트 그래픽 (파란색/분홍색 로고 감성)
         function drawMrBeastGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            // 파란색 바탕
             ctx.fillStyle = "#00cec9";
             ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-            // 핑크 번개 지그재그
             ctx.fillStyle = "#e84393";
             ctx.beginPath();
             ctx.moveTo(x - radius * 0.2, y - radius * 0.8);
@@ -1984,8 +1985,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // 중앙 미스터 비스트 문자 로고 "B"
-            ctx.font = "900 20px sans-serif";
+            ctx.font = "900 18px sans-serif";
             ctx.fillStyle = "#ffffff";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -1993,7 +1993,6 @@
 
             ctx.restore();
 
-            // 스킬 충전 원형 게이지 (9초 동안 연두색 테두리 회전)
             ctx.beginPath();
             ctx.arc(x, y, radius + 2, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * p.skillGauge));
             ctx.lineWidth = 4;
@@ -2008,7 +2007,6 @@
             ctx.closePath();
         }
 
-        // 동룡쓰 그래픽
         function drawDongryongGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
@@ -2073,7 +2071,9 @@
         }
 
         function drawPlayer(p) {
-            if (p.type === 'dongryong') {
+            if (p.type === 'pokemon') {
+                drawPokeballGraphic(p.x, p.y, p.radius);
+            } else if (p.type === 'dongryong') {
                 drawDongryongGraphic(p.x, p.y, p.radius, p);
             } else if (p.type === 'mrbeast') {
                 drawMrBeastGraphic(p.x, p.y, p.radius, p);
@@ -2082,6 +2082,9 @@
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fillStyle = p.color;
                 ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
                 ctx.closePath();
             }
         }
@@ -2113,29 +2116,24 @@
                 }
             });
 
-            // 미스터 비스트 댄스 밈 연출 (3초간 춤추며 아래로 밀어붙임)
             mrBeastAttacks.forEach(mb => {
                 let bx = mb.target.x;
                 let by = Math.max(30, mb.target.y - 70);
 
                 ctx.save();
                 ctx.translate(bx, by);
-                ctx.rotate(Math.sin(mb.danceAngle) * 0.3); // 춤추는 모션
+                ctx.rotate(Math.sin(mb.danceAngle) * 0.3);
 
-                // 미스터 비스트 몸통 (파란 후드)
                 ctx.fillStyle = "#0984e3";
                 ctx.fillRect(-15, 0, 30, 35);
-                // 얼굴 (살구색)
                 ctx.fillStyle = "#ffeaa7";
                 ctx.beginPath();
                 ctx.arc(0, -10, 15, 0, Math.PI * 2);
                 ctx.fill();
-                // 밈 포즈 손 펼침
                 ctx.fillStyle = "#ffeaa7";
                 ctx.fillRect(-28, -5, 12, 8);
                 ctx.fillRect(16, -5, 12, 8);
 
-                // 스킬 문구
                 ctx.font = "900 12px sans-serif";
                 ctx.fillStyle = "#f1c40f";
                 ctx.textAlign = "center";
@@ -2187,12 +2185,13 @@
                 drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
+            // 카운트다운 그래픽 (경기장 내부 정밀 출력)
             if (isCountingDown) {
                 ctx.save();
-                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "900 64px sans-serif";
+                ctx.font = "900 72px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
 
@@ -2205,9 +2204,9 @@
                 ctx.restore();
             }
 
+            // 승패 결과 그래픽
             if (gameOverState) {
                 ctx.save();
-                
                 ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -2250,4 +2249,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-        </html>
+</html>
