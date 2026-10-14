@@ -35,6 +35,34 @@
         }
         .hidden { display: none !important; }
 
+        /* 점검 중 풀스크린 화면 */
+        #maintenance-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            text-align: center;
+            padding: 20px;
+        }
+        #maintenance-screen h1 {
+            color: #e74c3c;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        #maintenance-screen p {
+            font-size: 16px;
+            color: #bdc3c7;
+            line-height: 1.5;
+        }
+
         /* 상단 네비게이션 바 (프로필 & 우편함) */
         .top-nav-bar {
             display: flex;
@@ -546,6 +574,12 @@
 </head>
 <body>
 
+    <!-- 점검 중 전체 화면 차단막 -->
+    <div class="hidden" id="maintenance-screen">
+        <h1>점검 중입니다</h1>
+        <p>지금 들어갈 수 없습니다.</p>
+    </div>
+
     <!-- 어드민 비밀번호 입력 모달 -->
     <div class="modal-overlay hidden" id="admin-auth-modal">
         <div class="modal-box" style="max-width: 300px;">
@@ -575,7 +609,13 @@
             <div class="admin-content">
                 <!-- 메인 탭 -->
                 <div id="admin-tab-main">
-                    <div class="admin-section-title">플레이어 체력 제어</div>
+                    <div class="admin-section-title">🚨 서버 점검 모드</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" style="background:#c0392b;" onclick="toggleMaintenance(true)">점검 켜기</button>
+                        <button class="admin-small-btn" style="background:#27ae60;" onclick="toggleMaintenance(false)">점검 끄기</button>
+                    </div>
+
+                    <div class="admin-section-title" style="margin-top: 10px;">플레이어 체력 제어</div>
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" onclick="adminSetHp('p1', 9999)">P1 무적</button>
                         <button class="admin-small-btn" onclick="adminSetHp('p2', 0)">P2 즉사</button>
@@ -777,7 +817,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v2';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v3';
         const ADMIN_PASSWORD = "777pqm";
 
         const badWords = [
@@ -787,7 +827,8 @@
         ];
 
         let savedUsername = "";
-        let registeredUsers = []; // [{name: "홍길동", banUntil: 0}]
+        let registeredUsers = []; 
+        let isServerUnderMaintenance = false; // 점검 모드 상태
         
         let gameStarted = false;
         let isCountingDown = false;
@@ -820,6 +861,22 @@
         let conn = null;
         let isHost = false; 
         let friendName = "친구";
+
+        function toggleMaintenance(status) {
+            isServerUnderMaintenance = status;
+            saveData();
+            applyMaintenanceUI();
+            alert(status ? "서버 점검 모드가 켜졌습니다." : "서버 점검 모드가 꺼졌습니다.");
+        }
+
+        function applyMaintenanceUI() {
+            const screen = document.getElementById('maintenance-screen');
+            if (isServerUnderMaintenance) {
+                screen.classList.remove('hidden');
+            } else {
+                screen.classList.add('hidden');
+            }
+        }
 
         function openAdminAuth() {
             document.getElementById('admin-password-input').value = "";
@@ -896,7 +953,7 @@
                     <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:4px;">
                         <b>${u.name}</b> ${statusText}
                     </div>
-                    <input type="text" id="ban-time-${index}" placeholder="시간 (예: 10분)" style="width:60px; padding:4px; font-size:10px; margin:0 4px; text-align:center;">
+                    <input type="text" id="ban-time-${index}" placeholder="시간" value="${u.banTimeStr || ''}" style="width:50px; padding:4px; font-size:10px; margin:0 4px; text-align:center;">
                     <button onclick="banUser(${index})" style="background:#e74c3c; color:#fff; border:none; padding:4px 6px; border-radius:4px; font-size:10px; cursor:pointer; margin-right:2px;">정지</button>
                     <button onclick="unbanUser(${index})" style="background:#27ae60; color:#fff; border:none; padding:4px 6px; border-radius:4px; font-size:10px; cursor:pointer;">풀기</button>
                 `;
@@ -910,12 +967,11 @@
                 alert("정지 시간을 적어주세요!");
                 return;
             }
-            // 임시로 1년 혹은 입력된 텍스트 보관 형태 적용
             registeredUsers[index].banTimeStr = inputVal;
-            registeredUsers[index].banUntil = Date.now() + 7 * 24 * 3600 * 1000; // 넉넉하게 세팅
+            registeredUsers[index].banUntil = Date.now() + 7 * 24 * 3600 * 1000; 
             saveData();
             renderAdminUserList();
-            alert(`${registeredUsers[index].name님}에게 ${inputVal} 정지가 적용되었습니다.`);
+            alert(`${registeredUsers[index].name}님에게 ${inputVal} 정지가 적용되었습니다.`);
         }
 
         function unbanUser(index) {
@@ -923,7 +979,7 @@
             registeredUsers[index].banTimeStr = "";
             saveData();
             renderAdminUserList();
-            alert(`${registeredUsers[index].name}님의 정기가 풀렸습니다.`);
+            alert(`${registeredUsers[index].name}님의 정지가 풀렸습니다.`);
         }
 
         function adminAddCoins(amount) {
@@ -1041,6 +1097,7 @@
                 trophies: userTrophies,
                 username: savedUsername,
                 registeredUsers: registeredUsers,
+                isServerUnderMaintenance: isServerUnderMaintenance,
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
@@ -1060,6 +1117,9 @@
                     if (parsed.registeredUsers !== undefined && Array.isArray(parsed.registeredUsers)) {
                         registeredUsers = parsed.registeredUsers;
                     }
+                    if (parsed.isServerUnderMaintenance !== undefined) {
+                        isServerUnderMaintenance = parsed.isServerUnderMaintenance;
+                    }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
                         parsed.balls.forEach(savedBall => {
@@ -1075,7 +1135,8 @@
                 }
             }
 
-            // 만약 기존 저장된 유저 이름이 있는데 registeredUsers 목록에 없다면 추가
+            applyMaintenanceUI();
+
             if (savedUsername && !registeredUsers.some(u => u.name === savedUsername)) {
                 registeredUsers.push({ name: savedUsername, banUntil: 0, banTimeStr: "" });
             }
@@ -1124,7 +1185,6 @@
                 return;
             }
 
-            // 밴 체크
             let existing = registeredUsers.find(u => u.name === val);
             if (existing && existing.banUntil && existing.banUntil > Date.now()) {
                 let timeStr = existing.banTimeStr || "지정된 시간";
@@ -1134,7 +1194,6 @@
 
             savedUsername = val;
             
-            // 유저 등록 목록에 추가 (중복 방지)
             if (!registeredUsers.some(u => u.name === val)) {
                 registeredUsers.push({ name: val, banUntil: 0, banTimeStr: "" });
             }
@@ -2340,4 +2399,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+        </html>
