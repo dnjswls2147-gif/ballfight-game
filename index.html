@@ -892,6 +892,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // 🖼️ 상품컴퍼니 프로필 이미지 로드
+        const sangpumImage = new Image();
+        // 이미지 경로 설정 (상대경로나 이미지 링크 주소 입력)
+        sangpumImage.src = 'sangpum_logo.png'; 
+
         const STORAGE_KEY = 'lily_ball_fight_permanent_v24';
         const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v24';
         const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v24';
@@ -1432,7 +1437,7 @@
             }
         }
 
-        // ⚽ 볼 정보 및 성능 데이터 (상품컴퍼니 볼 추가 완료)
+        // ⚽ 볼 정보 및 성능 데이터
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격 (개당 15데미지)', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
@@ -2087,26 +2092,23 @@
             });
         }
 
-        // 🟢 상품컴퍼니 볼 궁극기 (5초마단 랜덤 50% 확률로 기술 1 또는 기술 2 발동)
         function triggerSangsampanyUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             let randChoice = Math.random();
 
             if (randChoice < 0.5) {
-                // 기술 1: 대나무 행주 쓱싹 쓱싹 (2초 동안 130 데미지)
                 bambooAttacks.push({
                     target: target,
-                    duration: 120, // 2초 (60프레임 * 2)
+                    duration: 120,
                     damagePerFrame: 130 / 120,
                     sweepOffset: 0
                 });
             } else {
-                // 기술 2: 미용티슈 볼 (캐릭터 볼보다 2배 작은 볼이 나와서 상대방을 따라가서 폭발, 65 데미지)
                 tissuePursuers.push({
                     x: owner.x,
                     y: owner.y,
                     target: target,
-                    radius: owner.radius / 2, // 2배 작은 볼
+                    radius: owner.radius / 2,
                     speed: 3.5 * speedMultiplier,
                     damage: 65
                 });
@@ -2195,14 +2197,12 @@
             }
 
             if (p1.type === 'sangsampany') {
-                // 5초마다 기술 쿨타임 (5초 * 60프레임 = 300프레임)
                 p1.skillGauge += (1 / 300) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerSangsampanyUltimate(p1);
                 }
 
-                // 2초마다 수세미 물건 던지기 (15 데미지)
                 let now = Date.now();
                 if (now - p1.lastSuseumiTime >= 2000 / speedMultiplier) {
                     p1.lastSuseumiTime = now;
@@ -2292,7 +2292,6 @@
                 }
             }
 
-            // 🟢 상품컴퍼니 볼 기술 1: 대나무 행주 쓱싹 공격 업데이트
             for (let i = bambooAttacks.length - 1; i >= 0; i--) {
                 let bm = bambooAttacks[i];
                 bm.duration -= speedMultiplier;
@@ -2307,7 +2306,6 @@
                 }
             }
 
-            // 🟢 상품컴퍼니 볼 기술 2: 미용티슈 볼 추적 폭발 업데이트
             for (let i = tissuePursuers.length - 1; i >= 0; i--) {
                 let tp = tissuePursuers[i];
                 let dx = tp.target.x - tp.x;
@@ -2553,31 +2551,33 @@
             ctx.closePath();
         }
 
-        // 🟢 상품컴퍼니 볼 그래픽 디자인
+        // 🖼️ 상품컴퍼니 로고 이미지로 공을 그리는 함수
         function drawSangsampanyGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
 
-            let grad = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
-            grad.addColorStop(0, '#27ae60');
-            grad.addColorStop(1, '#1e8449');
-            ctx.fillStyle = grad;
-            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 11px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("상품", x, y);
+            if (sangpumImage.complete && sangpumImage.naturalWidth !== 0) {
+                // 이미지가 정상적으로 로드된 경우 이미지 출력
+                ctx.drawImage(sangpumImage, x - radius, y - radius, radius * 2, radius * 2);
+            } else {
+                // 이미지 로드 전 대체 그래픽
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+                ctx.fillStyle = "#0000ff";
+                ctx.font = "bold 10px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("SANGPUM", x, y);
+            }
 
             ctx.restore();
 
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#145a32";
+            ctx.strokeStyle = "#2980b9";
             ctx.stroke();
             ctx.closePath();
         }
@@ -2751,7 +2751,6 @@
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
-            // 🟢 대나무 행주 쓱싹 기술 이펙트 렌더링
             bambooAttacks.forEach(bm => {
                 let tx = bm.target.x;
                 let ty = bm.target.y;
@@ -2772,7 +2771,6 @@
                 ctx.restore();
             });
 
-            // 🟢 미용티슈 볼 렌더링
             tissuePursuers.forEach(tp => {
                 ctx.save();
                 ctx.beginPath();
@@ -2792,7 +2790,6 @@
                 ctx.restore();
             });
 
-            // 🟢 수세미 물건 렌더링
             suseumiProjectiles.forEach(sp => {
                 ctx.beginPath();
                 ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
