@@ -939,6 +939,9 @@
         let pokeFallBlocks = [];
         let amongusAttacks = [];
         let mrBeastAttacks = []; 
+        let suseumiProjectiles = [];
+        let bambooAttacks = [];
+        let tissuePursuers = [];
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 15, 21, 30, 0).getTime(); 
@@ -1429,14 +1432,15 @@
             }
         }
 
-        // ⚽ 볼 정보 및 성능 데이터 수정
+        // ⚽ 볼 정보 및 성능 데이터 (상품컴퍼니 볼 추가 완료)
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격 (개당 15데미지)', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 2초간 30개 이상 폭풍 폭격 (개당 3데미지)', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
             { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 1초마다 "쉿" 발사. 5초마다 어몽어스 벤트 습격(85데미지). HP 100 이하 시 붉어지며 2배 각성!', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 경기장 맨 위에서 미스터비스트 밈 댄스를 추며 상대를 아래로 내려찍어 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false }
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 경기장 맨 위에서 미스터비스트 밈 댄스를 추며 상대를 아래로 내려찍어 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false },
+            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 350, 데미지: 15 & 2초마다 수세미 물건 투척(15데미지). 5초마다 2가지 기술 중 1개 랜덤 발동 (대나무 행주 쓱싹 130데미지 OR 미용티슈 볼 쫓아가며 폭발 65데미지)', price: 3000, hp: 350, damage: 15, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -1581,11 +1585,11 @@
 
         let p1 = { 
             x: 85, y: 170, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, freezeTimer: 0 
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
         let p2 = { 
             x: 255, y: 170, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, freezeTimer: 0 
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
 
         function updateCoinsUI() {
@@ -1795,6 +1799,9 @@
                     pokeFallBlocks = data.pokeFallBlocks;
                     amongusAttacks = data.amongusAttacks || [];
                     mrBeastAttacks = data.mrBeastAttacks || [];
+                    suseumiProjectiles = data.suseumiProjectiles || [];
+                    bambooAttacks = data.bambooAttacks || [];
+                    tissuePursuers = data.tissuePursuers || [];
                     gameOverState = data.gameOverState;
                     updateHpBars();
                 }
@@ -2002,6 +2009,7 @@
             p1.skillGauge = 0;
             p1.lastIceAttackTime = Date.now();
             p1.lastShhTime = Date.now();
+            p1.lastSuseumiTime = Date.now();
             p1.freezeTimer = 0;
 
             p2.type = 'standard';
@@ -2021,6 +2029,9 @@
             pokeFallBlocks = [];
             amongusAttacks = [];
             mrBeastAttacks = [];
+            suseumiProjectiles = [];
+            bambooAttacks = [];
+            tissuePursuers = [];
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -2076,7 +2087,32 @@
             });
         }
 
-        // 🔥 스킬 로직 수정: 아이스 볼 (12초 = 720프레임 기준, 20데미지)
+        // 🟢 상품컴퍼니 볼 궁극기 (5초마단 랜덤 50% 확률로 기술 1 또는 기술 2 발동)
+        function triggerSangsampanyUltimate(owner) {
+            let target = (owner === p1) ? p2 : p1;
+            let randChoice = Math.random();
+
+            if (randChoice < 0.5) {
+                // 기술 1: 대나무 행주 쓱싹 쓱싹 (2초 동안 130 데미지)
+                bambooAttacks.push({
+                    target: target,
+                    duration: 120, // 2초 (60프레임 * 2)
+                    damagePerFrame: 130 / 120,
+                    sweepOffset: 0
+                });
+            } else {
+                // 기술 2: 미용티슈 볼 (캐릭터 볼보다 2배 작은 볼이 나와서 상대방을 따라가서 폭발, 65 데미지)
+                tissuePursuers.push({
+                    x: owner.x,
+                    y: owner.y,
+                    target: target,
+                    radius: owner.radius / 2, // 2배 작은 볼
+                    speed: 3.5 * speedMultiplier,
+                    damage: 65
+                });
+            }
+        }
+
         function triggerIceUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 4; i++) {
@@ -2088,14 +2124,13 @@
                         y: -60,
                         size: 55,
                         speed: 5 * speedMultiplier,
-                        damage: 20, // 30 -> 20 수정
+                        damage: 20,
                         target: target
                     });
                 }, i * 350);
             }
         }
 
-        // 🔥 스킬 로직 수정: 화염 볼 (8초 = 480프레임 기준, 개당 15데미지)
         function triggerFireUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 3; i++) {
@@ -2107,17 +2142,16 @@
                         y: -80,
                         radius: 40,
                         speed: 6 * speedMultiplier,
-                        damage: 15, // 25 -> 15 수정
+                        damage: 15,
                         target: target
                     });
                 }, i * 400);
             }
         }
 
-        // 🔥 스킬 로직 수정: 포켓몬 볼 (8초 = 480프레임 기준, 2초간 35개 폭풍 공격, 개당 3데미지)
         function triggerPokemonUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
-            let totalCount = 35; // 30개 이상 폭풍 공격
+            let totalCount = 35; 
             let delayInterval = 2000 / totalCount; 
 
             for (let i = 0; i < totalCount; i++) {
@@ -2129,7 +2163,7 @@
                         y: -30,
                         radius: 11,
                         speed: (5 + Math.random() * 5) * speedMultiplier,
-                        damage: 3, // 10 -> 3 수정
+                        damage: 3,
                         target: target
                     });
                 }, i * delayInterval);
@@ -2160,7 +2194,32 @@
                 if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
             }
 
-            if (p1.type === 'mrbeast') {
+            if (p1.type === 'sangsampany') {
+                // 5초마다 기술 쿨타임 (5초 * 60프레임 = 300프레임)
+                p1.skillGauge += (1 / 300) * speedMultiplier;
+                if (p1.skillGauge >= 1) {
+                    p1.skillGauge = 0;
+                    triggerSangsampanyUltimate(p1);
+                }
+
+                // 2초마다 수세미 물건 던지기 (15 데미지)
+                let now = Date.now();
+                if (now - p1.lastSuseumiTime >= 2000 / speedMultiplier) {
+                    p1.lastSuseumiTime = now;
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    suseumiProjectiles.push({
+                        x: p1.x,
+                        y: p1.y,
+                        vx: (dx / dist) * 5 * speedMultiplier,
+                        vy: (dy / dist) * 5 * speedMultiplier,
+                        radius: 10,
+                        target: p2,
+                        damage: 15
+                    });
+                }
+            } else if (p1.type === 'mrbeast') {
                 p1.skillGauge += (1 / 540) * speedMultiplier; 
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
@@ -2192,7 +2251,6 @@
                     });
                 }
             } else if (p1.type === 'ice') {
-                // 12초 쿨타임 (12초 * 60프레임 = 720프레임)
                 p1.skillGauge += (1 / 720) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
@@ -2216,14 +2274,12 @@
                     });
                 }
             } else if (p1.type === 'fire') {
-                // 8초 쿨타임 (8초 * 60프레임 = 480프레임)
                 p1.skillGauge += (1 / 480) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerFireUltimate(p1);
                 }
             } else if (p1.type === 'pokemon') {
-                // 8초 쿨타임 (8초 * 60프레임 = 480프레임)
                 p1.skillGauge += (1 / 480) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
@@ -2233,6 +2289,60 @@
                 p1.skillGauge += (1 / 300) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
+                }
+            }
+
+            // 🟢 상품컴퍼니 볼 기술 1: 대나무 행주 쓱싹 공격 업데이트
+            for (let i = bambooAttacks.length - 1; i >= 0; i--) {
+                let bm = bambooAttacks[i];
+                bm.duration -= speedMultiplier;
+                bm.sweepOffset += 0.4 * speedMultiplier;
+
+                bm.target.hp = Math.max(0, bm.target.hp - bm.damagePerFrame * speedMultiplier);
+                updateHpBars();
+                checkGameOver();
+
+                if (bm.duration <= 0) {
+                    bambooAttacks.splice(i, 1);
+                }
+            }
+
+            // 🟢 상품컴퍼니 볼 기술 2: 미용티슈 볼 추적 폭발 업데이트
+            for (let i = tissuePursuers.length - 1; i >= 0; i--) {
+                let tp = tissuePursuers[i];
+                let dx = tp.target.x - tp.x;
+                let dy = tp.target.y - tp.y;
+                let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+                tp.x += (dx / dist) * tp.speed;
+                tp.y += (dy / dist) * tp.speed;
+
+                if (dist < tp.target.radius + tp.radius) {
+                    tp.target.hp = Math.max(0, tp.target.hp - tp.damage);
+                    tissuePursuers.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                }
+            }
+
+            for (let i = suseumiProjectiles.length - 1; i >= 0; i--) {
+                let sp = suseumiProjectiles[i];
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+
+                if (sp.x < 0 || sp.x > canvas.width || sp.y < 0 || sp.y > canvas.height) {
+                    suseumiProjectiles.splice(i, 1);
+                    continue;
+                }
+
+                let dx = sp.target.x - sp.x;
+                let dy = sp.target.y - sp.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < sp.target.radius + sp.radius) {
+                    sp.target.hp = Math.max(0, sp.target.hp - sp.damage);
+                    suseumiProjectiles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
                 }
             }
 
@@ -2387,6 +2497,9 @@
                     pokeFallBlocks: pokeFallBlocks,
                     amongusAttacks: amongusAttacks,
                     mrBeastAttacks: mrBeastAttacks,
+                    suseumiProjectiles: suseumiProjectiles,
+                    bambooAttacks: bambooAttacks,
+                    tissuePursuers: tissuePursuers,
                     gameOverState: gameOverState
                 });
             }
@@ -2436,6 +2549,35 @@
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
             ctx.strokeStyle = "#2c3e50";
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // 🟢 상품컴퍼니 볼 그래픽 디자인
+        function drawSangsampanyGraphic(x, y, radius, p) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.clip();
+
+            let grad = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+            grad.addColorStop(0, '#27ae60');
+            grad.addColorStop(1, '#1e8449');
+            ctx.fillStyle = grad;
+            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("상품", x, y);
+
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#145a32";
             ctx.stroke();
             ctx.closePath();
         }
@@ -2571,6 +2713,8 @@
                 drawDongryongGraphic(p.x, p.y, p.radius, p);
             } else if (p.type === 'mrbeast') {
                 drawMrBeastGraphic(p.x, p.y, p.radius, p);
+            } else if (p.type === 'sangsampany') {
+                drawSangsampanyGraphic(p.x, p.y, p.radius, p);
             } else {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -2606,6 +2750,59 @@
 
             drawPlayer(p1, true);
             drawPlayer(p2, false);
+
+            // 🟢 대나무 행주 쓱싹 기술 이펙트 렌더링
+            bambooAttacks.forEach(bm => {
+                let tx = bm.target.x;
+                let ty = bm.target.y;
+                let offset = Math.sin(bm.sweepOffset) * 16;
+
+                ctx.save();
+                ctx.strokeStyle = "#27ae60";
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(tx - 35 + offset, ty - 25);
+                ctx.lineTo(tx + 35 + offset, ty + 25);
+                ctx.stroke();
+
+                ctx.font = "bold 13px sans-serif";
+                ctx.fillStyle = "#27ae60";
+                ctx.textAlign = "center";
+                ctx.fillText("🌿 대나무 행주 쓱싹!", tx, ty - 35);
+                ctx.restore();
+            });
+
+            // 🟢 미용티슈 볼 렌더링
+            tissuePursuers.forEach(tp => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(tp.x, tp.y, tp.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#e74c3c";
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.font = "900 9px sans-serif";
+                ctx.fillStyle = "#c0392b";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("티슈", tp.x, tp.y);
+                ctx.restore();
+            });
+
+            // 🟢 수세미 물건 렌더링
+            suseumiProjectiles.forEach(sp => {
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#d35400';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+            });
 
             projectiles.forEach(proj => {
                 if (proj.text) {
