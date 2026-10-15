@@ -904,7 +904,7 @@
         const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v22';
         
         const ADMIN_PASSWORD = "123kpq";
-        const MAINTENANCE_PASS = "123kpq"; // 비밀번호: 123kpq
+        const MAINTENANCE_PASS = "123kpq";
 
         const badWords = [
             "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
@@ -1019,6 +1019,12 @@
             isServerUnderMaintenance = status;
             localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(status));
             syncChannel.postMessage({ type: 'SYNC_MAINTENANCE', status: status });
+            
+            // P2P 연결된 다른 유저들에게도 점검 상태 송신
+            if (conn && conn.open) {
+                conn.send({ type: 'MAINTENANCE_SYNC', status: status });
+            }
+
             saveData();
             applyMaintenanceUI();
             alert(status ? "🚨 점검 모드가 켜졌습니다. 일반 유저 화면에 점검 창이 적용됩니다." : "🟢 점검 모드가 해제되었습니다.");
@@ -1038,7 +1044,6 @@
             }
         }
 
-        // 점검 중 [플레이 하기] 버튼클릭 시 비밀번호 창 표시
         function openMaintenancePassModal() {
             document.getElementById('maintenance-pass-input').value = "";
             document.getElementById('maintenance-pass-error').innerText = "";
@@ -1086,7 +1091,7 @@
             if (input === ADMIN_PASSWORD) {
                 isAdminLoggedIn = true;
                 closeAdminAuth();
-                applyMaintenanceUI(); // 관리자 권한이 생겼으므로 점검 화면 즉시 해제
+                applyMaintenanceUI(); 
                 renderAdminUserList();
                 renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
@@ -1225,7 +1230,7 @@
             const amountVal = parseInt(document.getElementById('admin-gift-amount').value);
 
             if (!targetVal) {
-                alert("선물을 받을 대상을 선택하세요.");
+                alert("선원을 받을 대상을 선택하세요.");
                 return;
             }
             if (isNaN(amountVal) || amountVal <= 0) {
@@ -1728,6 +1733,9 @@
                         name: savedUsername,
                         ball: getEquippedBall()
                     });
+                    
+                    // 접속 시 현재 점검 상태 전송 요청
+                    conn.send({ type: 'REQUEST_MAINTENANCE_STATUS' });
                     showCharacterSelect();
                 });
 
@@ -1788,6 +1796,13 @@
                     registeredUsers.push({ name: friendName, banUntil: 0, banTimeStr: "" });
                     localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
                     broadcastUsers();
+                }
+            } else if (data.type === 'MAINTENANCE_SYNC') {
+                isServerUnderMaintenance = data.status;
+                applyMaintenanceUI();
+            } else if (data.type === 'REQUEST_MAINTENANCE_STATUS') {
+                if (conn && conn.open) {
+                    conn.send({ type: 'MAINTENANCE_SYNC', status: isServerUnderMaintenance });
                 }
             } else if (data.type === 'GAME_SYNC') {
                 if (!isHost) {
@@ -2769,4 +2784,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
