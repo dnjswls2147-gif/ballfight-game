@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>릴리 볼 파이트</title>
-    <!-- 실시간 P2P 멀티플레이 라이브러리 -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * {
@@ -35,17 +34,17 @@
         }
         .hidden { display: none !important; }
 
-        /* 기간 안내 텍스트 */
-        .event-date-text {
+        /* 보스전 화면 우측 상단 이벤트 기간 텍스트 */
+        .boss-event-date-text {
             position: absolute;
             top: 10px;
             right: 15px;
             font-size: 11px;
             font-weight: bold;
             color: #d35400;
+            z-index: 25;
         }
 
-        /* 점검 중 풀스크린 화면 */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -88,7 +87,6 @@
             cursor: pointer;
         }
 
-        /* 상단 네비게이션 바 */
         .top-nav-bar {
             display: flex;
             justify-content: space-between;
@@ -153,7 +151,6 @@
             border-radius: 50%;
         }
 
-        /* 공통 오버레이 팝업 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -291,7 +288,6 @@
             white-space: nowrap;
         }
 
-        /* 🏆 랭킹 보드 스타일 */
         .ranking-tab-container {
             display: flex;
             gap: 6px;
@@ -573,7 +569,7 @@
             border-color: #962d22;
         }
 
-        /* 🕹️ 보스전 조이스틱 컨트롤 패널 */
+        /* 🕹️ 마인크래프트 방식 조이스틱 버튼 */
         .joystick-container {
             display: flex;
             justify-content: space-between;
@@ -635,7 +631,6 @@
             pointer-events: none;
         }
 
-        /* 어드민 패널 스타일 */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -751,14 +746,12 @@
 </head>
 <body>
 
-    <!-- 점검 중 풀스크린 화면 -->
     <div id="maintenance-screen" class="hidden">
         <h1>🚨 지금 점검 중입니다!</h1>
         <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
         <button class="btn-maint-play" onclick="openMaintenancePassModal()">플레이 하기</button>
     </div>
 
-    <!-- 점검 중 우회 비밀번호 입력 모달 -->
     <div class="modal-overlay hidden" id="maintenance-pass-modal">
         <div class="modal-box" style="max-width: 300px;">
             <div class="header-row">
@@ -772,7 +765,6 @@
         </div>
     </div>
 
-    <!-- 어드민 비밀번호 입력 모달 -->
     <div class="modal-overlay hidden" id="admin-auth-modal">
         <div class="modal-box" style="max-width: 300px;">
             <div class="header-row">
@@ -786,7 +778,6 @@
         </div>
     </div>
 
-    <!-- 어드민 패널 모달 창 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
@@ -799,7 +790,6 @@
                 <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
             </div>
             <div class="admin-content">
-                <!-- 메인 탭 -->
                 <div id="admin-tab-main">
                     <div class="admin-section-title">🚨 서버 점검 모드</div>
                     <div style="font-size: 11px; color: #a29bfe; margin-bottom: 6px; line-height: 1.3;">
@@ -815,7 +805,6 @@
                     <div class="admin-section-title" style="margin-top: 12px;">🚫 유저 밴 / 정지 관리</div>
                     <div id="admin-user-list-container"></div>
                 </div>
-                <!-- 재화 탭 -->
                 <div id="admin-tab-currency" class="hidden">
                     <div class="admin-section-title">내 재화 즉시 조절</div>
                     <div class="admin-section-title" style="color:#aaa;">코인 조절</div>
@@ -849,7 +838,6 @@
                         <button class="admin-small-btn" style="background: #e67e22; border-color: #d35400; padding: 6px; font-weight: bold; flex: 1;" onclick="sendAdminGift()">보내기</button>
                     </div>
                 </div>
-                <!-- 설정 탭 -->
                 <div id="admin-tab-screen" class="hidden">
                     <div class="admin-section-title">패널 투명도</div>
                     <div class="admin-slider-container">
@@ -861,7 +849,6 @@
         </div>
     </div>
 
-    <!-- 최초 1회 이름 설정 및 플레이하기 팝업 -->
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
@@ -878,7 +865,6 @@
         </div>
     </div>
 
-    <!-- 프로필 팝업 -->
     <div class="modal-overlay hidden" id="profile-modal">
         <div class="modal-box">
             <div class="header-row">
@@ -906,9 +892,8 @@
         </div>
     </div>
 
-    <!-- 메인 로비 -->
+    <!-- 메인 로비 (이벤트 기간 텍스트 제거됨) -->
     <div class="container hidden" id="lobby-screen">
-        <div class="event-date-text">10월15일~10월22일</div>
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">👤 프로필</button>
             <button class="mailbox-btn" onclick="showMailbox()">
@@ -935,7 +920,6 @@
         <button class="btn btn-admin" onclick="openAdminAuth()" style="margin-top: 12px;">⚙️ 어드민 패널 (F2)</button>
     </div>
 
-    <!-- 우편함 화면 -->
     <div class="container hidden" id="mailbox-screen">
         <div class="header-row">
             <h2>📬 우편함 📬</h2>
@@ -949,7 +933,6 @@
         </div>
     </div>
 
-    <!-- 🏆 랭킹 보드 화면 -->
     <div class="container hidden" id="ranking-screen">
         <div class="header-row">
             <h2>🏆 명예의 전당 🏆</h2>
@@ -967,7 +950,6 @@
         <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
-    <!-- 나의 공 상점 및 보관함 화면 -->
     <div class="container hidden" id="myball-screen">
         <h2>⚽ 나의 공 보관함 ⚽</h2>
         <div class="version-text">v1.3 버전</div>
@@ -982,7 +964,6 @@
         <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
-    <!-- 친구 플레이 메뉴 -->
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
         <div class="version-text">v1.3 버전</div>
@@ -1007,7 +988,6 @@
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
-    <!-- 👥 그룹 메뉴 -->
     <div class="container hidden" id="group-screen">
         <h2>👥 그룹 대기실 👥</h2>
         <div class="version-text">v1.3 버전</div>
@@ -1027,7 +1007,6 @@
         <button class="btn btn-back" onclick="showLobby()">로비로 가기</button>
     </div>
 
-    <!-- 캐릭터 선택 화면 -->
     <div class="container hidden" id="char-select-screen">
         <div class="header-row">
             <h2>⚔️ 출전 준비 ⚔️</h2>
@@ -1039,17 +1018,22 @@
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
     </div>
 
-    <!-- 대전 게임 화면 -->
+    <!-- 대전 게임 화면 (보스전용 기간 텍스트 추가) -->
     <div class="container hidden" id="game-screen">
+        <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
         <div class="canvas-container">
             <canvas id="gameCanvas" width="340" height="340"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
-        <!-- 보스전 조이스틱 이동 컨트롤러 -->
+        <!-- 마인크래프트 방식 조이스틱 이동 컨트롤러 -->
         <div class="joystick-container hidden" id="boss-joystick-panel">
-            <button class="joystick-btn" onmousedown="movePlayerLeft()" ontouchstart="movePlayerLeft()">◀ 왼쪽</button>
-            <button class="joystick-btn" onmousedown="movePlayerRight()" ontouchstart="movePlayerRight()">오른쪽 ▶</button>
+            <button class="joystick-btn" 
+                ontouchstart="startMoveLeft(event)" onmousedown="startMoveLeft(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">◀ 왼쪽</button>
+            <button class="joystick-btn" 
+                ontouchstart="startMoveRight(event)" onmousedown="startMoveRight(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">오른쪽 ▶</button>
         </div>
 
         <div class="label" id="p1-label" style="color: #2980b9;">Player 1 (블루)</div>
@@ -1123,9 +1107,11 @@
         // 😈 보스전 전용 변수
         let isBossMode = false;
         let bossTimerFrames = 0; 
-        let bossPhase = 1; 
         let bossObstacles = [];
-        let bossBigObstacles = [];
+        let bossTextObstacles = [];
+
+        // 마인크래프트 방식 조이스틱 이동 변수
+        let moveDirection = 0; // -1: 왼쪽, 1: 오른쪽, 0: 정지
 
         let projectiles = [];
         let iceFallBlocks = [];
@@ -1309,8 +1295,16 @@
                 openAdminAuth();
             }
             if (isBossMode && gameStarted) {
-                if (e.key === 'ArrowLeft' || e.key === 'a') movePlayerLeft();
-                if (e.key === 'ArrowRight' || e.key === 'd') movePlayerRight();
+                if (e.key === 'ArrowLeft' || e.key === 'a') moveDirection = -1;
+                if (e.key === 'ArrowRight' || e.key === 'd') moveDirection = 1;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (isBossMode && gameStarted) {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') {
+                    moveDirection = 0;
+                }
             }
         });
 
@@ -2165,8 +2159,10 @@
             if (isBossMode) {
                 document.getElementById('p2-label').innerText = "😈 L 보스 (체력: 750)";
                 document.getElementById('boss-joystick-panel').classList.remove('hidden');
+                document.getElementById('game-event-date').classList.remove('hidden');
             } else {
                 document.getElementById('boss-joystick-panel').classList.add('hidden');
+                document.getElementById('game-event-date').classList.add('hidden');
                 if (nextGameMode === 'ai') {
                     document.getElementById('p2-label').innerText = "AI 봇 (기본 볼) (레드)";
                 } else {
@@ -2198,14 +2194,21 @@
             }, 1000);
         }
 
-        function movePlayerLeft() {
+        // 마인크래프트 방식 조이스틱 연속 이동 함수들
+        function startMoveLeft(e) {
+            e.preventDefault();
             if (!gameStarted || !isBossMode) return;
-            p1.x = Math.max(p1.radius, p1.x - 18);
+            moveDirection = -1;
         }
 
-        function movePlayerRight() {
+        function startMoveRight(e) {
+            e.preventDefault();
             if (!gameStarted || !isBossMode) return;
-            p1.x = Math.min(canvas.width - p1.radius, p1.x + 18);
+            moveDirection = 1;
+        }
+
+        function stopMove() {
+            moveDirection = 0;
         }
 
         function retryGame() {
@@ -2333,7 +2336,7 @@
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
             p1.x = 170; 
-            p1.y = 290;
+            p1.y = 310; // 볼을 더 밑에 위치시킴
             p1.radius = isBossMode ? 12 : 24; 
             
             let v1 = getRandomVelocity();
@@ -2344,6 +2347,7 @@
             p1.lastShhTime = Date.now();
             p1.lastSuseumiTime = Date.now();
             p1.freezeTimer = 0;
+            moveDirection = 0;
 
             if (isBossMode) {
                 p2.type = 'boss';
@@ -2354,7 +2358,6 @@
                 p2.vx = 0; p2.vy = 0;
                 p2.radius = 35;
                 bossTimerFrames = 0;
-                bossPhase = 1;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
@@ -2380,7 +2383,7 @@
             bambooAttacks = [];
             tissuePursuers = [];
             bossObstacles = [];
-            bossBigObstacles = [];
+            bossTextObstacles = [];
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -2417,109 +2420,6 @@
             }
         }
 
-        function triggerDongryongUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            let isEnraged = owner.hp <= 100;
-            let baseDamage = isEnraged ? 170 : 85;
-
-            amongusAttacks.push({
-                target: target,
-                stabsLeft: 5,
-                timer: 0,
-                damagePerStab: baseDamage / 5
-            });
-        }
-
-        function triggerMrBeastUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            mrBeastAttacks.push({
-                target: target,
-                duration: 180,
-                damagePerFrame: 150 / 180,
-                danceAngle: 0
-            });
-        }
-
-        function triggerSangsampanyUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            let randChoice = Math.random();
-
-            if (randChoice < 0.5) {
-                bambooAttacks.push({
-                    target: target,
-                    duration: 120,
-                    damagePerFrame: 130 / 120,
-                    sweepOffset: 0
-                });
-            } else {
-                tissuePursuers.push({
-                    x: owner.x,
-                    y: owner.y,
-                    target: target,
-                    radius: owner.radius / 2,
-                    speed: 3.5 * speedMultiplier,
-                    damage: 65
-                });
-            }
-        }
-
-        function triggerIceUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            for (let i = 0; i < 4; i++) {
-                setTimeout(() => {
-                    if (!gameStarted) return;
-                    let startX = 50 + i * 80;
-                    iceFallBlocks.push({
-                        x: startX,
-                        y: -60,
-                        size: 55,
-                        speed: 5 * speedMultiplier,
-                        damage: 20,
-                        target: target
-                    });
-                }, i * 350);
-            }
-        }
-
-        function triggerFireUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    if (!gameStarted) return;
-                    let startX = 60 + i * 100;
-                    fireFallBlocks.push({
-                        x: startX,
-                        y: -80,
-                        radius: 40,
-                        speed: 6 * speedMultiplier,
-                        damage: 15,
-                        target: target
-                    });
-                }, i * 400);
-            }
-        }
-
-        function triggerPokemonUltimate(owner) {
-            let target = (owner === p1) ? p2 : p1;
-            let totalCount = 35; 
-            let delayInterval = 2000 / totalCount; 
-
-            for (let i = 0; i < totalCount; i++) {
-                setTimeout(() => {
-                    if (!gameStarted) return;
-                    let startX = 20 + Math.random() * (canvas.width - 40);
-                    pokeFallBlocks.push({
-                        x: startX,
-                        y: -30,
-                        radius: 11,
-                        speed: (5 + Math.random() * 5) * speedMultiplier,
-                        damage: 3,
-                        target: target
-                    });
-                }, i * delayInterval);
-            }
-        }
-
         function update() {
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
@@ -2545,61 +2445,57 @@
                     if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
                 }
             } else {
-                // 😈 보스전 전용 페이즈 및 공격 기믹
+                // 마인크래프트 방식 조이스틱 이동 처리 (꾸준히 이동)
+                if (moveDirection !== 0) {
+                    p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 5 * speedMultiplier));
+                }
+
                 bossTimerFrames += speedMultiplier;
 
-                // 1단계: 처음 5초간 0.5초(30프레임)마다 하늘에서 볼 2개씩 낙하
+                // 1단계: 처음 5초(300프레임)동안 0.5초마다 더 큰 공 2개씩 낙하
                 if (bossTimerFrames <= 300) {
                     if (Math.floor(bossTimerFrames) % 30 < speedMultiplier) {
                         for (let k = 0; k < 2; k++) {
                             bossObstacles.push({
-                                x: 15 + Math.random() * (canvas.width - 30),
-                                y: -15,
-                                radius: 10 + Math.random() * 8,
+                                x: 25 + Math.random() * (canvas.width - 50),
+                                y: -25,
+                                radius: 18 + Math.random() * 8, // 더 커진 공 크기
                                 speed: (4 + Math.random() * 3) * speedMultiplier,
-                                damage: 20
+                                damage: 25
                             });
                         }
                     }
                 } 
-                // 2단계: 5초 이후, 5초(300프레임)마다 대형 오른쪽 L & 왼쪽 "가져가" 장애물 투하
-                else if (bossTimerFrames > 300 && bossTimerFrames <= 900) {
-                    if (Math.floor(bossTimerFrames - 300) % 300 < speedMultiplier) {
-                        // 오른쪽 L 장애물 (경기장 절반 크기)
-                        bossBigObstacles.push({
-                            type: 'L',
-                            x: canvas.width / 2,
-                            y: -170,
-                            width: canvas.width / 2,
-                            height: 170,
-                            speed: 3 * speedMultiplier,
-                            damage: 40
-                        });
-                        // 왼쪽 "가져가" 장애물
-                        bossBigObstacles.push({
-                            type: 'TAKE',
-                            x: 0,
-                            y: -170,
-                            width: canvas.width / 2,
-                            height: 170,
-                            speed: 3 * speedMultiplier,
-                            damage: 40
-                        });
+                // 2단계: 5초 이후, 패턴 2회 반복 (L 먼저 -> 2초 뒤 '가져가')
+                else if (bossTimerFrames > 300 && bossTimerFrames <= 1100) {
+                    let relFrame = bossTimerFrames - 300;
+                    // 첫 번째 반복 (0초: L, 2초: 가져가)
+                    if (Math.abs(relFrame - 0) < speedMultiplier) {
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                    }
+                    if (Math.abs(relFrame - 120) < speedMultiplier) {
+                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.25, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                    }
+                    // 두 번째 반복 (10초: L, 12초: 가져가)
+                    if (Math.abs(relFrame - 300) < speedMultiplier) {
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                    }
+                    if (Math.abs(relFrame - 420) < speedMultiplier) {
+                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.25, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
                     }
                 } 
-                // 3단계: 마지막 5초간 보스를 공격하여 잡을 수 있는 타임!
-                else if (bossTimerFrames > 900 && bossTimerFrames <= 1200) {
+                // 3단계: 마지막 5초 동안 보스 처치 기회 부여 (체력 깎기)
+                else if (bossTimerFrames > 1100 && bossTimerFrames <= 1400) {
                     p2.hp = Math.max(0, p2.hp - 2.5 * speedMultiplier);
                     updateHpBars();
                     checkGameOver();
                 }
             }
 
-            // 일반 장애물 충돌 처리
+            // 일반 장애물 충돌
             for (let i = bossObstacles.length - 1; i >= 0; i--) {
                 let bo = bossObstacles[i];
                 bo.y += bo.speed;
-
                 let dx = bo.x - p1.x;
                 let dy = bo.y - p1.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
@@ -2610,290 +2506,24 @@
                     checkGameOver();
                     continue;
                 }
-
-                if (bo.y > canvas.height + 30) {
-                    bossObstacles.splice(i, 1);
-                }
+                if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
             }
 
-            // 대형 L / 가져가 장애물 충돌 처리
-            for (let i = bossBigObstacles.length - 1; i >= 0; i--) {
-                let bbo = bossBigObstacles[i];
-                bbo.y += bbo.speed;
+            // 텍스트 장애물 충돌 (오직 텍스트만)
+            for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
+                let bto = bossTextObstacles[i];
+                bto.y += bto.speed;
 
-                if (p1.x + p1.radius > bbo.x && p1.x - p1.radius < bbo.x + bbo.width &&
-                    p1.y + p1.radius > bbo.y && p1.y - p1.radius < bbo.y + bbo.height) {
-                    p1.hp = Math.max(0, p1.hp - bbo.damage);
-                    bossBigObstacles.splice(i, 1);
+                let hitX = bto.x - bto.width / 2;
+                if (p1.x + p1.radius > hitX && p1.x - p1.radius < hitX + bto.width &&
+                    p1.y + p1.radius > bto.y && p1.y - p1.radius < bto.y + bto.height) {
+                    p1.hp = Math.max(0, p1.hp - bto.damage);
+                    bossTextObstacles.splice(i, 1);
                     updateHpBars();
                     checkGameOver();
                     continue;
                 }
-
-                if (bbo.y > canvas.height + 180) {
-                    bossBigObstacles.splice(i, 1);
-                }
-            }
-
-            if (p1.type === 'sangsampany') {
-                p1.skillGauge += (1 / 300) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerSangsampanyUltimate(p1);
-                }
-
-                let now = Date.now();
-                if (now - p1.lastSuseumiTime >= 2000 / speedMultiplier) {
-                    p1.lastSuseumiTime = now;
-                    let dx = p2.x - p1.x;
-                    let dy = p2.y - p1.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    suseumiProjectiles.push({
-                        x: p1.x,
-                        y: p1.y,
-                        vx: (dx / dist) * 5 * speedMultiplier,
-                        vy: (dy / dist) * 5 * speedMultiplier,
-                        radius: 10,
-                        target: p2,
-                        damage: 15
-                    });
-                }
-            } else if (p1.type === 'mrbeast') {
-                p1.skillGauge += (1 / 540) * speedMultiplier; 
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerMrBeastUltimate(p1);
-                }
-            } else if (p1.type === 'dongryong') {
-                p1.skillGauge += (1 / 300) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerDongryongUltimate(p1);
-                }
-
-                let now = Date.now();
-                if (now - p1.lastShhTime >= 1000 / speedMultiplier) {
-                    p1.lastShhTime = now;
-                    let dx = p2.x - p1.x;
-                    let dy = p2.y - p1.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    let isEnraged = p1.hp <= 100;
-                    projectiles.push({
-                        x: p1.x,
-                        y: p1.y,
-                        vx: (dx / dist) * 6 * speedMultiplier,
-                        vy: (dy / dist) * 6 * speedMultiplier,
-                        radius: 12,
-                        text: "쉿",
-                        target: p2,
-                        damage: isEnraged ? 30 : 15
-                    });
-                }
-            } else if (p1.type === 'ice') {
-                p1.skillGauge += (1 / 720) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerIceUltimate(p1);
-                }
-
-                let now = Date.now();
-                if (now - p1.lastIceAttackTime >= 1000 / speedMultiplier) {
-                    p1.lastIceAttackTime = now;
-                    let dx = p2.x - p1.x;
-                    let dy = p2.y - p1.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    projectiles.push({
-                        x: p1.x,
-                        y: p1.y,
-                        vx: (dx / dist) * 6 * speedMultiplier,
-                        vy: (dy / dist) * 6 * speedMultiplier,
-                        radius: 8,
-                        target: p2,
-                        damage: 15
-                    });
-                }
-            } else if (p1.type === 'fire') {
-                p1.skillGauge += (1 / 480) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerFireUltimate(p1);
-                }
-            } else if (p1.type === 'pokemon') {
-                p1.skillGauge += (1 / 480) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                    triggerPokemonUltimate(p1);
-                }
-            } else {
-                p1.skillGauge += (1 / 300) * speedMultiplier;
-                if (p1.skillGauge >= 1) {
-                    p1.skillGauge = 0;
-                }
-            }
-
-            for (let i = bambooAttacks.length - 1; i >= 0; i--) {
-                let bm = bambooAttacks[i];
-                bm.duration -= speedMultiplier;
-                bm.sweepOffset += 0.4 * speedMultiplier;
-
-                bm.target.hp = Math.max(0, bm.target.hp - bm.damagePerFrame * speedMultiplier);
-                updateHpBars();
-                checkGameOver();
-
-                if (bm.duration <= 0) {
-                    bambooAttacks.splice(i, 1);
-                }
-            }
-
-            for (let i = tissuePursuers.length - 1; i >= 0; i--) {
-                let tp = tissuePursuers[i];
-                let dx = tp.target.x - tp.x;
-                let dy = tp.target.y - tp.y;
-                let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-
-                tp.x += (dx / dist) * tp.speed;
-                tp.y += (dy / dist) * tp.speed;
-
-                if (dist < tp.target.radius + tp.radius) {
-                    tp.target.hp = Math.max(0, tp.target.hp - tp.damage);
-                    tissuePursuers.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                }
-            }
-
-            for (let i = suseumiProjectiles.length - 1; i >= 0; i--) {
-                let sp = suseumiProjectiles[i];
-                sp.x += sp.vx;
-                sp.y += sp.vy;
-
-                if (sp.x < 0 || sp.x > canvas.width || sp.y < 0 || sp.y > canvas.height) {
-                    suseumiProjectiles.splice(i, 1);
-                    continue;
-                }
-
-                let dx = sp.target.x - sp.x;
-                let dy = sp.target.y - sp.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < sp.target.radius + sp.radius) {
-                    sp.target.hp = Math.max(0, sp.target.hp - sp.damage);
-                    suseumiProjectiles.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                }
-            }
-
-            for (let i = mrBeastAttacks.length - 1; i >= 0; i--) {
-                let mb = mrBeastAttacks[i];
-                mb.duration -= speedMultiplier;
-                mb.danceAngle += 0.25 * speedMultiplier;
-                
-                mb.target.y = Math.min(canvas.height - mb.target.radius, mb.target.y + 4.5 * speedMultiplier);
-                mb.target.hp = Math.max(0, mb.target.hp - mb.damagePerFrame * speedMultiplier);
-
-                updateHpBars();
-                checkGameOver();
-
-                if (mb.duration <= 0) {
-                    mrBeastAttacks.splice(i, 1);
-                }
-            }
-
-            for (let i = amongusAttacks.length - 1; i >= 0; i--) {
-                let atk = amongusAttacks[i];
-                atk.timer += speedMultiplier;
-                if (atk.timer >= 12) {
-                    atk.timer = 0;
-                    atk.target.hp = Math.max(0, atk.target.hp - atk.damagePerStab);
-                    atk.stabsLeft--;
-                    updateHpBars();
-                    checkGameOver();
-                    if (atk.stabsLeft <= 0) {
-                        amongusAttacks.splice(i, 1);
-                    }
-                }
-            }
-
-            for (let i = projectiles.length - 1; i >= 0; i--) {
-                let proj = projectiles[i];
-                proj.x += proj.vx;
-                proj.y += proj.vy;
-
-                if (proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
-                    projectiles.splice(i, 1);
-                    continue;
-                }
-
-                let dx = proj.target.x - proj.x;
-                let dy = proj.target.y - proj.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < proj.target.radius + proj.radius) {
-                    proj.target.hp = Math.max(0, proj.target.hp - proj.damage);
-                    projectiles.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                }
-            }
-
-            for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
-                let ice = iceFallBlocks[i];
-                ice.y += ice.speed;
-
-                let dx = ice.target.x - ice.x;
-                let dy = ice.target.y - ice.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < ice.target.radius + ice.size / 2.5) {
-                    ice.target.hp = Math.max(0, ice.target.hp - ice.damage);
-                    ice.target.freezeTimer = 60;
-                    iceFallBlocks.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                    continue;
-                }
-
-                if (ice.y > canvas.height + 80) {
-                    iceFallBlocks.splice(i, 1);
-                }
-            }
-
-            for (let i = fireFallBlocks.length - 1; i >= 0; i--) {
-                let fire = fireFallBlocks[i];
-                fire.y += fire.speed;
-
-                let dx = fire.target.x - fire.x;
-                let dy = fire.target.y - fire.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < fire.target.radius + fire.radius) {
-                    fire.target.hp = Math.max(0, fire.target.hp - fire.damage);
-                    fireFallBlocks.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                    continue;
-                }
-
-                if (fire.y > canvas.height + 80) {
-                    fireFallBlocks.splice(i, 1);
-                }
-            }
-
-            for (let i = pokeFallBlocks.length - 1; i >= 0; i--) {
-                let poke = pokeFallBlocks[i];
-                poke.y += poke.speed;
-
-                let dx = poke.target.x - poke.x;
-                let dy = poke.target.y - poke.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < poke.target.radius + poke.radius) {
-                    poke.target.hp = Math.max(0, poke.target.hp - poke.damage);
-                    pokeFallBlocks.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
-                    continue;
-                }
-
-                if (poke.y > canvas.height + 50) {
-                    pokeFallBlocks.splice(i, 1);
-                }
+                if (bto.y > canvas.height + 60) bossTextObstacles.splice(i, 1);
             }
 
             if (!isBossMode) {
@@ -2914,33 +2544,12 @@
                     p2.x += nx * overlap / 2;
                     p2.y += ny * overlap / 2;
 
-                    let p1Dmg = p1.damage;
-                    if (p1.type === 'dongryong' && p1.hp <= 100) p1Dmg *= 2;
-
                     p1.hp = Math.max(0, p1.hp - p2.damage);
-                    p2.hp = Math.max(0, p2.hp - p1Dmg);
+                    p2.hp = Math.max(0, p2.hp - p1.damage);
 
                     updateHpBars();
                     checkGameOver();
                 }
-            }
-
-            if (nextGameMode === 'friend' && isHost && conn && conn.open) {
-                conn.send({
-                    type: 'GAME_SYNC',
-                    p1: { x: p1.x, y: p1.y, hp: p1.hp, skillGauge: p1.skillGauge },
-                    p2: { x: p2.x, y: p2.y, hp: p2.hp, skillGauge: p2.skillGauge },
-                    projectiles: projectiles,
-                    iceFallBlocks: iceFallBlocks,
-                    fireFallBlocks: fireFallBlocks,
-                    pokeFallBlocks: pokeFallBlocks,
-                    amongusAttacks: amongusAttacks,
-                    mrBeastAttacks: mrBeastAttacks,
-                    suseumiProjectiles: suseumiProjectiles,
-                    bambooAttacks: bambooAttacks,
-                    tissuePursuers: tissuePursuers,
-                    gameOverState: gameOverState
-                });
             }
         }
 
@@ -2962,28 +2571,21 @@
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.clip();
-
             ctx.fillStyle = "#e74c3c";
             ctx.fillRect(x - radius, y - radius, radius * 2, radius);
-
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(x - radius, y, radius * 2, radius);
-
             ctx.fillStyle = "#2c3e50";
             ctx.fillRect(x - radius, y - radius * 0.15, radius * 2, radius * 0.3);
-
             ctx.beginPath();
             ctx.arc(x, y, radius * 0.35, 0, Math.PI * 2);
             ctx.fillStyle = "#2c3e50";
             ctx.fill();
-
             ctx.beginPath();
             ctx.arc(x, y, radius * 0.22, 0, Math.PI * 2);
             ctx.fillStyle = "#ffffff";
             ctx.fill();
-
             ctx.restore();
-
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
@@ -2992,161 +2594,8 @@
             ctx.closePath();
         }
 
-        function drawSangsampanyGraphic(x, y, radius, p) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.clip();
-
-            if (sangpumImage.complete && sangpumImage.naturalWidth !== 0) {
-                ctx.drawImage(sangpumImage, x - radius, y - radius, radius * 2, radius * 2);
-            } else {
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-                ctx.fillStyle = "#0000ff";
-                ctx.font = "bold 10px sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("SANGPUM", x, y);
-            }
-
-            ctx.restore();
-
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#2980b9";
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        function drawMrBeastGraphic(x, y, radius, p) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.clip();
-
-            let gradBg = ctx.createRadialGradient(x, y, 2, x, y, radius);
-            gradBg.addColorStop(0, '#74b9ff');
-            gradBg.addColorStop(0.7, '#0984e3');
-            gradBg.addColorStop(1, '#0056b3');
-            ctx.fillStyle = gradBg;
-            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-
-            let s = radius / 22; 
-            ctx.translate(x, y);
-
-            ctx.beginPath();
-            ctx.moveTo(-16 * s, -14 * s);
-            ctx.lineTo(-6 * s, -10 * s);
-            ctx.lineTo(2 * s, -17 * s);
-            ctx.lineTo(10 * s, -10 * s);
-            ctx.lineTo(17 * s, -4 * s);
-            ctx.lineTo(19 * s, 1 * s);
-            ctx.lineTo(13 * s, 7 * s);
-            ctx.lineTo(7 * s, 12 * s);
-            ctx.lineTo(2 * s, 16 * s);
-            ctx.lineTo(-4 * s, 14 * s);
-            ctx.lineTo(-12 * s, 6 * s);
-            ctx.lineTo(-17 * s, -2 * s);
-            ctx.closePath();
-
-            let beastFill = ctx.createLinearGradient(-15 * s, -15 * s, 15 * s, 15 * s);
-            beastFill.addColorStop(0, '#00d2d3');
-            beastFill.addColorStop(0.5, '#0984e3');
-            beastFill.addColorStop(1, '#10ac84');
-            ctx.fillStyle = beastFill;
-            ctx.fill();
-            ctx.lineWidth = 1.8 * s;
-            ctx.strokeStyle = '#051923';
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(3 * s, 3 * s);
-            ctx.lineTo(13 * s, 5 * s);
-            ctx.lineTo(8 * s, 11 * s);
-            ctx.lineTo(1 * s, 7 * s);
-            ctx.closePath();
-            ctx.fillStyle = '#ff2a2a';
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.moveTo(3 * s, 3 * s); ctx.lineTo(5 * s, 6 * s); ctx.lineTo(6 * s, 3 * s); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(8 * s, 3 * s); ctx.lineTo(10 * s, 6 * s); ctx.lineTo(11 * s, 3 * s); ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(-20 * s, -7 * s);
-            ctx.lineTo(-2 * s, -6 * s);
-            ctx.lineTo(-5 * s, -1 * s);
-            ctx.lineTo(14 * s, -3 * s);
-            ctx.lineTo(3 * s, 3 * s);
-            ctx.lineTo(6 * s, 1 * s);
-            ctx.lineTo(-8 * s, 0 * s);
-            ctx.lineTo(-6 * s, -4 * s);
-            ctx.closePath();
-
-            let thunderGrad = ctx.createLinearGradient(-15 * s, -5 * s, 10 * s, -1 * s);
-            thunderGrad.addColorStop(0, '#ff007f');
-            thunderGrad.addColorStop(1, '#ff66c4');
-            ctx.fillStyle = thunderGrad;
-            ctx.fill();
-            ctx.lineWidth = 1.2 * s;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(6 * s, -7 * s);
-            ctx.lineTo(11 * s, -5 * s);
-            ctx.lineTo(7 * s, -3 * s);
-            ctx.closePath();
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-
-            ctx.restore();
-
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#002b5b";
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        function drawDongryongGraphic(x, y, radius, p) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.clip();
-
-            ctx.fillStyle = "#c0392b"; 
-            ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-
-            ctx.fillStyle = "#a93226";
-            ctx.beginPath();
-            ctx.arc(x, y + radius * 0.1, radius * 0.75, Math.PI, 0);
-            ctx.fill();
-
-            ctx.fillStyle = "#a2d9ce";
-            ctx.beginPath();
-            ctx.roundRect(x - radius * 0.55, y - radius * 0.35, radius * 1.1, radius * 0.45, 8);
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "#16a085";
-            ctx.stroke();
-
-            ctx.restore();
-
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.lineWidth = p.hp <= 100 ? 5 : 2.5;
-            ctx.strokeStyle = p.hp <= 100 ? "#ff0000" : "#2c3e50";
-            ctx.stroke();
-            ctx.closePath();
-        }
-
         function drawPlayer(p, isPlayer1) {
             if (p.type === 'boss') {
-                // 검정색 바탕 원 안의 L 보스 그래픽
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#000000';
@@ -3166,12 +2615,6 @@
 
             if (p.type === 'pokemon') {
                 drawPokeballGraphic(p.x, p.y, p.radius);
-            } else if (p.type === 'dongryong') {
-                drawDongryongGraphic(p.x, p.y, p.radius, p);
-            } else if (p.type === 'mrbeast') {
-                drawMrBeastGraphic(p.x, p.y, p.radius, p);
-            } else if (p.type === 'sangsampany') {
-                drawSangsampanyGraphic(p.x, p.y, p.radius, p);
             } else {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -3190,15 +2633,6 @@
                 ctx.strokeStyle = "#2ecc71";
                 ctx.stroke();
                 ctx.closePath();
-
-                if (p.skillGauge > 0) {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius + 7, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * Math.min(1, p.skillGauge)));
-                    ctx.lineWidth = 4;
-                    ctx.strokeStyle = "#f1c40f";
-                    ctx.stroke();
-                    ctx.closePath();
-                }
             }
         }
 
@@ -3208,7 +2642,6 @@
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
-            // 일반 보스 장애물 렌더링
             bossObstacles.forEach(bo => {
                 ctx.beginPath();
                 ctx.arc(bo.x, bo.y, bo.radius, 0, Math.PI * 2);
@@ -3226,185 +2659,18 @@
                 ctx.fillText("💀", bo.x, bo.y);
             });
 
-            // 대형 L / 가져가 장애물 렌더링
-            bossBigObstacles.forEach(bbo => {
+            // 텍스트 장애물 (박스 배경 없이 오직 텍스트만)
+            bossTextObstacles.forEach(bto => {
                 ctx.save();
-                ctx.fillStyle = "#2c3e50";
-                ctx.fillRect(bbo.x, bbo.y, bbo.width, bbo.height);
-                ctx.strokeStyle = "#e74c3c";
-                ctx.lineWidth = 4;
-                ctx.strokeRect(bbo.x, bbo.y, bbo.width, bbo.height);
-
-                ctx.font = "900 28px sans-serif";
-                ctx.fillStyle = "#ffffff";
+                ctx.font = "900 32px sans-serif";
+                ctx.fillStyle = "#e74c3c";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                let txt = bbo.type === 'L' ? "L" : "가져가";
-                ctx.fillText(txt, bbo.x + bbo.width / 2, bbo.y + bbo.height / 2);
-                ctx.restore();
-            });
-
-            bambooAttacks.forEach(bm => {
-                let tx = bm.target.x;
-                let ty = bm.target.y;
-                let offset = Math.sin(bm.sweepOffset) * 16;
-
-                ctx.save();
-                ctx.strokeStyle = "#27ae60";
-                ctx.lineWidth = 6;
-                ctx.beginPath();
-                ctx.moveTo(tx - 35 + offset, ty - 25);
-                ctx.lineTo(tx + 35 + offset, ty + 25);
-                ctx.stroke();
-
-                ctx.font = "bold 13px sans-serif";
-                ctx.fillStyle = "#27ae60";
-                ctx.textAlign = "center";
-                ctx.fillText("🌿 대나무 행주 쓱싹!", tx, ty - 35);
-                ctx.restore();
-            });
-
-            tissuePursuers.forEach(tp => {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(tp.x, tp.y, tp.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "#ffffff";
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "#e74c3c";
-                ctx.stroke();
-                ctx.closePath();
-
-                ctx.font = "900 9px sans-serif";
-                ctx.fillStyle = "#c0392b";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("티슈", tp.x, tp.y);
-                ctx.restore();
-            });
-
-            suseumiProjectiles.forEach(sp => {
-                ctx.beginPath();
-                ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#d35400';
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                ctx.closePath();
-            });
-
-            projectiles.forEach(proj => {
-                if (proj.text) {
-                    ctx.save();
-                    ctx.font = "bold 16px sans-serif";
-                    ctx.fillStyle = "#e74c3c";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText(proj.text, proj.x, proj.y);
-                    ctx.restore();
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#0984e3';
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                    ctx.closePath();
-                }
-            });
-
-            mrBeastAttacks.forEach(mb => {
-                let stageX = canvas.width / 2;
-                let stageY = 55;
-                let danceOffset = Math.sin(mb.danceAngle) * 8;
-
-                ctx.save();
-                
-                ctx.fillStyle = "rgba(255, 0, 128, 0.25)";
-                ctx.beginPath();
-                ctx.moveTo(stageX, 0);
-                ctx.lineTo(stageX - 120, canvas.height);
-                ctx.lineTo(stageX + 120, canvas.height);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.translate(stageX, stageY + danceOffset);
-
-                ctx.fillStyle = "#1e272e";
-                [-35, -20, 20, 35].forEach(dx => {
-                    ctx.beginPath();
-                    ctx.arc(dx, -5, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillRect(dx - 4, 0, 8, 16);
-                });
-
-                ctx.fillStyle = "#f5cd79";
-                ctx.beginPath(); ctx.arc(0, -10, 10, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = "#1e272e";
-                ctx.fillRect(-8, 0, 16, 22);
-
-                ctx.font = "900 14px sans-serif";
-                ctx.fillStyle = "#f1c40f";
-                ctx.textAlign = "center";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 3.5;
-                ctx.strokeText("MR. RIZZ!! 💥150", 0, -25);
-                ctx.fillText("MR. RIZZ!! 💥150", 0, -25);
-
-                ctx.restore();
-
-                ctx.beginPath();
-                ctx.arc(mb.target.x, mb.target.y, mb.target.radius + 8, 0, Math.PI * 2);
-                ctx.strokeStyle = "rgba(231, 76, 60, 0.8)";
+                ctx.strokeStyle = "#ffffff";
                 ctx.lineWidth = 4;
-                ctx.stroke();
-
+                ctx.strokeText(bto.text, bto.x, bto.y);
+                ctx.fillText(bto.text, bto.x, bto.y);
                 ctx.restore();
-            });
-
-            amongusAttacks.forEach(atk => {
-                let tx = atk.target.x + 25;
-                let ty = atk.target.y - 10;
-
-                ctx.fillStyle = "#7f8c8d";
-                ctx.fillRect(tx - 15, ty + 10, 30, 8);
-
-                ctx.fillStyle = "#c0392b";
-                ctx.fillRect(tx - 10, ty - 15, 20, 25);
-                
-                ctx.fillStyle = "#74b9ff";
-                ctx.fillRect(tx - 12, ty - 12, 8, 8);
-                
-                ctx.fillStyle = "#bdc3c7";
-                ctx.fillRect(tx - 18, ty - 2, 10, 4);
-            });
-
-            iceFallBlocks.forEach(ice => {
-                ctx.save();
-                ctx.translate(ice.x, ice.y);
-                ctx.fillStyle = '#74b9ff';
-                ctx.strokeStyle = '#0984e3';
-                ctx.lineWidth = 3;
-                ctx.fillRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
-                ctx.strokeRect(-ice.size / 2, -ice.size / 2, ice.size, ice.size);
-                ctx.restore();
-            });
-
-            fireFallBlocks.forEach(fire => {
-                ctx.beginPath();
-                ctx.arc(fire.x, fire.y, fire.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#f39c12';
-                ctx.stroke();
-                ctx.closePath();
-            });
-
-            pokeFallBlocks.forEach(poke => {
-                drawPokeballGraphic(poke.x, poke.y, poke.radius);
             });
 
             if (isCountingDown) {
@@ -3415,11 +2681,9 @@
                 ctx.font = "900 72px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 8;
                 ctx.strokeText(countdownValue, canvas.width / 2, canvas.height / 2);
-
                 ctx.fillStyle = "#f1c40f";
                 ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
                 ctx.restore();
@@ -3451,10 +2715,8 @@
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 6;
                 ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
-
                 ctx.fillStyle = textColor;
                 ctx.fillText(resultText, canvas.width / 2, canvas.height / 2);
-
                 ctx.restore();
             }
         }
@@ -3469,4 +2731,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-            </html>
+                </html>
