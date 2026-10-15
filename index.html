@@ -35,7 +35,7 @@
         }
         .hidden { display: none !important; }
 
-        /* 점검 중 풀스크린 화면 */
+        /* 점검 중 풀스크린 화면 (모든 접속자 차단) */
         #maintenance-screen {
             position: fixed;
             top: 0;
@@ -48,7 +48,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 999999;
+            z-index: 99999999;
             text-align: center;
             padding: 20px;
         }
@@ -615,7 +615,7 @@
 </head>
 <body>
 
-    <!-- 점검 중 풀스크린 화면 -->
+    <!-- 점검 중 풀스크린 화면 (플레이어 차단) -->
     <div class="hidden" id="maintenance-screen">
         <h1>🚨 지금 점검 중입니다!</h1>
         <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
@@ -897,11 +897,11 @@
         const ctx = canvas.getContext('2d');
 
         // 데이터 영구 저장 키
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v22';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v22';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v22';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v22';
-        const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v22';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v23';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v23';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v23';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v23';
+        const GLOBAL_MAINTENANCE_KEY = 'lily_ball_fight_maintenance_status_v23';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -953,7 +953,7 @@
         let isHost = false; 
         let friendName = "친구";
 
-        const syncChannel = new BroadcastChannel('lily_ball_fight_sync_channel');
+        const syncChannel = new BroadcastChannel('lily_ball_fight_sync_channel_v23');
         syncChannel.onmessage = (event) => {
             const data = event.data;
             if (data.type === 'SYNC_USERS') {
@@ -1020,22 +1020,30 @@
             localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(status));
             syncChannel.postMessage({ type: 'SYNC_MAINTENANCE', status: status });
             
-            // P2P 연결된 다른 유저들에게도 점검 상태 송신
+            // P2P 연결된 다른 유저들에게도 즉시 점검 상태 전송
             if (conn && conn.open) {
                 conn.send({ type: 'MAINTENANCE_SYNC', status: status });
             }
 
             saveData();
             applyMaintenanceUI();
-            alert(status ? "🚨 점검 모드가 켜졌습니다. 일반 유저 화면에 점검 창이 적용됩니다." : "🟢 점검 모드가 해제되었습니다.");
+            alert(status ? "🚨 점검 모드가 켜졌습니다. 모든 플레이어 화면에 점검 창이 적용됩니다!" : "🟢 점검 모드가 해제되었습니다.");
         }
 
         function applyMaintenanceUI() {
             const screen = document.getElementById('maintenance-screen');
-            // 관리자 로그인이 되어 있거나, 비밀번호로 우회한 경우에는 점검 화면을 띄우지 않음
+            // 로컬 스토리지에 저장된 점검 상태도 한 번 더 확실하게 체크
+            let savedMaint = localStorage.getItem(GLOBAL_MAINTENANCE_KEY);
+            if (savedMaint) {
+                try { isServerUnderMaintenance = JSON.parse(savedMaint); } catch(e){}
+            }
+
+            // 관리자 로그인이 되어 있거나, 비밀번호로 우회한 경우가 아니라면 일반 플레이어는 무조건 점검 창 표시
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) {
                 screen.classList.remove('hidden');
                 document.getElementById('name-modal').classList.add('hidden');
+                document.getElementById('lobby-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
                 if (!savedUsername && !isServerUnderMaintenance) {
@@ -1230,7 +1238,7 @@
             const amountVal = parseInt(document.getElementById('admin-gift-amount').value);
 
             if (!targetVal) {
-                alert("선원을 받을 대상을 선택하세요.");
+                alert("선물을 받을 대상을 선택하세요.");
                 return;
             }
             if (isNaN(amountVal) || amountVal <= 0) {
@@ -1667,6 +1675,10 @@
         }
 
         function checkUserHasName() {
+            if (isServerUnderMaintenance) {
+                alert("현재 점검 중이므로 게임을 플레이할 수 없습니다.");
+                return false;
+            }
             if (!savedUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
                 return false;
@@ -1778,6 +1790,9 @@
                 conn.on('open', () => {
                     err.innerText = "친구가 접속했습니다!";
                     nextGameMode = 'friend';
+                    
+                    // 접속한 친구에게 현재 점검 상태 송신
+                    conn.send({ type: 'MAINTENANCE_SYNC', status: isServerUnderMaintenance });
                     showCharacterSelect();
                 });
                 conn.on('data', handleNetworkData);
@@ -1799,6 +1814,7 @@
                 }
             } else if (data.type === 'MAINTENANCE_SYNC') {
                 isServerUnderMaintenance = data.status;
+                localStorage.setItem(GLOBAL_MAINTENANCE_KEY, JSON.stringify(data.status));
                 applyMaintenanceUI();
             } else if (data.type === 'REQUEST_MAINTENANCE_STATUS') {
                 if (conn && conn.open) {
@@ -1830,6 +1846,7 @@
         }
 
         function showCharacterSelect() {
+            if (isServerUnderMaintenance) return;
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
@@ -1854,6 +1871,7 @@
         }
 
         function confirmCharacterSelection() {
+            if (isServerUnderMaintenance) return;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -1871,6 +1889,7 @@
         }
 
         function startCountdownAndGame() {
+            if (isServerUnderMaintenance) return;
             gameStarted = false;
             gameOverState = null;
             document.getElementById('btn-game-retry').classList.add('hidden');
@@ -1891,6 +1910,7 @@
         }
 
         function retryGame() {
+            if (isServerUnderMaintenance) return;
             if (nextGameMode === 'friend' && conn && conn.open) {
                 conn.send({ type: 'RETRY_GAME' });
             }
@@ -1898,7 +1918,7 @@
         }
 
         function toggleSpeed() {
-            if (!gameStarted) return;
+            if (!gameStarted || isServerUnderMaintenance) return;
 
             if (nextGameMode === 'friend') {
                 const confirmChoice = confirm("⚡ 친구에게 2배속 요청이 들어왔습니다.\n승인하시겠습니까?");
@@ -1934,6 +1954,7 @@
         }
 
         function showMyBallShop() {
+            if (isServerUnderMaintenance) return;
             document.getElementById('lobby-screen').classList.add('hidden');
             renderShop();
             document.getElementById('myball-screen').classList.remove('hidden');
@@ -1970,7 +1991,10 @@
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
-            document.getElementById('lobby-screen').classList.remove('hidden');
+            
+            if (!isServerUnderMaintenance) {
+                document.getElementById('lobby-screen').classList.remove('hidden');
+            }
         }
 
         function resetRoom() {
@@ -2143,6 +2167,7 @@
         }
 
         function update() {
+            if (isServerUnderMaintenance) return;
             if (!gameStarted) return;
 
             if (nextGameMode === 'friend' && !isHost) return;
@@ -2784,4 +2809,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                </html>
