@@ -941,7 +941,8 @@
         let mrBeastAttacks = []; 
 
         let mailClaimed = false; 
-        const EXPIRY_TIME = new Date(2026, 9, 14, 22, 0, 0).getTime(); 
+        // 유효기간: 10월 15일 오후 9시 30분 (2026년 10월 15일 21시 30분)
+        const EXPIRY_TIME = new Date(2026, 9, 15, 21, 30, 0).getTime(); 
 
         let peer = null;
         let conn = null;
@@ -990,7 +991,6 @@
             isDragging = false;
         });
 
-        // ★★★ status.json 파일을 주기적으로 확인하여 점검 상태 동기화 (오류 안전처리 추가) ★★★
         function checkMaintenanceStatus() {
             fetch('status.json?t=' + new Date().getTime())
                 .then(response => {
@@ -1004,13 +1004,11 @@
                     }
                 })
                 .catch(err => {
-                    // status.json 파일이 없거나 로드 실패 시 점검 상태를 false로 유지하여 정상 작동 보장
                     isServerUnderMaintenance = false;
                     applyMaintenanceUI();
                 });
         }
 
-        // 2초마다 주기적으로 점검 상태 체크
         setInterval(checkMaintenanceStatus, 2000);
 
         function applyMaintenanceUI() {
@@ -1026,7 +1024,6 @@
                 document.getElementById('mailbox-screen').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
-                // 다른 화면이 활성화되어 있지 않고 이름이 없거나 로비 화면이어야 할 때 적절히 표시
                 const isAnyScreenActive = 
                     !document.getElementById('lobby-screen').classList.contains('hidden') ||
                     !document.getElementById('game-screen').classList.contains('hidden') ||
@@ -1354,8 +1351,8 @@
                 itemDiv.className = 'mail-item';
                 itemDiv.innerHTML = `
                     <div>
-                        <div class="mail-info-title">🎁 이벤트 선물: 500 코인</div>
-                        <div class="mail-info-time">유효 기간: 10월 14일 오후 10시까지</div>
+                        <div class="mail-info-title">🎁 특별 선물: 1000 코인</div>
+                        <div class="mail-info-time">유효 기간: 10월 15일 오후 9시 30분까지</div>
                     </div>
                     <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
                 `;
@@ -1396,7 +1393,7 @@
         function claimMailReward() {
             const now = new Date().getTime();
             if (now >= EXPIRY_TIME) {
-                alert("보상을 받을수 없음니다 (유효기간 만료)");
+                alert("보상을 받을수 없습니다 (유효기간 만료)");
                 renderMailbox();
                 checkMailRedDot();
                 return;
@@ -1404,12 +1401,12 @@
 
             if (!mailClaimed) {
                 mailClaimed = true;
-                userCoins += 500;
+                userCoins += 1000;
                 updateCoinsUI();
                 saveData();
                 checkMailRedDot();
                 renderMailbox();
-                alert("🎉 500코인을 받았습니다!");
+                alert("🎉 1000코인을 받았습니다!");
             }
         }
 
@@ -1494,7 +1491,6 @@
             syncGlobalUsers();
             checkMaintenanceStatus();
 
-            // 유저 이름이 없거나 임시 이름이면 이름 설정 모달 오픈, 아니면 로비 오픈
             if (!hasRealUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
                 document.getElementById('lobby-screen').classList.add('hidden');
