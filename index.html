@@ -78,26 +78,26 @@
             cursor: pointer;
         }
 
-        /* 상단 네비게이션 바 (프로필 & 우편함) */
+        /* 상단 네비게이션 바 (프로필, 우편함, 랭킹보드) */
         .top-nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
-            gap: 6px;
+            gap: 4px;
         }
         .profile-btn {
             background: #2980b9;
             color: #fff;
             border: 2px solid #1c5980;
             border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 13px;
+            padding: 8px 6px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             flex: 1;
             justify-content: center;
         }
@@ -107,13 +107,28 @@
             color: #fff;
             border: 2px solid #a04000;
             border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 13px;
+            padding: 8px 6px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+        }
+        .ranking-nav-btn {
+            background: #8e44ad;
+            color: #fff;
+            border: 2px solid #6c3483;
+            border-radius: 8px;
+            padding: 8px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
             flex: 1;
             justify-content: center;
         }
@@ -265,6 +280,92 @@
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
+        }
+
+        /* 🏆 랭킹 보드 스타일 */
+        .ranking-tab-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .ranking-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #bdc3c7;
+            background: #ecf0f1;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        .ranking-tab-btn.active {
+            background: #8e44ad;
+            color: #ffffff;
+            border-color: #6c3483;
+        }
+        .ranking-list-box {
+            background: #5d4037;
+            border: 3px solid #3e2723;
+            border-radius: 10px;
+            padding: 10px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .ranking-item {
+            background: #795548;
+            border: 2px solid #4e342e;
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .ranking-item:last-child {
+            margin-bottom: 0;
+        }
+        .ranking-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ranking-rank {
+            font-size: 14px;
+            font-weight: bold;
+            width: 28px;
+            text-align: center;
+            color: #ffe0b2;
+        }
+        .ranking-rank.top1 { color: #f1c40f; font-size: 16px; }
+        .ranking-rank.top2 { color: #bdc3c7; font-size: 15px; }
+        .ranking-rank.top3 { color: #e67e22; font-size: 15px; }
+
+        .ranking-profile-btn {
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .ranking-username {
+            font-size: 13px;
+            font-weight: bold;
+            color: #ffffff;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ranking-val {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f1c40f;
         }
 
         h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
@@ -746,7 +847,7 @@
     <div class="modal-overlay hidden" id="profile-modal">
         <div class="modal-box">
             <div class="header-row">
-                <h2 id="profile-modal-title">👤 내 프로필</h2>
+                <h2 id="profile-modal-title">👤 프로필 조회</h2>
                 <button class="btn-close-x" onclick="closeProfileModal()">X</button>
             </div>
             <div class="version-text">릴리 볼 파이트 v1.3</div>
@@ -778,6 +879,7 @@
                 📬 우편함
                 <div class="red-dot hidden" id="mail-red-dot"></div>
             </button>
+            <button class="ranking-nav-btn" onclick="showRankingBoard()">🏆 랭킹보드</button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.3 버전</div>
@@ -809,6 +911,26 @@
             <div class="mail-status-title" id="mail-status-msg">도착한 우편이 있습니다!</div>
             <div id="mail-content-area"></div>
         </div>
+    </div>
+
+    <!-- 🏆 랭킹 보드 화면 -->
+    <div class="container hidden" id="ranking-screen">
+        <div class="header-row">
+            <h2>🏆 명예의 전당 🏆</h2>
+            <button class="btn-close-x" onclick="showLobby()">X</button>
+        </div>
+        <div class="version-text">v1.3 버전 (실시간 순위)</div>
+        
+        <div class="ranking-tab-container">
+            <button class="ranking-tab-btn active" id="rank-tab-trophy" onclick="switchRankingTab('trophy')">🏆 트로피 랭킹</button>
+            <button class="ranking-tab-btn" id="rank-tab-coin" onclick="switchRankingTab('coin')">🪙 코인 랭킹</button>
+        </div>
+
+        <div class="ranking-list-box" id="ranking-list-container">
+            <!-- 랭킹 항목 들어가는 곳 -->
+        </div>
+
+        <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
     <!-- 나의 공 상점 및 보관함 화면 -->
@@ -849,6 +971,26 @@
         </div>
 
         <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
+    </div>
+
+    <!-- 👥 그룹 메뉴 -->
+    <div class="container hidden" id="group-screen">
+        <h2>👥 그룹 대기실 👥</h2>
+        <div class="version-text">v1.3 버전</div>
+        <div class="desc">그룹 코드로 친구들과 같은 대기실에 입장하세요!</div>
+        <div class="error" id="group-error"></div>
+
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createGroupRoom()">그룹 방 생성</button>
+        </div>
+        <div class="room-box hidden" id="group-room-display">----</div>
+
+        <div id="group-join-container">
+            <input type="text" id="group-code-input" placeholder="그룹 코드 4자리 입력" maxlength="4">
+            <button class="btn btn-join" style="background:#8e44ad;" onclick="joinGroupRoom()">그룹 입장하기</button>
+        </div>
+
+        <button class="btn btn-back" onclick="showLobby()">로비로 가기</button>
     </div>
 
     <!-- 캐릭터 선택 화면 -->
@@ -892,9 +1034,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 🖼️ 상품컴퍼니 프로필 이미지 로드
         const sangpumImage = new Image();
-        // 이미지 경로 설정 (상대경로나 이미지 링크 주소 입력)
         sangpumImage.src = 'sangpum_logo.png'; 
 
         const STORAGE_KEY = 'lily_ball_fight_permanent_v24';
@@ -937,6 +1077,13 @@
         
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
+
+        let currentRankingType = 'trophy'; // trophy or coin
+
+        // 보스 피하기 모드 변수
+        let isBossMode = false;
+        let bossObstacles = [];
+        let bossTimer = 0;
 
         let projectiles = [];
         let iceFallBlocks = [];
@@ -1026,18 +1173,22 @@
                 document.getElementById('lobby-screen').classList.add('hidden');
                 document.getElementById('game-screen').classList.add('hidden');
                 document.getElementById('friend-screen').classList.add('hidden');
+                document.getElementById('group-screen').classList.add('hidden');
                 document.getElementById('char-select-screen').classList.add('hidden');
                 document.getElementById('myball-screen').classList.add('hidden');
                 document.getElementById('mailbox-screen').classList.add('hidden');
+                document.getElementById('ranking-screen').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
                 const isAnyScreenActive = 
                     !document.getElementById('lobby-screen').classList.contains('hidden') ||
                     !document.getElementById('game-screen').classList.contains('hidden') ||
                     !document.getElementById('friend-screen').classList.contains('hidden') ||
+                    !document.getElementById('group-screen').classList.contains('hidden') ||
                     !document.getElementById('char-select-screen').classList.contains('hidden') ||
                     !document.getElementById('myball-screen').classList.contains('hidden') ||
                     !document.getElementById('mailbox-screen').classList.contains('hidden') ||
+                    !document.getElementById('ranking-screen').classList.contains('hidden') ||
                     !document.getElementById('name-modal').classList.contains('hidden');
 
                 if (!isAnyScreenActive) {
@@ -1143,10 +1294,18 @@
             if (!Array.isArray(incomingUsers)) return;
             incomingUsers.forEach(u => {
                 if (!registeredUsers.some(existing => existing.name === u.name)) {
-                    registeredUsers.push(u);
+                    registeredUsers.push({
+                        name: u.name,
+                        coins: u.coins || 0,
+                        trophies: u.trophies || 0,
+                        banUntil: u.banUntil || 0,
+                        banTimeStr: u.banTimeStr || ""
+                    });
                 } else {
                     let match = registeredUsers.find(existing => existing.name === u.name);
                     if (match) {
+                        match.coins = u.coins !== undefined ? u.coins : match.coins;
+                        match.trophies = u.trophies !== undefined ? u.trophies : match.trophies;
                         match.banUntil = u.banUntil || match.banUntil;
                         match.banTimeStr = u.banTimeStr || match.banTimeStr;
                     }
@@ -1163,8 +1322,14 @@
                     mergeUsers(parsedUsers);
                 } catch(e){}
             }
-            if (savedUsername && !registeredUsers.some(u => u.name === savedUsername)) {
-                registeredUsers.push({ name: savedUsername, banUntil: 0, banTimeStr: "" });
+            if (savedUsername) {
+                let match = registeredUsers.find(u => u.name === savedUsername);
+                if (!match) {
+                    registeredUsers.push({ name: savedUsername, coins: userCoins, trophies: userTrophies, banUntil: 0, banTimeStr: "" });
+                } else {
+                    match.coins = userCoins;
+                    match.trophies = userTrophies;
+                }
                 localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             }
         }
@@ -1437,6 +1602,83 @@
             }
         }
 
+        // 🏆 랭킹 보드 함수들
+        function showRankingBoard() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            renderRankingList();
+            document.getElementById('ranking-screen').classList.remove('hidden');
+        }
+
+        function switchRankingTab(type) {
+            currentRankingType = type;
+            document.getElementById('rank-tab-trophy').classList.remove('active');
+            document.getElementById('rank-tab-coin').classList.remove('active');
+
+            if (type === 'trophy') {
+                document.getElementById('rank-tab-trophy').classList.add('active');
+            } else {
+                document.getElementById('rank-tab-coin').classList.add('active');
+            }
+            renderRankingList();
+        }
+
+        function renderRankingList() {
+            syncGlobalUsers();
+            const container = document.getElementById('ranking-list-container');
+            container.innerHTML = '';
+
+            let sorted = [...registeredUsers];
+            if (currentRankingType === 'trophy') {
+                sorted.sort((a, b) => (b.trophies || 0) - (a.trophies || 0));
+            } else {
+                sorted.sort((a, b) => (b.coins || 0) - (a.coins || 0));
+            }
+
+            // 1등부터 최대 100등까지 렌더링
+            let displayList = sorted.slice(0, 100);
+
+            if (displayList.length === 0) {
+                container.innerHTML = `<div style="font-size:12px; color:#ffe0b2; text-align:center; padding:15px 0;">랭킹에 등록된 유저가 없습니다.</div>`;
+                return;
+            }
+
+            displayList.forEach((user, index) => {
+                let rank = index + 1;
+                let rankClass = "";
+                if (rank === 1) rankClass = "top1";
+                else if (rank === 2) rankClass = "top2";
+                else if (rank === 3) rankClass = "top3";
+
+                let val = currentRankingType === 'trophy' ? (user.trophies || 0) + '🏆' : (user.coins || 0) + '🪙';
+
+                let item = document.createElement('div');
+                item.className = 'ranking-item';
+                item.innerHTML = `
+                    <div class="ranking-left">
+                        <span class="ranking-rank ${rankClass}">${rank}등</span>
+                        <button class="ranking-profile-btn" onclick="openUserProfile('${user.name}')">프로필</button>
+                        <span class="ranking-username">${user.name}</span>
+                    </div>
+                    <div class="ranking-val">${val}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openUserProfile(username) {
+            syncGlobalUsers();
+            let target = registeredUsers.find(u => u.name === username);
+            if (!target) {
+                target = { name: username, coins: 0, trophies: 0 };
+            }
+
+            document.getElementById('profile-modal-title').innerText = "👤 유저 프로필";
+            document.getElementById('profile-modal-name').innerText = target.name;
+            document.getElementById('profile-modal-coin').innerText = (target.coins || 0) + "개";
+            document.getElementById('profile-modal-trophy').innerText = (target.trophies || 0) + "개";
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
         // ⚽ 볼 정보 및 성능 데이터
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
@@ -1457,6 +1699,7 @@
                 mailClaimed: mailClaimed
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
+            syncGlobalUsers();
         }
 
         function loadData() {
@@ -1557,7 +1800,7 @@
             savedUsername = val;
             
             if (!registeredUsers.some(u => u.name === val)) {
-                registeredUsers.push({ name: val, banUntil: 0, banTimeStr: "" });
+                registeredUsers.push({ name: val, coins: userCoins, trophies: userTrophies, banUntil: 0, banTimeStr: "" });
             }
             localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
 
@@ -1585,7 +1828,6 @@
 
         function closeProfileModal() {
             document.getElementById('profile-modal').classList.add('hidden');
-            showLobby();
         }
 
         let p1 = { 
@@ -1684,24 +1926,43 @@
 
         function startAI() {
             if (!checkUserHasName()) return;
+            isBossMode = false;
             nextGameMode = 'ai';
             showCharacterSelect();
         }
 
+        // 😈 보스 피하기 게임 모드 시작
         function startBossMode() {
-            const err = document.getElementById('lobby-error-msg');
-            err.innerText = "🛠️ 현재 보스 피하기 기능은 점검 중입니다!";
-            setTimeout(() => {
-                err.innerText = "";
-            }, 3000);
+            if (!checkUserHasName()) return;
+            isBossMode = true;
+            nextGameMode = 'boss';
+            showCharacterSelect();
         }
 
+        // 👥 그룹 메뉴 열기
         function openGroupMenu() {
-            const err = document.getElementById('lobby-error-msg');
-            err.innerText = "🛠️ 현재 그룹 기능은 점검 중입니다!";
-            setTimeout(() => {
-                err.innerText = "";
-            }, 3000);
+            if (!checkUserHasName()) return;
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.remove('hidden');
+        }
+
+        function createGroupRoom() {
+            let code = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('group-room-display').innerText = "그룹 코드: " + code;
+            document.getElementById('group-room-display').classList.remove('hidden');
+            document.getElementById('group-error').style.color = "#27ae60";
+            document.getElementById('group-error').innerText = "그룹 대기실이 생성되었습니다! 친구를 초대하세요.";
+        }
+
+        function joinGroupRoom() {
+            let code = document.getElementById('group-code-input').value.trim();
+            if (code.length !== 4 || isNaN(code)) {
+                document.getElementById('group-error').style.color = "#e74c3c";
+                document.getElementById('group-error').innerText = "올바른 4자리 코드를 입력해주세요!";
+                return;
+            }
+            document.getElementById('group-error').style.color = "#27ae60";
+            document.getElementById('group-error').innerText = `[${code}] 그룹에 참가했습니다! 대기 중...`;
         }
 
         function joinRoomMatch() {
@@ -1732,6 +1993,7 @@
 
                 conn.on('open', () => {
                     err.innerText = "";
+                    isBossMode = false;
                     nextGameMode = 'friend';
                     conn.send({
                         type: 'JOIN_INFO',
@@ -1779,6 +2041,7 @@
                 conn = c;
                 conn.on('open', () => {
                     err.innerText = "친구가 접속했습니다!";
+                    isBossMode = false;
                     nextGameMode = 'friend';
                     showCharacterSelect();
                 });
@@ -1826,8 +2089,10 @@
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.remove('hidden');
 
             let equipped = getEquippedBall();
@@ -1856,7 +2121,9 @@
             let equipped = getEquippedBall();
             document.getElementById('p1-label').innerText = `${savedUsername} (${equipped.name}) (블루)`;
 
-            if (nextGameMode === 'ai') {
+            if (isBossMode) {
+                document.getElementById('p2-label').innerText = "😈 보스 몬스터 (낙하 공격)";
+            } else if (nextGameMode === 'ai') {
                 document.getElementById('p2-label').innerText = "AI 봇 (기본 볼) (레드)";
             } else {
                 document.getElementById('p2-label').innerText = `${friendName} (기본 볼) (레드)`;
@@ -1964,9 +2231,11 @@
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('myball-screen').classList.add('hidden');
             document.getElementById('mailbox-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
             document.getElementById('profile-modal').classList.add('hidden');
             
             if (!isServerUnderMaintenance || isAdminLoggedIn || isBypassedByPassword) {
@@ -2017,13 +2286,23 @@
             p1.lastSuseumiTime = Date.now();
             p1.freezeTimer = 0;
 
-            p2.type = 'standard';
-            p2.maxHp = 200;
-            p2.hp = 200;
-            p2.damage = 10;
-            p2.x = 250; p2.y = 170; 
-            let v2 = getRandomVelocity();
-            p2.vx = v2.vx; p2.vy = v2.vy;
+            if (isBossMode) {
+                p2.type = 'boss';
+                p2.maxHp = 500;
+                p2.hp = 500;
+                p2.damage = 0;
+                p2.x = 170; p2.y = 50;
+                p2.vx = 0; p2.vy = 0;
+            } else {
+                p2.type = 'standard';
+                p2.maxHp = 200;
+                p2.hp = 200;
+                p2.damage = 10;
+                p2.x = 250; p2.y = 170; 
+                let v2 = getRandomVelocity();
+                p2.vx = v2.vx; p2.vy = v2.vy;
+            }
+            
             p2.skillGauge = 0;
             p2.lastShhTime = Date.now();
             p2.freezeTimer = 0;
@@ -2037,6 +2316,8 @@
             suseumiProjectiles = [];
             bambooAttacks = [];
             tissuePursuers = [];
+            bossObstacles = [];
+            bossTimer = 0;
             
             isDoubleSpeed = false;
             speedMultiplier = 1;
@@ -2187,13 +2468,51 @@
                 if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
             }
 
-            if (p2.freezeTimer > 0) {
-                p2.freezeTimer -= speedMultiplier;
+            if (!isBossMode) {
+                if (p2.freezeTimer > 0) {
+                    p2.freezeTimer -= speedMultiplier;
+                } else {
+                    p2.x += p2.vx * speedMultiplier; 
+                    p2.y += p2.vy * speedMultiplier;
+                    if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
+                    if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+                }
             } else {
-                p2.x += p2.vx * speedMultiplier; 
-                p2.y += p2.vy * speedMultiplier;
-                if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-                if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+                // 보스 모드 장애물 떨어뜨리기
+                bossTimer += speedMultiplier;
+                if (bossTimer % 30 < 1) {
+                    bossObstacles.push({
+                        x: 20 + Math.random() * (canvas.width - 40),
+                        y: -20,
+                        radius: 12 + Math.random() * 10,
+                        speed: (3 + Math.random() * 4) * speedMultiplier,
+                        damage: 25
+                    });
+                }
+
+                p2.hp = Math.max(0, p2.hp - 0.2 * speedMultiplier);
+                updateHpBars();
+                checkGameOver();
+            }
+
+            for (let i = bossObstacles.length - 1; i >= 0; i--) {
+                let bo = bossObstacles[i];
+                bo.y += bo.speed;
+
+                let dx = bo.x - p1.x;
+                let dy = bo.y - p1.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < bo.radius + p1.radius) {
+                    p1.hp = Math.max(0, p1.hp - bo.damage);
+                    bossObstacles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+
+                if (bo.y > canvas.height + 30) {
+                    bossObstacles.splice(i, 1);
+                }
             }
 
             if (p1.type === 'sangsampany') {
@@ -2457,31 +2776,33 @@
                 }
             }
 
-            let dx = p2.x - p1.x;
-            let dy = p2.y - p1.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (!isBossMode) {
+                let dx = p2.x - p1.x;
+                let dy = p2.y - p1.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < p1.radius + p2.radius) {
-                let tempVx = p1.vx; let tempVy = p1.vy;
-                p1.vx = p2.vx; p1.vy = p2.vy;
-                p2.vx = tempVx; p2.vy = tempVy;
+                if (dist < p1.radius + p2.radius) {
+                    let tempVx = p1.vx; let tempVy = p1.vy;
+                    p1.vx = p2.vx; p1.vy = p2.vy;
+                    p2.vx = tempVx; p2.vy = tempVy;
 
-                let overlap = (p1.radius + p2.radius) - dist;
-                let nx = dx / (dist || 1);
-                let ny = dy / (dist || 1);
-                p1.x -= nx * overlap / 2;
-                p1.y -= ny * overlap / 2;
-                p2.x += nx * overlap / 2;
-                p2.y += ny * overlap / 2;
+                    let overlap = (p1.radius + p2.radius) - dist;
+                    let nx = dx / (dist || 1);
+                    let ny = dy / (dist || 1);
+                    p1.x -= nx * overlap / 2;
+                    p1.y -= ny * overlap / 2;
+                    p2.x += nx * overlap / 2;
+                    p2.y += ny * overlap / 2;
 
-                let p1Dmg = p1.damage;
-                if (p1.type === 'dongryong' && p1.hp <= 100) p1Dmg *= 2;
+                    let p1Dmg = p1.damage;
+                    if (p1.type === 'dongryong' && p1.hp <= 100) p1Dmg *= 2;
 
-                p1.hp = Math.max(0, p1.hp - p2.damage);
-                p2.hp = Math.max(0, p2.hp - p1Dmg);
+                    p1.hp = Math.max(0, p1.hp - p2.damage);
+                    p2.hp = Math.max(0, p2.hp - p1Dmg);
 
-                updateHpBars();
-                checkGameOver();
+                    updateHpBars();
+                    checkGameOver();
+                }
             }
 
             if (nextGameMode === 'friend' && isHost && conn && conn.open) {
@@ -2551,7 +2872,6 @@
             ctx.closePath();
         }
 
-        // 🖼️ 상품컴퍼니 로고 이미지로 공을 그리는 함수
         function drawSangsampanyGraphic(x, y, radius, p) {
             ctx.save();
             ctx.beginPath();
@@ -2559,10 +2879,8 @@
             ctx.clip();
 
             if (sangpumImage.complete && sangpumImage.naturalWidth !== 0) {
-                // 이미지가 정상적으로 로드된 경우 이미지 출력
                 ctx.drawImage(sangpumImage, x - radius, y - radius, radius * 2, radius * 2);
             } else {
-                // 이미지 로드 전 대체 그래픽
                 ctx.fillStyle = "#ffffff";
                 ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
                 ctx.fillStyle = "#0000ff";
@@ -2707,6 +3025,24 @@
         }
 
         function drawPlayer(p, isPlayer1) {
+            if (p.type === 'boss') {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#8e44ad';
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.font = "bold 18px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("😈 BOSS", p.x, p.y);
+                return;
+            }
+
             if (p.type === 'pokemon') {
                 drawPokeballGraphic(p.x, p.y, p.radius);
             } else if (p.type === 'dongryong') {
@@ -2750,6 +3086,23 @@
 
             drawPlayer(p1, true);
             drawPlayer(p2, false);
+
+            bossObstacles.forEach(bo => {
+                ctx.beginPath();
+                ctx.arc(bo.x, bo.y, bo.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.font = "12px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("💀", bo.x, bo.y);
+            });
 
             bambooAttacks.forEach(bm => {
                 let tx = bm.target.x;
@@ -2976,4 +3329,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+                    </html>
