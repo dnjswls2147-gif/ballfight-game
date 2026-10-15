@@ -941,7 +941,6 @@
         let mrBeastAttacks = []; 
 
         let mailClaimed = false; 
-        // 유효기간: 10월 15일 오후 9시 30분 (2026년 10월 15일 21시 30분)
         const EXPIRY_TIME = new Date(2026, 9, 15, 21, 30, 0).getTime(); 
 
         let peer = null;
@@ -1430,11 +1429,12 @@
             }
         }
 
+        // ⚽ 볼 정보 및 성능 데이터 수정
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
-            { id: 'fire', name: '화염 볼', desc: '체력: 220, 데미지: 15 & 3초마다 왕관 화염구 3개 폭격 (개당 25데미지)', price: 50, hp: 220, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 25 & 8초마다 30데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 25, owned: false, equipped: false },
-            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 25 & 10초마다 2초간 300개 이상 폭풍 폭격 (개당 10데미지)', price: 300, hp: 300, damage: 25, owned: false, equipped: false },
+            { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격 (개당 15데미지)', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격 (1초 정지)', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 2초간 30개 이상 폭풍 폭격 (개당 3데미지)', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
             { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 1초마다 "쉿" 발사. 5초마다 어몽어스 벤트 습격(85데미지). HP 100 이하 시 붉어지며 2배 각성!', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
             { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 (기본 공격 없음) & 9초마다 경기장 맨 위에서 미스터비스트 밈 댄스를 추며 상대를 아래로 내려찍어 폭격! (총 150 데미지)', price: 1500, hp: 300, damage: 0, owned: false, equipped: false }
         ];
@@ -2076,6 +2076,7 @@
             });
         }
 
+        // 🔥 스킬 로직 수정: 아이스 볼 (12초 = 720프레임 기준, 20데미지)
         function triggerIceUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 4; i++) {
@@ -2087,13 +2088,14 @@
                         y: -60,
                         size: 55,
                         speed: 5 * speedMultiplier,
-                        damage: 30,
+                        damage: 20, // 30 -> 20 수정
                         target: target
                     });
                 }, i * 350);
             }
         }
 
+        // 🔥 스킬 로직 수정: 화염 볼 (8초 = 480프레임 기준, 개당 15데미지)
         function triggerFireUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
             for (let i = 0; i < 3; i++) {
@@ -2105,16 +2107,17 @@
                         y: -80,
                         radius: 40,
                         speed: 6 * speedMultiplier,
-                        damage: 25,
+                        damage: 15, // 25 -> 15 수정
                         target: target
                     });
                 }, i * 400);
             }
         }
 
+        // 🔥 스킬 로직 수정: 포켓몬 볼 (8초 = 480프레임 기준, 2초간 35개 폭풍 공격, 개당 3데미지)
         function triggerPokemonUltimate(owner) {
             let target = (owner === p1) ? p2 : p1;
-            let totalCount = 310; 
+            let totalCount = 35; // 30개 이상 폭풍 공격
             let delayInterval = 2000 / totalCount; 
 
             for (let i = 0; i < totalCount; i++) {
@@ -2126,7 +2129,7 @@
                         y: -30,
                         radius: 11,
                         speed: (5 + Math.random() * 5) * speedMultiplier,
-                        damage: 10,
+                        damage: 3, // 10 -> 3 수정
                         target: target
                     });
                 }, i * delayInterval);
@@ -2189,7 +2192,8 @@
                     });
                 }
             } else if (p1.type === 'ice') {
-                p1.skillGauge += (1 / 480) * speedMultiplier;
+                // 12초 쿨타임 (12초 * 60프레임 = 720프레임)
+                p1.skillGauge += (1 / 720) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerIceUltimate(p1);
@@ -2208,17 +2212,19 @@
                         vy: (dy / dist) * 6 * speedMultiplier,
                         radius: 8,
                         target: p2,
-                        damage: 25
+                        damage: 15
                     });
                 }
             } else if (p1.type === 'fire') {
-                p1.skillGauge += (1 / 180) * speedMultiplier;
+                // 8초 쿨타임 (8초 * 60프레임 = 480프레임)
+                p1.skillGauge += (1 / 480) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerFireUltimate(p1);
                 }
             } else if (p1.type === 'pokemon') {
-                p1.skillGauge += (1 / 600) * speedMultiplier;
+                // 8초 쿨타임 (8초 * 60프레임 = 480프레임)
+                p1.skillGauge += (1 / 480) * speedMultiplier;
                 if (p1.skillGauge >= 1) {
                     p1.skillGauge = 0;
                     triggerPokemonUltimate(p1);
