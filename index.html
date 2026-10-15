@@ -990,11 +990,13 @@
             isDragging = false;
         });
 
-        // ★★★ status.json 파일을 주기적으로 확인하여 점검 상태 동기화 ★★★
+        // ★★★ status.json 파일을 주기적으로 확인하여 점검 상태 동기화 (오류 안전처리 추가) ★★★
         function checkMaintenanceStatus() {
-            // 캐시 방지를 위해 현재 시간 파라미터(?t=...) 추가
             fetch('status.json?t=' + new Date().getTime())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error("status.json 파일 없음");
+                    return response.json();
+                })
                 .then(data => {
                     if (data && typeof data.maintenance === 'boolean') {
                         isServerUnderMaintenance = data.maintenance;
@@ -1002,7 +1004,9 @@
                     }
                 })
                 .catch(err => {
-                    console.log("status.json 읽기 오류:", err);
+                    // status.json 파일이 없거나 로드 실패 시 점검 상태를 false로 유지하여 정상 작동 보장
+                    isServerUnderMaintenance = false;
+                    applyMaintenanceUI();
                 });
         }
 
@@ -1022,10 +1026,22 @@
                 document.getElementById('mailbox-screen').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
-                if (!savedUsername && document.getElementById('lobby-screen').classList.contains('hidden') && document.getElementById('char-select-screen').classList.contains('hidden') && document.getElementById('game-screen').classList.contains('hidden')) {
-                    document.getElementById('name-modal').classList.remove('hidden');
-                } else if (savedUsername && document.getElementById('name-modal').classList.contains('hidden')) {
-                    // 정상 플레이 중
+                // 다른 화면이 활성화되어 있지 않고 이름이 없거나 로비 화면이어야 할 때 적절히 표시
+                const isAnyScreenActive = 
+                    !document.getElementById('lobby-screen').classList.contains('hidden') ||
+                    !document.getElementById('game-screen').classList.contains('hidden') ||
+                    !document.getElementById('friend-screen').classList.contains('hidden') ||
+                    !document.getElementById('char-select-screen').classList.contains('hidden') ||
+                    !document.getElementById('myball-screen').classList.contains('hidden') ||
+                    !document.getElementById('mailbox-screen').classList.contains('hidden') ||
+                    !document.getElementById('name-modal').classList.contains('hidden');
+
+                if (!isAnyScreenActive) {
+                    if (!savedUsername || savedUsername.startsWith("유저_")) {
+                        document.getElementById('name-modal').classList.remove('hidden');
+                    } else {
+                        document.getElementById('lobby-screen').classList.remove('hidden');
+                    }
                 }
             }
         }
@@ -1439,6 +1455,8 @@
 
         function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
+            let hasRealUsername = false;
+
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -1446,6 +1464,7 @@
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
                     if (parsed.username !== undefined && parsed.username.trim() !== "") {
                         savedUsername = parsed.username;
+                        hasRealUsername = true;
                     }
                     if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
                     if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
@@ -1472,15 +1491,20 @@
                 try { claimedMailIds = JSON.parse(savedClaimedIds); } catch(e) {}
             }
 
-            if (!savedUsername) {
-                let tempName = "유저_" + Math.floor(1000 + Math.random() * 9000);
-                savedUsername = tempName;
-            }
-
             syncGlobalUsers();
             checkMaintenanceStatus();
 
-            checkUserBanStatus(savedUsername);
+            // 유저 이름이 없거나 임시 이름이면 이름 설정 모달 오픈, 아니면 로비 오픈
+            if (!hasRealUsername) {
+                document.getElementById('name-modal').classList.remove('hidden');
+                document.getElementById('lobby-screen').classList.add('hidden');
+            } else {
+                if (!checkUserBanStatus(savedUsername)) {
+                    document.getElementById('name-modal').classList.add('hidden');
+                    document.getElementById('lobby-screen').classList.remove('hidden');
+                }
+            }
+
             checkMailRedDot();
             updateCoinsUI();
         }
