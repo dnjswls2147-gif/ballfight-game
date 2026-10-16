@@ -568,6 +568,22 @@
             border-color: #962d22;
         }
 
+        .bgm-btn {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            background: #27ae60;
+            color: white;
+            border: 2px solid #1e8449;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         .joystick-container {
             display: flex;
             justify-content: space-between;
@@ -1021,6 +1037,7 @@
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
         <div class="canvas-container">
+            <button class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔊 BGM 켜기</button>
             <canvas id="gameCanvas" width="340" height="340"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
@@ -1169,32 +1186,55 @@
             isDragging = false;
         });
 
-        // 사용자가 아무 버튼이나 누를 때 사전에 BGM 오디오 잠금 해제 (모바일 브라우저 대응)
-        document.addEventListener('click', function unlockAudio() {
+        // BGM 켜고 끄기 함수 (직접 클릭)
+        function toggleBGM() {
             const bgm = document.getElementById('bgm');
-            if (bgm) {
-                bgm.play().then(() => {
-                    bgm.pause();
-                    bgm.currentTime = 0;
-                }).catch(e => {});
-            }
-            document.removeEventListener('click', unlockAudio);
-        }, { once: true });
+            const btn = document.getElementById('bgm-btn');
+            if (!bgm) return;
 
-        // BGM 자동 재생 / 정지 함수
+            if (bgm.paused) {
+                bgm.play().then(() => {
+                    btn.innerText = "🔊 BGM 끄기";
+                    btn.style.background = "#e74c3c";
+                }).catch(e => {
+                    alert("음원을 재생할 수 없습니다.");
+                });
+            } else {
+                bgm.pause();
+                btn.innerText = "🔊 BGM 켜기";
+                btn.style.background = "#27ae60";
+            }
+        }
+
         function playSansBGM() {
             const bgm = document.getElementById('bgm');
+            const btn = document.getElementById('bgm-btn');
             if (bgm) {
                 bgm.currentTime = 0;
-                bgm.play().catch(e => console.log("터치 이벤트 후 재생 가능합니다."));
+                bgm.play().then(() => {
+                    if (btn) {
+                        btn.innerText = "🔊 BGM 끄기";
+                        btn.style.background = "#e74c3c";
+                    }
+                }).catch(e => {
+                    if (btn) {
+                        btn.innerText = "🔊 BGM 켜기";
+                        btn.style.background = "#27ae60";
+                    }
+                });
             }
         }
 
         function stopSansBGM() {
             const bgm = document.getElementById('bgm');
+            const btn = document.getElementById('bgm-btn');
             if (bgm) {
                 bgm.pause();
                 bgm.currentTime = 0;
+            }
+            if (btn) {
+                btn.innerText = "🔊 BGM 켜기";
+                btn.style.background = "#27ae60";
             }
         }
 
@@ -2188,7 +2228,7 @@
                 document.getElementById('p2-label').innerText = "😈 L 보스 (체력: 750)";
                 document.getElementById('boss-joystick-panel').classList.remove('hidden');
                 document.getElementById('game-event-date').classList.remove('hidden');
-                playSansBGM(); // 보스전 진입 시 샌즈 BGM 자동 재생
+                playSansBGM();
             } else {
                 stopSansBGM();
                 document.getElementById('boss-joystick-panel').classList.add('hidden');
@@ -2301,7 +2341,7 @@
         }
 
         function showLobby() {
-            stopSansBGM(); // 로비로 탈출하면 BGM 멈춤
+            stopSansBGM();
 
             if (timerInterval) clearInterval(timerInterval);
             if (countdownInterval) clearInterval(countdownInterval);
@@ -2433,7 +2473,7 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
-                stopSansBGM(); // 게임 오버되면 BGM 멈춤
+                stopSansBGM();
 
                 if (p1.hp > 0 && p2.hp <= 0) {
                     gameOverState = 'win';
