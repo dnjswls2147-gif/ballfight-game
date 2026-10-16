@@ -34,7 +34,6 @@
         }
         .hidden { display: none !important; }
 
-        /* 보스전 화면 우측 상단 이벤트 기간 텍스트 */
         .boss-event-date-text {
             position: absolute;
             top: 10px;
@@ -569,7 +568,6 @@
             border-color: #962d22;
         }
 
-        /* 🕹️ 마인크래프트 방식 조이스틱 버튼 */
         .joystick-container {
             display: flex;
             justify-content: space-between;
@@ -892,7 +890,6 @@
         </div>
     </div>
 
-    <!-- 메인 로비 (이벤트 기간 텍스트 제거됨) -->
     <div class="container hidden" id="lobby-screen">
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">👤 프로필</button>
@@ -1018,7 +1015,6 @@
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
     </div>
 
-    <!-- 대전 게임 화면 (보스전용 기간 텍스트 추가) -->
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
         <div class="canvas-container">
@@ -1026,7 +1022,6 @@
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
-        <!-- 마인크래프트 방식 조이스틱 이동 컨트롤러 -->
         <div class="joystick-container hidden" id="boss-joystick-panel">
             <button class="joystick-btn" 
                 ontouchstart="startMoveLeft(event)" onmousedown="startMoveLeft(event)" 
@@ -1104,14 +1099,12 @@
 
         let currentRankingType = 'trophy';
 
-        // 😈 보스전 전용 변수
         let isBossMode = false;
         let bossTimerFrames = 0; 
         let bossObstacles = [];
         let bossTextObstacles = [];
 
-        // 마인크래프트 방식 조이스틱 이동 변수
-        let moveDirection = 0; // -1: 왼쪽, 1: 오른쪽, 0: 정지
+        let moveDirection = 0;
 
         let projectiles = [];
         let iceFallBlocks = [];
@@ -2194,7 +2187,6 @@
             }, 1000);
         }
 
-        // 마인크래프트 방식 조이스틱 연속 이동 함수들
         function startMoveLeft(e) {
             e.preventDefault();
             if (!gameStarted || !isBossMode) return;
@@ -2336,7 +2328,7 @@
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
             p1.x = 170; 
-            p1.y = 310; // 볼을 더 밑에 위치시킴
+            p1.y = 310;
             p1.radius = isBossMode ? 12 : 24; 
             
             let v1 = getRandomVelocity();
@@ -2445,54 +2437,51 @@
                     if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
                 }
             } else {
-                // 마인크래프트 방식 조이스틱 이동 처리 (꾸준히 이동)
                 if (moveDirection !== 0) {
                     p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 5 * speedMultiplier));
                 }
 
                 bossTimerFrames += speedMultiplier;
 
-                // 1단계: 처음 5초(300프레임)동안 0.5초마다 더 큰 공 2개씩 낙하
-                if (bossTimerFrames <= 300) {
-                    if (Math.floor(bossTimerFrames) % 30 < speedMultiplier) {
+                // 1단계: 7초(420프레임)동안 더 크고 70개 이상의 공이 떨어지도록 설정
+                if (bossTimerFrames <= 420) {
+                    if (Math.floor(bossTimerFrames) % 10 < speedMultiplier) {
                         for (let k = 0; k < 2; k++) {
                             bossObstacles.push({
                                 x: 25 + Math.random() * (canvas.width - 50),
-                                y: -25,
-                                radius: 18 + Math.random() * 8, // 더 커진 공 크기
+                                y: -30,
+                                radius: 22 + Math.random() * 10, // 더 커진 공 크기
                                 speed: (4 + Math.random() * 3) * speedMultiplier,
-                                damage: 25
+                                damage: 5 // 데미지 5로 설정
                             });
                         }
                     }
                 } 
-                // 2단계: 5초 이후, 패턴 2회 반복 (L 먼저 -> 2초 뒤 '가져가')
-                else if (bossTimerFrames > 300 && bossTimerFrames <= 1100) {
-                    let relFrame = bossTimerFrames - 300;
-                    // 첫 번째 반복 (0초: L, 2초: 가져가)
+                // 2단계: 7초 이후, 패턴 2회 반복 (L 먼저 -> 2초 뒤 '가져가')
+                else if (bossTimerFrames > 420 && bossTimerFrames <= 1220) {
+                    let relFrame = bossTimerFrames - 420;
                     if (Math.abs(relFrame - 0) < speedMultiplier) {
-                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
                     }
                     if (Math.abs(relFrame - 120) < speedMultiplier) {
-                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.25, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.5, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
                     }
-                    // 두 번째 반복 (10초: L, 12초: 가져가)
                     if (Math.abs(relFrame - 300) < speedMultiplier) {
-                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
                     }
                     if (Math.abs(relFrame - 420) < speedMultiplier) {
-                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.25, y: -50, width: canvas.width / 2, height: 80, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.5, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
                     }
                 } 
-                // 3단계: 마지막 5초 동안 보스 처치 기회 부여 (체력 깎기)
-                else if (bossTimerFrames > 1100 && bossTimerFrames <= 1400) {
+                // 3단계: 마지막 5초 동안 보스 처치 기회 부여
+                else if (bossTimerFrames > 1220 && bossTimerFrames <= 1520) {
                     p2.hp = Math.max(0, p2.hp - 2.5 * speedMultiplier);
                     updateHpBars();
                     checkGameOver();
                 }
             }
 
-            // 일반 장애물 충돌
+            // 일반 장애물 충돌 (데미지 5)
             for (let i = bossObstacles.length - 1; i >= 0; i--) {
                 let bo = bossObstacles[i];
                 bo.y += bo.speed;
@@ -2509,7 +2498,7 @@
                 if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
             }
 
-            // 텍스트 장애물 충돌 (오직 텍스트만)
+            // 텍스트 장애물 충돌 (경기장 절반 너비 적용)
             for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
                 let bto = bossTextObstacles[i];
                 bto.y += bto.speed;
@@ -2652,22 +2641,22 @@
                 ctx.stroke();
                 ctx.closePath();
 
-                ctx.font = "12px sans-serif";
+                ctx.font = "14px sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText("💀", bo.x, bo.y);
             });
 
-            // 텍스트 장애물 (박스 배경 없이 오직 텍스트만)
+            // 텍스트 장애물 (경기장 절반 너비 꽉 채우도록 폰트 확대)
             bossTextObstacles.forEach(bto => {
                 ctx.save();
-                ctx.font = "900 32px sans-serif";
+                ctx.font = "900 44px sans-serif";
                 ctx.fillStyle = "#e74c3c";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 4;
+                ctx.lineWidth = 5;
                 ctx.strokeText(bto.text, bto.x, bto.y);
                 ctx.fillText(bto.text, bto.x, bto.y);
                 ctx.restore();
@@ -2731,4 +2720,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                </html>
+</html>
