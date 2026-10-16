@@ -744,7 +744,7 @@
 </head>
 <body>
 
-    <!-- BGM 오디오 태그 추가 -->
+    <!-- 샌즈 BGM 오디오 태그 -->
     <audio id="bgm" loop src="https://ia803008.us.archive.org/28/items/Megalovania_201701/Megalovania.mp3"></audio>
 
     <div id="maintenance-screen" class="hidden">
@@ -910,11 +910,8 @@
             <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
             <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
-        
-        <!-- BGM 컨트롤 버튼 추가 -->
-        <button class="btn" style="background:#9b59b6; margin-top: 5px; margin-bottom: 5px;" onclick="toggleBGM()">🎵 샌즈 BGM 켜기 / 끄기</button>
 
-        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 5px;">AI 자동 매칭</button>
+        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 10px;">AI 자동 매칭</button>
         <button class="btn btn-boss" onclick="startBossMode()" style="margin-top: 6px;">😈 보스 피하기</button>
         <div style="display: flex; gap: 6px;">
             <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 6px;">친구 플레이</button>
@@ -1172,25 +1169,12 @@
             isDragging = false;
         });
 
-        // BGM 관련 함수 추가
-        function toggleBGM() {
-            const bgm = document.getElementById('bgm');
-            if (bgm.paused) {
-                bgm.play().then(() => {
-                    console.log("BGM 재생 시작");
-                }).catch(err => {
-                    alert("음악을 재생하려면 화면을 한 번 클릭해 주세요!");
-                });
-            } else {
-                bgm.pause();
-            }
-        }
-
+        // BGM 자동 재생 / 정지 함수
         function playSansBGM() {
             const bgm = document.getElementById('bgm');
             if (bgm) {
                 bgm.currentTime = 0;
-                bgm.play().catch(e => console.log("자동 재생 정책으로 인해 클릭 후 재생됩니다."));
+                bgm.play().catch(e => console.log("자동 재생 정책으로 인해 터치 후 재생됩니다."));
             }
         }
 
@@ -1198,6 +1182,7 @@
             const bgm = document.getElementById('bgm');
             if (bgm) {
                 bgm.pause();
+                bgm.currentTime = 0;
             }
         }
 
@@ -1991,6 +1976,7 @@
 
         function startAI() {
             if (!checkUserHasName()) return;
+            stopSansBGM();
             isBossMode = false;
             nextGameMode = 'ai';
             showCharacterSelect();
@@ -2056,6 +2042,7 @@
 
                 conn.on('open', () => {
                     err.innerText = "";
+                    stopSansBGM();
                     isBossMode = false;
                     nextGameMode = 'friend';
                     conn.send({
@@ -2104,6 +2091,7 @@
                 conn = c;
                 conn.on('open', () => {
                     err.innerText = "친구가 접속했습니다!";
+                    stopSansBGM();
                     isBossMode = false;
                     nextGameMode = 'friend';
                     showCharacterSelect();
@@ -2188,7 +2176,9 @@
                 document.getElementById('p2-label').innerText = "😈 L 보스 (체력: 750)";
                 document.getElementById('boss-joystick-panel').classList.remove('hidden');
                 document.getElementById('game-event-date').classList.remove('hidden');
+                playSansBGM(); // 보스전 진입 시 샌즈 BGM 자동 재생
             } else {
+                stopSansBGM();
                 document.getElementById('boss-joystick-panel').classList.add('hidden');
                 document.getElementById('game-event-date').classList.add('hidden');
                 if (nextGameMode === 'ai') {
@@ -2243,6 +2233,9 @@
             if (nextGameMode === 'friend' && conn && conn.open) {
                 conn.send({ type: 'RETRY_GAME' });
             }
+            if (isBossMode) {
+                playSansBGM();
+            }
             startCountdownAndGame();
         }
 
@@ -2296,6 +2289,8 @@
         }
 
         function showLobby() {
+            stopSansBGM(); // 로비로 탈출하면 BGM 멈춤
+
             if (timerInterval) clearInterval(timerInterval);
             if (countdownInterval) clearInterval(countdownInterval);
 
@@ -2426,6 +2421,7 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
+                stopSansBGM(); // 게임 오버되면 BGM 멈춤
 
                 if (p1.hp > 0 && p2.hp <= 0) {
                     gameOverState = 'win';
@@ -2478,7 +2474,6 @@
 
                 bossTimerFrames += speedMultiplier;
 
-                // 1단계: 8초(480프레임)동안 내 공 크기(12px)만한 장애물 공 100개 이상 폭풍 낙하 (데미지 15)
                 if (bossTimerFrames <= 480) {
                     if (Math.floor(bossTimerFrames) % 4 < speedMultiplier) {
                         bossObstacles.push({
@@ -2490,7 +2485,6 @@
                         });
                     }
                 } 
-                // 2단계: 8초가 딱 지난 후, 3회 반복 패턴 ('L' 오른쪽 -> 2초 뒤 '을 가져가' 왼쪽)
                 else if (bossTimerFrames > 480 && bossTimerFrames <= 1680) {
                     let relFrame = bossTimerFrames - 480;
                     if (Math.abs(relFrame - 0) < speedMultiplier) {
