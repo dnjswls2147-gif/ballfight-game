@@ -1,16 +1,12 @@
-// 게임 시작 시 BGM 재생
-function playSansBGM() {
+function toggleBGM() {
     const bgm = document.getElementById('bgm');
-    if (bgm) {
-        bgm.currentTime = 0; // 처음부터 재생
-        bgm.play().catch(e => console.log("자동 재생 정책으로 인해 클릭 후 재생됩니다."));
-    }
-}
-
-// 로비로 돌아가거나 게임이 끝날 때 BGM 끄기
-function stopSansBGM() {
-    const bgm = document.getElementById('bgm');
-    if (bgm) {
+    if (bgm.paused) {
+        bgm.play().then(() => {
+            console.log("BGM 재생 시작");
+        }).catch(err => {
+            alert("음악을 재생하려면 화면을 한 번 클릭해 주세요!");
+        });
+    } else {
         bgm.pause();
     }
 }
