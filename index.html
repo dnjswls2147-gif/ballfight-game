@@ -760,8 +760,8 @@
 </head>
 <body>
 
-    <!-- 샌즈 Megalovania 유튜브 오디오 플레이어 (차단 완벽 우회) -->
-    <iframe id="bgm" width="0" height="0" src="https://www.youtube.com/embed/wDgQdr8Zktw?enablejsapi=1" allow="autoplay" style="display:none;"></iframe>
+    <!-- 🎵 샌즈 Megalovania 안정적인 오디오 태그 -->
+    <audio id="bgm" loop src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" preload="auto"></audio>
 
     <div id="maintenance-screen" class="hidden">
         <h1>🚨 지금 점검 중입니다!</h1>
@@ -1186,24 +1186,40 @@
             isDragging = false;
         });
 
-        // 🎵 유튜브 BGM 제어 함수 (모바일 보안 완벽 해결)
+        // 🎵 모바일 오디오 자동 재생 제한 완벽 해제 코드
+        document.addEventListener('click', function unlockAudioOnce() {
+            const bgm = document.getElementById('bgm');
+            if (bgm) {
+                bgm.play().then(() => {
+                    bgm.pause();
+                    bgm.currentTime = 0;
+                }).catch(e => {});
+            }
+            document.removeEventListener('click', unlockAudioOnce);
+        }, { once: true });
+
         function playSansBGM() {
             const bgm = document.getElementById('bgm');
             const btn = document.getElementById('bgm-btn');
-            if (bgm && bgm.contentWindow) {
-                bgm.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                if (btn) {
-                    btn.innerText = "🔊 BGM 끄기";
-                    btn.style.background = "#e74c3c";
-                }
+            if (bgm) {
+                bgm.currentTime = 0;
+                bgm.play().then(() => {
+                    if (btn) {
+                        btn.innerText = "🔊 BGM 끄기";
+                        btn.style.background = "#e74c3c";
+                    }
+                }).catch(e => {
+                    alert("음원을 재생할 수 없습니다. 화면을 한 번 터치한 후 다시 시도해 주세요.");
+                });
             }
         }
 
         function stopSansBGM() {
             const bgm = document.getElementById('bgm');
             const btn = document.getElementById('bgm-btn');
-            if (bgm && bgm.contentWindow) {
-                bgm.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            if (bgm) {
+                bgm.pause();
+                bgm.currentTime = 0;
             }
             if (btn) {
                 btn.innerText = "🔊 BGM 켜기";
@@ -1212,8 +1228,11 @@
         }
 
         function toggleBGM() {
+            const bgm = document.getElementById('bgm');
             const btn = document.getElementById('bgm-btn');
-            if (btn && btn.innerText.includes("켜기")) {
+            if (!bgm) return;
+
+            if (bgm.paused) {
                 playSansBGM();
             } else {
                 stopSansBGM();
@@ -2780,4 +2799,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-        </html>
+</html>
