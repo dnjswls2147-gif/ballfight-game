@@ -1,22 +1,487 @@
-<!-- MP4 파일 오디오 재생용 태그 -->
-<video id="bgm" loop style="display:none;" playsinline>
-    <source src="sans.mp4" type="video/mp4">
-</video>
-// BGM (MP4) 재생 및 정지 함수
-function playSansBGM() {
-    const bgm = document.getElementById('bgm');
-    if (bgm) {
-        bgm.currentTime = 0; // 처음부터 재생
-        bgm.play().catch(e => {
-            console.log("재생 오류:", e);
-        });
-    }
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>릴리 볼 파이트 - 보스전 전용</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background-color: #2c163a;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 380px;
+            background: #fff8e8;
+            border: 3px solid #e67e22;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+            text-align: center;
+            position: relative;
+        }
+        .boss-event-date-text {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #d35400;
+            z-index: 25;
+        }
+        h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .version-text { font-size: 11px; color: #7f8c8d; margin-bottom: 10px; font-weight: bold; }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto 12px auto;
+            border: 3px solid #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #ffffff;
+        }
+        .bgm-btn {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            background: #27ae60;
+            color: white;
+            border: 2px solid #1e8449;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .speed-btn {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: #d35400;
+            color: white;
+            border: 2px solid #a04000;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .speed-btn.active {
+            background: #c0392b;
+            border-color: #962d22;
+        }
+        .joystick-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .joystick-btn {
+            flex: 1;
+            padding: 14px 0;
+            background: #e67e22;
+            color: white;
+            border: 2px solid #d35400;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a04000;
+            touch-action: manipulation;
+        }
+        .joystick-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #a04000;
+        }
+        .hp-bar {
+            position: relative;
+            width: 100%;
+            height: 22px;
+            background: #e0e0e0;
+            border: 2.5px solid #2c3e50;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .hp-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #2980b9;
+            transition: width 0.1s;
+        }
+        .hp-fill.p2 { background-color: #c0392b; }
+        .hp-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000000;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-retry { background-color: #27ae60; }
+        .btn-back { background-color: #d35400; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
 
-function stopSansBGM() {
-    const bgm = document.getElementById('bgm');
-    if (bgm) {
-        bgm.pause();
-        bgm.currentTime = 0;
-    }
-}
+    <!-- 🎵 MP4 샌즈 노래 영상 오디오/비디오 소스 (깃허브 리포지토리에 업로드한 mp4 파일명을 여기에 적어주세요) -->
+    <video id="sans-bgm-video" src="sans_song.mp4" loop style="display:none;"></video>
+
+    <div class="container" id="game-screen">
+        <h2>😈 릴리 볼 파이트 - 보스전</h2>
+        <div class="boss-event-date-text">10월15일~10월22일</div>
+        <div class="canvas-container">
+            <button class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔊 BGM 켜기</button>
+            <canvas id="gameCanvas" width="340" height="340"></canvas>
+            <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
+        </div>
+        
+        <div class="joystick-container" id="boss-joystick-panel">
+            <button class="joystick-btn" 
+                ontouchstart="startMoveLeft(event)" onmousedown="startMoveLeft(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">◀ 왼쪽</button>
+            <button class="joystick-btn" 
+                ontouchstart="startMoveRight(event)" onmousedown="startMoveRight(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">오른쪽 ▶</button>
+        </div>
+
+        <div class="label" id="p1-label" style="color: #2980b9;">플레이어 (블루)</div>
+        <div class="hp-bar">
+            <div class="hp-fill" id="p1-hp"></div>
+            <div class="hp-text" id="p1-hp-text">200 / 200</div>
+        </div>
+
+        <div class="label" id="p2-label" style="color: #c0392b;">😈 L 보스 (체력: 750)</div>
+        <div class="hp-bar">
+            <div class="hp-fill p2" id="p2-hp"></div>
+            <div class="hp-text" id="p2-hp-text">750 / 750</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button class="btn btn-retry hidden" id="btn-game-retry" onclick="retryGame()" style="margin-top: 0; flex: 1;">🔄 다시 플레이</button>
+            <button class="btn btn-back" id="btn-game-lobby" onclick="location.href='index.html'" style="margin-top: 0; flex: 1;">🏠 메인 로비로</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameStarted = true;
+        let gameOverState = null;
+        let isDoubleSpeed = false;
+        let speedMultiplier = 1;
+        let bossTimerFrames = 0;
+        let bossObstacles = [];
+        let bossTextObstacles = [];
+        let moveDirection = 0;
+
+        let p1 = { x: 170, y: 310, radius: 12, hp: 200, maxHp: 200 };
+        let p2 = { hp: 750, maxHp: 750 };
+
+        // 🎵 MP4 영상 BGM 재생/일시정지 제어
+        function playSansBGM() {
+            const video = document.getElementById('sans-bgm-video');
+            const btn = document.getElementById('bgm-btn');
+            if (video) {
+                video.currentTime = 0;
+                video.play().then(() => {
+                    if (btn) {
+                        btn.innerText = "🔊 BGM 끄기";
+                        btn.style.background = "#e74c3c";
+                    }
+                }).catch(e => {
+                    alert("음원 재생이 차단되었습니다. 화면을 터치한 뒤 다시 시도해 주세요.");
+                });
+            }
+        }
+
+        function stopSansBGM() {
+            const video = document.getElementById('sans-bgm-video');
+            const btn = document.getElementById('bgm-btn');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+            if (btn) {
+                btn.innerText = "🔊 BGM 켜기";
+                btn.style.background = "#27ae60";
+            }
+        }
+
+        function toggleBGM() {
+            const video = document.getElementById('sans-bgm-video');
+            if (!video) return;
+            if (video.paused) {
+                playSansBGM();
+            } else {
+                stopSansBGM();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') moveDirection = -1;
+            if (e.key === 'ArrowRight' || e.key === 'd') moveDirection = 1;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') {
+                moveDirection = 0;
+            }
+        });
+
+        function startMoveLeft(e) {
+            e.preventDefault();
+            moveDirection = -1;
+        }
+
+        function startMoveRight(e) {
+            e.preventDefault();
+            moveDirection = 1;
+        }
+
+        function stopMove() {
+            moveDirection = 0;
+        }
+
+        function resetGameState() {
+            p1.x = 170;
+            p1.y = 310;
+            p1.hp = 200;
+            p2.hp = 750;
+            bossTimerFrames = 0;
+            bossObstacles = [];
+            bossTextObstacles = [];
+            gameOverState = null;
+            gameStarted = true;
+            document.getElementById('btn-game-retry').classList.add('hidden');
+            updateHpBars();
+            playSansBGM();
+        }
+
+        function retryGame() {
+            resetGameState();
+        }
+
+        function toggleSpeed() {
+            isDoubleSpeed = !isDoubleSpeed;
+            speedMultiplier = isDoubleSpeed ? 2 : 1;
+            const btn = document.getElementById('speed-toggle-btn');
+            if (isDoubleSpeed) {
+                btn.innerText = "⚡ 2X 온 (ON)";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "⚡ 2X 배속";
+                btn.classList.remove('active');
+            }
+        }
+
+        function updateHpBars() {
+            document.getElementById('p1-hp').style.width = Math.max(0, (p1.hp / p1.maxHp * 100)) + '%';
+            document.getElementById('p1-hp-text').innerText = Math.max(0, Math.ceil(p1.hp)) + " / " + p1.maxHp;
+            document.getElementById('p2-hp').style.width = Math.max(0, (p2.hp / p2.maxHp * 100)) + '%';
+            document.getElementById('p2-hp-text').innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
+        }
+
+        function checkGameOver() {
+            if (p1.hp <= 0 || p2.hp <= 0) {
+                gameStarted = false;
+                stopSansBGM();
+
+                if (p1.hp > 0 && p2.hp <= 0) {
+                    gameOverState = 'win';
+                } else {
+                    gameOverState = 'lose';
+                }
+                document.getElementById('btn-game-retry').classList.remove('hidden');
+            }
+        }
+
+        function update() {
+            if (!gameStarted) return;
+
+            if (moveDirection !== 0) {
+                p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 5 * speedMultiplier));
+            }
+
+            bossTimerFrames += speedMultiplier;
+
+            if (bossTimerFrames <= 480) {
+                if (Math.floor(bossTimerFrames) % 4 < speedMultiplier) {
+                    bossObstacles.push({
+                        x: 15 + Math.random() * (canvas.width - 30),
+                        y: -15,
+                        radius: 12,
+                        speed: (4.5 + Math.random() * 3.5) * speedMultiplier,
+                        damage: 15
+                    });
+                }
+            } else if (bossTimerFrames > 480 && bossTimerFrames <= 1680) {
+                let relFrame = bossTimerFrames - 480;
+                if (Math.abs(relFrame - 0) < speedMultiplier) {
+                    bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                }
+                if (Math.abs(relFrame - 120) < speedMultiplier) {
+                    bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                }
+            }
+
+            for (let i = bossObstacles.length - 1; i >= 0; i--) {
+                let bo = bossObstacles[i];
+                bo.y += bo.speed;
+                let dx = bo.x - p1.x;
+                let dy = bo.y - p1.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < bo.radius + p1.radius) {
+                    p1.hp = Math.max(0, p1.hp - bo.damage);
+                    bossObstacles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+                if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
+            }
+
+            for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
+                let bto = bossTextObstacles[i];
+                bto.y += bto.speed;
+                let hitX = bto.x - bto.width / 2;
+                if (p1.x + p1.radius > hitX && p1.x - p1.radius < hitX + bto.width &&
+                    p1.y + p1.radius > bto.y && p1.y - p1.radius < bto.y + bto.height) {
+                    p1.hp = Math.max(0, p1.hp - bto.damage);
+                    bossTextObstacles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+                if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
+            }
+
+            // 보스 체력이 시간에 따라 깎이도록 설정 (예시)
+            p2.hp = Math.max(0, 750 - (bossTimerFrames * 0.2));
+            if (p2.hp <= 0) checkGameOver();
+            updateHpBars();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 플레이어 그리기
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#2980b9';
+            ctx.fill();
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = "#2ecc71";
+            ctx.stroke();
+            ctx.closePath();
+
+            // 보스 장애물 그리기
+            bossObstacles.forEach(bo => {
+                ctx.beginPath();
+                ctx.arc(bo.x, bo.y, bo.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+                ctx.font = "10px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("💀", bo.x, bo.y);
+            });
+
+            // 텍스트 장애물 그리기
+            bossTextObstacles.forEach(bto => {
+                ctx.save();
+                ctx.font = bto.text === 'L' ? "900 65px sans-serif" : "900 45px sans-serif";
+                ctx.fillStyle = "#e74c3c";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 5;
+                ctx.strokeText(bto.text, bto.x, bto.y);
+                ctx.fillText(bto.text, bto.x, bto.y);
+                ctx.restore();
+            });
+
+            // 게임 오버 화면
+            if (gameOverState) {
+                ctx.save();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = "900 42px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                let resultText = gameOverState === 'win' ? "🎉 보스 처치!" : "패배";
+                let textColor = gameOverState === 'win' ? "#2ecc71" : "#e74c3c";
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 6;
+                ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
+                ctx.fillStyle = textColor;
+                ctx.fillText(resultText, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // 페이지 로드 시 자동 BGM 대기
+        playSansBGM();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
