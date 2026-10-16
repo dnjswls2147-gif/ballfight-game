@@ -1,0 +1,22 @@
+<!-- MP4 파일 오디오 재생용 태그 -->
+<video id="bgm" loop style="display:none;" playsinline>
+    <source src="sans.mp4" type="video/mp4">
+</video>
+// BGM (MP4) 재생 및 정지 함수
+function playSansBGM() {
+    const bgm = document.getElementById('bgm');
+    if (bgm) {
+        bgm.currentTime = 0; // 처음부터 재생
+        bgm.play().catch(e => {
+            console.log("재생 오류:", e);
+        });
+    }
+}
+
+function stopSansBGM() {
+    const bgm = document.getElementById('bgm');
+    if (bgm) {
+        bgm.pause();
+        bgm.currentTime = 0;
+    }
+}
