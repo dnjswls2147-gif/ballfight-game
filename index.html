@@ -1,5 +1,16 @@
-<!-- BGM 오디오 태그 (Megalovania 음원 링크) -->
-<audio id="bgm" loop src="https://ia803008.us.archive.org/28/items/Megalovania_201701/Megalovania.mp3"></audio>
+// 게임 시작 시 BGM 재생
+function playSansBGM() {
+    const bgm = document.getElementById('bgm');
+    if (bgm) {
+        bgm.currentTime = 0; // 처음부터 재생
+        bgm.play().catch(e => console.log("자동 재생 정책으로 인해 클릭 후 재생됩니다."));
+    }
+}
 
-<!-- BGM 컨트롤 버튼 -->
-<button class="btn" style="background:#9b59b6; margin-bottom:10px;" onclick="toggleBGM()">🎵 BGM 켜기 / 끄기</button>
+// 로비로 돌아가거나 게임이 끝날 때 BGM 끄기
+function stopSansBGM() {
+    const bgm = document.getElementById('bgm');
+    if (bgm) {
+        bgm.pause();
+    }
+}
