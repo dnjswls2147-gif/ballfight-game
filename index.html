@@ -745,7 +745,7 @@
 <body>
 
     <!-- 샌즈 BGM 오디오 태그 -->
-    <audio id="bgm" loop src="https://ia803008.us.archive.org/28/items/Megalovania_201701/Megalovania.mp3"></audio>
+    <audio id="bgm" loop src="https://ia803008.us.archive.org/28/items/Megalovania_201701/Megalovania.mp3" preload="auto"></audio>
 
     <div id="maintenance-screen" class="hidden">
         <h1>🚨 지금 점검 중입니다!</h1>
@@ -1169,12 +1169,24 @@
             isDragging = false;
         });
 
+        // 사용자가 아무 버튼이나 누를 때 사전에 BGM 오디오 잠금 해제 (모바일 브라우저 대응)
+        document.addEventListener('click', function unlockAudio() {
+            const bgm = document.getElementById('bgm');
+            if (bgm) {
+                bgm.play().then(() => {
+                    bgm.pause();
+                    bgm.currentTime = 0;
+                }).catch(e => {});
+            }
+            document.removeEventListener('click', unlockAudio);
+        }, { once: true });
+
         // BGM 자동 재생 / 정지 함수
         function playSansBGM() {
             const bgm = document.getElementById('bgm');
             if (bgm) {
                 bgm.currentTime = 0;
-                bgm.play().catch(e => console.log("자동 재생 정책으로 인해 터치 후 재생됩니다."));
+                bgm.play().catch(e => console.log("터치 이벤트 후 재생 가능합니다."));
             }
         }
 
@@ -2746,4 +2758,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-  </html>
+    </html>
