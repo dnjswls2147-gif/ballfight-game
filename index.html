@@ -2443,45 +2443,54 @@
 
                 bossTimerFrames += speedMultiplier;
 
-                // 1단계: 7초(420프레임)동안 더 크고 70개 이상의 공이 떨어지도록 설정
-                if (bossTimerFrames <= 420) {
-                    if (Math.floor(bossTimerFrames) % 10 < speedMultiplier) {
-                        for (let k = 0; k < 2; k++) {
-                            bossObstacles.push({
-                                x: 25 + Math.random() * (canvas.width - 50),
-                                y: -30,
-                                radius: 22 + Math.random() * 10, // 더 커진 공 크기
-                                speed: (4 + Math.random() * 3) * speedMultiplier,
-                                damage: 5 // 데미지 5로 설정
-                            });
-                        }
+                // 1단계: 8초(480프레임)동안 내 공 크기(12px)만한 장애물 공 100개 이상 폭풍 낙하 (데미지 15)
+                if (bossTimerFrames <= 480) {
+                    if (Math.floor(bossTimerFrames) % 4 < speedMultiplier) {
+                        bossObstacles.push({
+                            x: 15 + Math.random() * (canvas.width - 30),
+                            y: -15,
+                            radius: 12, // 내 볼 크기(12px)로 작게 조정
+                            speed: (4.5 + Math.random() * 3.5) * speedMultiplier,
+                            damage: 15 // 데미지 15
+                        });
                     }
                 } 
-                // 2단계: 7초 이후, 패턴 2회 반복 (L 먼저 -> 2초 뒤 '가져가')
-                else if (bossTimerFrames > 420 && bossTimerFrames <= 1220) {
-                    let relFrame = bossTimerFrames - 420;
+                // 2단계: 8초가 딱 지난 후, 3회 반복 패턴 ('L' 오른쪽 -> 2초 뒤 '을 가져가' 왼쪽)
+                else if (bossTimerFrames > 480 && bossTimerFrames <= 1680) {
+                    let relFrame = bossTimerFrames - 480;
+                    // 1번째 반복 (0초, 2초)
                     if (Math.abs(relFrame - 0) < speedMultiplier) {
-                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
                     }
                     if (Math.abs(relFrame - 120) < speedMultiplier) {
-                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.5, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
+                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
                     }
-                    if (Math.abs(relFrame - 300) < speedMultiplier) {
-                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
+
+                    // 2번째 반복 (6초, 8초)
+                    if (Math.abs(relFrame - 360) < speedMultiplier) {
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
                     }
-                    if (Math.abs(relFrame - 420) < speedMultiplier) {
-                        bossTextObstacles.push({ text: '가져가', x: canvas.width * 0.5, y: -50, width: canvas.width, height: 100, speed: 3.5 * speedMultiplier, damage: 35 });
+                    if (Math.abs(relFrame - 480) < speedMultiplier) {
+                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                    }
+
+                    // 3번째 반복 (12초, 14초)
+                    if (Math.abs(relFrame - 720) < speedMultiplier) {
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                    }
+                    if (Math.abs(relFrame - 840) < speedMultiplier) {
+                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
                     }
                 } 
-                // 3단계: 마지막 5초 동안 보스 처치 기회 부여
-                else if (bossTimerFrames > 1220 && bossTimerFrames <= 1520) {
+                // 3단계: 마지막 5초 동안 보스 처치 타임
+                else if (bossTimerFrames > 1680 && bossTimerFrames <= 1980) {
                     p2.hp = Math.max(0, p2.hp - 2.5 * speedMultiplier);
                     updateHpBars();
                     checkGameOver();
                 }
             }
 
-            // 일반 장애물 충돌 (데미지 5)
+            // 일반 공 장애물 충돌 (데미지 15)
             for (let i = bossObstacles.length - 1; i >= 0; i--) {
                 let bo = bossObstacles[i];
                 bo.y += bo.speed;
@@ -2498,7 +2507,7 @@
                 if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
             }
 
-            // 텍스트 장애물 충돌 (경기장 절반 너비 적용)
+            // 텍스트 장애물 충돌 (데미지 50)
             for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
                 let bto = bossTextObstacles[i];
                 bto.y += bto.speed;
@@ -2512,7 +2521,7 @@
                     checkGameOver();
                     continue;
                 }
-                if (bto.y > canvas.height + 60) bossTextObstacles.splice(i, 1);
+                if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
             }
 
             if (!isBossMode) {
@@ -2631,27 +2640,28 @@
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
+            // 작아진 공 장애물 렌더링
             bossObstacles.forEach(bo => {
                 ctx.beginPath();
                 ctx.arc(bo.x, bo.y, bo.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#e74c3c';
                 ctx.fill();
                 ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1.5;
                 ctx.stroke();
                 ctx.closePath();
 
-                ctx.font = "14px sans-serif";
+                ctx.font = "10px sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText("💀", bo.x, bo.y);
             });
 
-            // 텍스트 장애물 (경기장 절반 너비 꽉 채우도록 폰트 확대)
+            // 텍스트 장애물 (경기장 절반을 꽉 채우는 거대한 크기)
             bossTextObstacles.forEach(bto => {
                 ctx.save();
-                ctx.font = "900 44px sans-serif";
+                ctx.font = bto.text === 'L' ? "900 65px sans-serif" : "900 45px sans-serif";
                 ctx.fillStyle = "#e74c3c";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
