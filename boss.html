@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -190,10 +189,9 @@
 </head>
 <body>
 
-    <!-- 🎵 사용자가 깃허브에 올린 sans_song.mp4 파일 직접 연동 -->
-    <video id="sans-bgm-video" src="sans_song.mp4" loop style="display:none;"></video>
+    <!-- 🎵 모바일 차단 없는 확실한 Megalovania 음원 링크 -->
+    <audio id="sans-bgm-video" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
 
-    <!-- 3-2-1 카운트다운 화면 -->
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
         <button class="start-btn" onclick="startCountdown()">보스전 시작!</button>
@@ -253,12 +251,11 @@
         function startCountdown() {
             const screen = document.getElementById('countdown-screen');
             const title = document.getElementById('countdown-text');
-            const video = document.getElementById('sans-bgm-video');
+            const audio = document.getElementById('sans-bgm-video');
 
-            // 버튼 터치를 통해 모바일 브라우저 오디오 보안 해제
-            video.play().then(() => {
-                video.pause();
-                video.currentTime = 0;
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
             }).catch(e => {});
 
             let count = 3;
@@ -273,9 +270,7 @@
                 } else {
                     clearInterval(timer);
                     screen.style.display = 'none';
-                    
-                    // 3, 2, 1 끝나고 카운트다운이 닫히는 정확한 순간에 샌즈 노래 재생!
-                    video.play().catch(e => {});
+                    audio.play().catch(e => {});
                     gameStarted = true;
                 }
             }, 1000);
@@ -348,8 +343,8 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
-                const video = document.getElementById('sans-bgm-video');
-                if (video) video.pause();
+                const audio = document.getElementById('sans-bgm-video');
+                if (audio) audio.pause();
 
                 if (p1.hp > 0 && p2.hp <= 0) {
                     gameOverState = 'win';
