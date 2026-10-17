@@ -742,16 +742,17 @@
             background: #e2e8f0;
         }
 
+        /* ---------------- 영상 속 리메이크된 어드민 패널 디자인 ---------------- */
         .admin-window {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 320px;
+            width: 350px;
             background: #1e1b29;
             border: 2px solid #e91e63;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             color: #ffffff;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             z-index: 100000001;
@@ -765,15 +766,15 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #3a354d;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
             cursor: grab;
         }
         .admin-header:active {
             cursor: grabbing;
         }
         .admin-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #e91e63;
             display: flex;
@@ -783,15 +784,15 @@
         }
         .admin-body {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         .admin-sidebar {
-            width: 70px;
+            width: 65px;
             border-right: 1px solid #3a354d;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding-right: 8px;
+            gap: 5px;
+            padding-right: 6px;
         }
         .admin-tab-btn {
             background: transparent;
@@ -810,32 +811,35 @@
         }
         .admin-content {
             flex: 1;
-            font-size: 12px;
-            max-height: 280px;
+            font-size: 11px;
+            max-height: 300px;
             overflow-y: auto;
+            padding-right: 2px;
         }
         .admin-section-title {
             color: #ffe0b2;
             font-size: 11px;
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
+            margin-top: 6px;
         }
         .admin-btn-row {
             display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 4px;
+            margin-bottom: 6px;
             flex-wrap: wrap;
         }
         .admin-small-btn {
             background: #2d2a3e;
             border: 1px solid #4a4463;
             color: #fff;
-            border-radius: 6px;
-            padding: 6px 8px;
-            font-size: 11px;
+            border-radius: 4px;
+            padding: 5px 6px;
+            font-size: 10px;
             cursor: pointer;
             flex: 1;
-            min-width: 45px;
+            min-width: 35px;
+            text-align: center;
         }
         .admin-small-btn.active-type {
             background: #e91e63 !important;
@@ -845,7 +849,7 @@
             background: #e91e63;
         }
         .admin-slider-container {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .admin-slider-container input {
             width: 100%;
@@ -917,66 +921,57 @@
         </div>
     </div>
 
+    <!-- 영상 버전과 동일한 리메이크된 어드민 패널 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
-            <button class="btn-close-x" style="width:24px; height:24px; font-size:12px; position:static;" onclick="closeAdminPanel()">X</button>
+            <button class="btn-close-x" style="width:22px; height:22px; font-size:11px; position:static;" onclick="closeAdminPanel()">X</button>
         </div>
         <div class="admin-body">
             <div class="admin-sidebar">
                 <button class="admin-tab-btn active" onclick="switchAdminTab('main')">메인</button>
-                <button class="admin-tab-btn" onclick="switchAdminTab('currency')">재화</button>
-                <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('char')">캐릭터</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('manage')">관리</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('screen')">화면</button>
             </div>
             <div class="admin-content">
+                <!-- 메인 탭 -->
                 <div id="admin-tab-main">
-                    <div class="admin-section-title">🚨 서버 점검 모드</div>
-                    <div style="font-size: 11px; color: #a29bfe; margin-bottom: 6px; line-height: 1.3;">
-                        * 점검을 켜려면 깃허브의 <b>status.json</b> 파일 내용을 <code style="color:#e91e63;">true</code>로 수정하세요!
-                    </div>
-
-                    <div class="admin-section-title" style="margin-top: 10px;">플레이어 체력 제어</div>
+                    <div class="admin-section-title">게임 속도</div>
                     <div class="admin-btn-row">
-                        <button class="admin-small-btn" onclick="adminSetHp('p1', 9999)">P1 무적</button>
-                        <button class="admin-small-btn" onclick="adminSetHp('p2', 0)">P2 즉사</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(0.5)">x0.5</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(1)">x1</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(2)">x2</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(4)">x4</button>
                     </div>
+                    <div class="admin-section-title">점검 상태 제어</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn active-type" onclick="alert('status.json 파일을 확인하세요')">점검 OFF</button>
+                    </div>
+                </div>
 
-                    <div class="admin-section-title" style="margin-top: 12px;">🚫 유저 밴 / 정지 관리</div>
+                <!-- 캐릭터 탭 -->
+                <div id="admin-tab-char" class="hidden">
+                    <div class="admin-section-title">1P / 2P 능력치 제어</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn active-type" id="char-1p-btn" onclick="switchAdminCharTarget('1p')">1P</button>
+                        <button class="admin-small-btn" id="char-2p-btn" onclick="switchAdminCharTarget('2p')">2P</button>
+                    </div>
+                    <div class="admin-section-title">체력 / 무적 / 즉사</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminSetHp(currentAdminCharTarget, 9999)">무적</button>
+                        <button class="admin-small-btn" onclick="adminSetHp(currentAdminCharTarget, 0)">즉사</button>
+                    </div>
+                    <div style="font-size:10px; color:#ffe0b2; margin-top:4px;">현재 대상: <span id="admin-target-label">1P</span></div>
+                </div>
+
+                <!-- 관리 탭 -->
+                <div id="admin-tab-manage" class="hidden">
+                    <div class="admin-section-title">유저 밴 / 우편 관리</div>
                     <div id="admin-user-list-container"></div>
                 </div>
-                <div id="admin-tab-currency" class="hidden">
-                    <div class="admin-section-title">내 재화 즉시 조절</div>
-                    <div class="admin-section-title" style="color:#aaa;">코인 조절</div>
-                    <div class="admin-btn-row">
-                        <button class="admin-small-btn" onclick="adminAddCoins(1000)">+1000</button>
-                        <button class="admin-small-btn" onclick="adminAddCoins(-1000)">-1000</button>
-                        <button class="admin-small-btn" onclick="adminAddCoins(100)">+100</button>
-                        <button class="admin-small-btn" onclick="adminAddCoins(-100)">-100</button>
-                    </div>
-                    <div class="admin-section-title" style="color:#aaa;">트로피 조절</div>
-                    <div class="admin-btn-row">
-                        <button class="admin-small-btn" onclick="adminAddTrophies(100)">+100</button>
-                        <button class="admin-small-btn" onclick="adminAddTrophies(-100)">-100</button>
-                        <button class="admin-small-btn" onclick="adminAddTrophies(10)">+10</button>
-                        <button class="admin-small-btn" onclick="adminAddTrophies(-10)">-10</button>
-                    </div>
 
-                    <hr style="border: 0; border-top: 1px dashed #3a354d; margin: 12px 0;">
-
-                    <div class="admin-section-title" style="color: #f1c40f;">🎁 유저에게 선물 보내기 (우편함)</div>
-                    <select id="admin-gift-target-user" style="padding: 6px; font-size: 11px; margin-bottom: 6px; background: #2d2a3e; color: #fff; border-color: #4a4463;">
-                    </select>
-
-                    <div class="admin-btn-row" style="margin-bottom: 6px;">
-                        <button class="admin-small-btn active-type" id="gift-type-coin-btn" onclick="selectGiftType('coin')">코인</button>
-                        <button class="admin-small-btn" id="gift-type-trophy-btn" onclick="selectGiftType('trophy')">트로피</button>
-                    </div>
-
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        <input type="number" id="admin-gift-amount" placeholder="개수 입력" min="1" style="margin-bottom: 0; padding: 6px; font-size: 11px; background: #2d2a3e; color: #fff; border-color: #4a4463; flex: 2;">
-                        <button class="admin-small-btn" style="background: #e67e22; border-color: #d35400; padding: 6px; font-weight: bold; flex: 1;" onclick="sendAdminGift()">보내기</button>
-                    </div>
-                </div>
+                <!-- 화면 탭 -->
                 <div id="admin-tab-screen" class="hidden">
                     <div class="admin-section-title">패널 투명도</div>
                     <div class="admin-slider-container">
@@ -1202,10 +1197,10 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v25';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v25';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v25';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v25';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v26';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v26';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v26';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v26';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1225,6 +1220,7 @@
         let isAdminLoggedIn = false;
         let isBypassedByPassword = false;
         let selectedGiftType = 'coin';
+        let currentAdminCharTarget = '1p';
 
         let gameStarted = false;
         let isCountingDown = false;
@@ -1391,7 +1387,6 @@
         function openAdminAuth() {
             if (isAdminLoggedIn) {
                 renderAdminUserList();
-                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
                 return;
             }
@@ -1413,7 +1408,6 @@
                 closeAdminAuth();
                 applyMaintenanceUI(); 
                 renderAdminUserList();
-                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
                 err.innerText = "비밀번호가 올바르지 않습니다!";
@@ -1507,9 +1501,11 @@
             }
         });
 
+        // 영상 버전 어드민 패널 탭 제어
         function switchAdminTab(tabName) {
             document.getElementById('admin-tab-main').classList.add('hidden');
-            document.getElementById('admin-tab-currency').classList.add('hidden');
+            document.getElementById('admin-tab-char').classList.add('hidden');
+            document.getElementById('admin-tab-manage').classList.add('hidden');
             document.getElementById('admin-tab-screen').classList.add('hidden');
 
             const tabs = document.querySelectorAll('.admin-tab-btn');
@@ -1518,15 +1514,46 @@
             if (tabName === 'main') {
                 document.getElementById('admin-tab-main').classList.remove('hidden');
                 tabs[0].classList.add('active');
-                renderAdminUserList();
-            } else if (tabName === 'currency') {
-                document.getElementById('admin-tab-currency').classList.remove('hidden');
+            } else if (tabName === 'char') {
+                document.getElementById('admin-tab-char').classList.remove('hidden');
                 tabs[1].classList.add('active');
-                renderAdminGiftUserSelect();
+            } else if (tabName === 'manage') {
+                document.getElementById('admin-tab-manage').classList.remove('hidden');
+                tabs[2].classList.add('active');
+                renderAdminUserList();
             } else if (tabName === 'screen') {
                 document.getElementById('admin-tab-screen').classList.remove('hidden');
-                tabs[2].classList.add('active');
+                tabs[3].classList.add('active');
             }
+        }
+
+        function switchAdminCharTarget(target) {
+            currentAdminCharTarget = target;
+            const btn1p = document.getElementById('char-1p-btn');
+            const btn2p = document.getElementById('char-2p-btn');
+            const label = document.getElementById('admin-target-label');
+
+            if (target === '1p') {
+                btn1p.classList.add('active-type');
+                btn2p.classList.remove('active-type');
+                label.innerText = '1P';
+            } else {
+                btn2p.classList.add('active-type');
+                btn1p.classList.remove('active-type');
+                label.innerText = '2P';
+            }
+        }
+
+        function setAdminSpeed(mult) {
+            speedMultiplier = mult;
+            isDoubleSpeed = (mult === 2);
+            const btn = document.getElementById('speed-toggle-btn');
+            if (btn) {
+                btn.innerText = `⚡ x${mult} 배속`;
+                if (mult > 1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+            alert(`게임 속도가 x${mult}로 설정되었습니다.`);
         }
 
         function mergeUsers(incomingUsers) {
@@ -1576,136 +1603,50 @@
         function renderAdminUserList() {
             syncGlobalUsers();
             const container = document.getElementById('admin-user-list-container');
+            if (!container) return;
             container.innerHTML = '';
 
             if (registeredUsers.length === 0) {
-                container.innerHTML = `<div style="color: #b2bec3; font-size:11px; padding:6px 0;">등록된 유저가 없습니다.</div>`;
+                container.innerHTML = `<div style="color: #b2bec3; font-size:10px; padding:4px 0;">등록된 유저가 없습니다.</div>`;
                 return;
             }
 
             registeredUsers.forEach((u, index) => {
                 let row = document.createElement('div');
-                row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #2d2a3e; padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; font-size:11px;";
+                row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #2d2a3e; padding: 5px 6px; border-radius: 4px; margin-bottom: 4px; font-size:10px;";
 
                 let isBanned = u.banUntil && u.banUntil > Date.now();
-                let statusText = isBanned ? `<span style="color:#e74c3c;">(정지중)</span>` : `<span style="color:#2ecc71;">(정상)</span>`;
+                let statusText = isBanned ? `<span style="color:#e74c3c;">(정지)</span>` : `<span style="color:#2ecc71;">(정상)</span>`;
 
                 row.innerHTML = `
                     <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:4px;">
                         <b>${u.name}</b> ${statusText}
                     </div>
-                    <input type="text" id="ban-time-${index}" placeholder="시간" value="${u.banTimeStr || ''}" style="width:50px; padding:4px; font-size:10px; margin:0 4px; text-align:center;">
-                    <button onclick="banUser(${index})" style="background:#e74c3c; color:#fff; border:none; padding:4px 6px; border-radius:4px; font-size:10px; cursor:pointer; margin-right:2px;">정지</button>
-                    <button onclick="unbanUser(${index})" style="background:#27ae60; color:#fff; border:none; padding:4px 6px; border-radius:4px; font-size:10px; cursor:pointer;">풀기</button>
+                    <button onclick="banUser(${index})" style="background:#e74c3c; color:#fff; border:none; padding:3px 5px; border-radius:3px; font-size:9px; cursor:pointer; margin-right:2px;">밴</button>
+                    <button onclick="unbanUser(${index})" style="background:#27ae60; color:#fff; border:none; padding:3px 5px; border-radius:3px; font-size:9px; cursor:pointer;">해제</button>
                 `;
                 container.appendChild(row);
             });
         }
 
-        function renderAdminGiftUserSelect() {
-            syncGlobalUsers();
-            const selectEl = document.getElementById('admin-gift-target-user');
-            selectEl.innerHTML = '';
-
-            let allOpt = document.createElement('option');
-            allOpt.value = "ALL_USERS";
-            allOpt.innerText = "🌐 [전체] 모두에게 보내기";
-            selectEl.appendChild(allOpt);
-
-            registeredUsers.forEach(u => {
-                let opt = document.createElement('option');
-                opt.value = u.name;
-                opt.innerText = u.name;
-                selectEl.appendChild(opt);
-            });
-        }
-
-        function selectGiftType(type) {
-            selectedGiftType = type;
-            const coinBtn = document.getElementById('gift-type-coin-btn');
-            const trophyBtn = document.getElementById('gift-type-trophy-btn');
-
-            if (type === 'coin') {
-                coinBtn.classList.add('active-type');
-                trophyBtn.classList.remove('active-type');
-            } else {
-                trophyBtn.classList.add('active-type');
-                coinBtn.classList.remove('active-type');
-            }
-        }
-
-        function sendAdminGift() {
-            const targetVal = document.getElementById('admin-gift-target-user').value;
-            const amountVal = parseInt(document.getElementById('admin-gift-amount').value);
-
-            if (!targetVal) {
-                alert("선물을 받을 대상을 선택하세요.");
-                return;
-            }
-            if (isNaN(amountVal) || amountVal <= 0) {
-                alert("올바른 개수를 입력하세요.");
-                return;
-            }
-
-            let typeName = selectedGiftType === 'coin' ? '코인' : '트로피';
-            let newGift = {
-                id: "gift_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
-                targetUser: targetVal,
-                type: selectedGiftType,
-                amount: amountVal
-            };
-
-            globalMails.push(newGift);
-            localStorage.setItem(GLOBAL_GIFT_KEY, JSON.stringify(globalMails));
-
-            saveData();
-            checkMailRedDot();
-            document.getElementById('admin-gift-amount').value = '';
-
-            if (targetVal === "ALL_USERS") {
-                alert(`🌐 전체 유저 대상 ${typeName} ${amountVal}개 선물이 발송되었습니다!`);
-            } else {
-                alert(`[${targetVal}] 님 대상 ${typeName} ${amountVal}개 선물이 발송되었습니다!`);
-            }
-        }
-
         function banUser(index) {
-            let inputVal = document.getElementById(`ban-time-${index}`).value.trim();
-            if (!inputVal) {
-                alert("정지 시간을 적어주세요!");
-                return;
-            }
-            registeredUsers[index].banTimeStr = inputVal;
             registeredUsers[index].banUntil = Date.now() + 7 * 24 * 3600 * 1000; 
             localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             saveData();
             renderAdminUserList();
-            alert(`${registeredUsers[index].name}님에게 ${inputVal} 정지가 적용되었습니다.`);
+            alert(`${registeredUsers[index].name}님이 밴 되었습니다.`);
         }
 
         function unbanUser(index) {
             registeredUsers[index].banUntil = 0;
-            registeredUsers[index].banTimeStr = "";
             localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             saveData();
             renderAdminUserList();
-            alert(`${registeredUsers[index].name}님의 정지가 풀렸습니다.`);
+            alert(`${registeredUsers[index].name}님의 밴이 해제되었습니다.`);
         }
 
-        function adminAddCoins(amount) {
-            userCoins = Math.max(0, userCoins + amount);
-            updateCoinsUI();
-            saveData();
-        }
-
-        function adminAddTrophies(amount) {
-            userTrophies = Math.max(0, userTrophies + amount);
-            updateCoinsUI();
-            saveData();
-        }
-
-        function adminSetHp(player, hp) {
-            if (player === 'p1') {
+        function adminSetHp(target, hp) {
+            if (target === '1p') {
                 p1.hp = hp;
                 p1.maxHp = Math.max(p1.maxHp, hp);
             } else {
@@ -1713,6 +1654,7 @@
             }
             updateHpBars();
             checkGameOver();
+            alert(`[${target.toUpperCase()}] 체력이 ${hp}로 설정되었습니다.`);
         }
 
         function changeAdminOpacity(val) {
@@ -1997,8 +1939,7 @@
             if (!name) return false;
             let found = registeredUsers.find(u => u.name === name);
             if (found && found.banUntil && found.banUntil > Date.now()) {
-                let timeStr = found.banTimeStr || "지정된 시간";
-                alert(`${timeStr} 동안 게임을 플레이할 수 없습니다.`);
+                alert("정지된 계정입니다.");
                 return true;
             }
             return false;
@@ -2026,13 +1967,6 @@
 
             syncGlobalUsers();
 
-            let existing = registeredUsers.find(u => u.name === val);
-            if (existing && existing.banUntil && existing.banUntil > Date.now()) {
-                let timeStr = existing.banTimeStr || "지정된 시간";
-                err.innerText = `${timeStr} 동안 게임을 플레이할 수 없습니다.`;
-                return;
-            }
-
             savedUsername = val;
             
             if (!registeredUsers.some(u => u.name === val)) {
@@ -2044,7 +1978,6 @@
             err.innerText = "";
             document.getElementById('btn-save-name').classList.add('hidden');
             document.getElementById('btn-play-after-name').classList.remove('hidden');
-            renderAdminGiftUserSelect();
             checkMailRedDot();
             alert(`이름 [ ${val} ]이(가) 저장되었습니다!`);
         }
@@ -3082,4 +3015,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
