@@ -23,7 +23,7 @@
         }
         .container {
             width: 100%;
-            max-width: 380px;
+            max-width: 440px;
             background: #fff8e8;
             border: 3px solid #e67e22;
             border-radius: 12px;
@@ -534,7 +534,7 @@
         .canvas-container {
             position: relative;
             width: 100%;
-            max-width: 340px;
+            max-width: 400px;
             aspect-ratio: 1 / 1;
             margin: 0 auto 12px auto;
             border: 3px solid #2c3e50;
@@ -1018,7 +1018,7 @@
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
         <div class="canvas-container">
-            <canvas id="gameCanvas" width="340" height="340"></canvas>
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
@@ -1855,11 +1855,11 @@
         }
 
         let p1 = { 
-            x: 80, y: 170, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
+            x: 100, y: 200, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
         let p2 = { 
-            x: 260, y: 170, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
+            x: 300, y: 200, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
 
@@ -2312,28 +2312,26 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.x = 80; 
-            p1.y = 170;
             p1.radius = isBossMode ? 12 : 24; 
+            
+            p1.x = 100; 
+            p1.y = 200;
             
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
             p1.vy = isBossMode ? 0 : v1.vy;
-            p1.skillGauge = 0;
             p1.lastIceAttackTime = Date.now();
-            p1.lastShhTime = Date.now();
-            p1.lastSuseumiTime = Date.now();
             p1.freezeTimer = 0;
             moveDirection = 0;
 
             if (isBossMode) {
-                p1.x = 170;
-                p1.y = 310;
+                p1.x = 200;
+                p1.y = 360;
                 p2.type = 'boss';
                 p2.maxHp = 750;
                 p2.hp = 750;
                 p2.damage = 0;
-                p2.x = 170; p2.y = 50;
+                p2.x = 200; p2.y = 60;
                 p2.vx = 0; p2.vy = 0;
                 p2.radius = 35;
                 bossTimerFrames = 0;
@@ -2342,14 +2340,13 @@
                 p2.maxHp = 200;
                 p2.hp = 200;
                 p2.damage = 10;
-                p2.x = 260; p2.y = 170; 
+                p2.x = 300; 
+                p2.y = 200; 
                 p2.radius = 24;
                 let v2 = getRandomVelocity();
                 p2.vx = v2.vx; p2.vy = v2.vy;
             }
             
-            p2.skillGauge = 0;
-            p2.lastShhTime = Date.now();
             p2.freezeTimer = 0;
 
             projectiles = [];
@@ -2402,7 +2399,6 @@
             if (!isBossMode) {
                 let now = Date.now();
 
-                // P1 스킬 처리
                 if (p1.type === 'fire' && now - p1.lastIceAttackTime > 8000) {
                     p1.lastIceAttackTime = now;
                     for(let i=0; i<3; i++) {
@@ -2424,8 +2420,12 @@
                 } else {
                     p1.x += p1.vx * speedMultiplier; 
                     p1.y += p1.vy * speedMultiplier;
-                    if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-                    if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+                    
+                    // 벽 충돌 및 낌 방지 강제 보정
+                    if (p1.x - p1.radius < 0) { p1.x = p1.radius + 2; p1.vx *= -1; }
+                    if (p1.x + p1.radius > canvas.width) { p1.x = canvas.width - p1.radius - 2; p1.vx *= -1; }
+                    if (p1.y - p1.radius < 0) { p1.y = p1.radius + 2; p1.vy *= -1; }
+                    if (p1.y + p1.radius > canvas.height) { p1.y = canvas.height - p1.radius - 2; p1.vy *= -1; }
                 }
 
                 if (p2.freezeTimer > 0) {
@@ -2433,8 +2433,12 @@
                 } else {
                     p2.x += p2.vx * speedMultiplier; 
                     p2.y += p2.vy * speedMultiplier;
-                    if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-                    if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+                    
+                    // 벽 충돌 및 낌 방지 강제 보정
+                    if (p2.x - p2.radius < 0) { p2.x = p2.radius + 2; p2.vx *= -1; }
+                    if (p2.x + p2.radius > canvas.width) { p2.x = canvas.width - p2.radius - 2; p2.vx *= -1; }
+                    if (p2.y - p2.radius < 0) { p2.y = p2.radius + 2; p2.vy *= -1; }
+                    if (p2.y + p2.radius > canvas.height) { p2.y = canvas.height - p2.radius - 2; p2.vy *= -1; }
                 }
 
                 // 화염구 충돌
@@ -2461,7 +2465,7 @@
                     let dy = ib.y - p2.y;
                     if (Math.sqrt(dx*dx + dy*dy) < ib.radius + p2.radius) {
                         p2.hp = Math.max(0, p2.hp - ib.damage);
-                        p2.freezeTimer = 60; // 1초간 얼음
+                        p2.freezeTimer = 60;
                         iceFallBlocks.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
@@ -2550,6 +2554,7 @@
                 if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
             }
 
+            // 공끼리 충돌 시 겹쳐서 끼는 현상 방지 (안티 스턱 오버랩 해제)
             if (!isBossMode) {
                 let dx = p2.x - p1.x;
                 let dy = p2.y - p1.y;
@@ -2560,7 +2565,7 @@
                     p1.vx = p2.vx; p1.vy = p2.vy;
                     p2.vx = tempVx; p2.vy = tempVy;
 
-                    let overlap = (p1.radius + p2.radius) - dist;
+                    let overlap = (p1.radius + p2.radius) - dist + 1; // 여유 공간 추가
                     let nx = dx / (dist || 1);
                     let ny = dy / (dist || 1);
                     p1.x -= nx * overlap / 2;
@@ -2778,4 +2783,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
