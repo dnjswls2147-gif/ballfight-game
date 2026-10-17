@@ -3569,6 +3569,90 @@
 
         loadData();
         requestAnimationFrame(loop);
+                // 1. 유저 정보 및 플레이 타임 동기화 함수
+        function syncGlobalUsers() {
+            if (savedUsername && savedUsername.trim() !== "") {
+                if (!window.userUniqueId) {
+                    window.userUniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                }
+
+                const playTimeMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
+
+                const userData = {
+                    name: savedUsername,
+                    uid: window.userUniqueId,
+                    coins: userCoins,
+                    trophies: userTrophies,
+                    friendsCount: 0,
+                    recvReqCount: 0,
+                    sendReqCount: 0,
+                    playTime: playTimeMinutes,
+                    status: "온라인",
+                    lastAccess: "지금 접속 중",
+                    banUntil: 0,
+                    banReason: ""
+                };
+
+                db.ref('users/' + savedUsername.replace(/[.#$/\[\]]/g, "_")).update(userData);
+            }
+        }
+
+        // 2. 어드민 패널 유저 목록 렌더링 함수
+        function renderAdminUserList() {
+            const container = document.getElementById('admin-user-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (registeredUsers.length === 0) {
+                container.innerHTML = `<div style="color: #b2bec3; font-size:12px; padding:10px 0;">등록된 플레이어가 없습니다.</div>`;
+                return;
+            }
+
+            registeredUsers.forEach((u, index) => {
+                let card = document.createElement('div');
+                card.style.cssText = "background: #181524; border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid #2d2640; text-align: left;";
+
+                let isBanned = u.banUntil && u.banUntil > Date.now();
+                let statusText = isBanned ? "정지됨" : (u.status || "온라인");
+                let statusColor = isBanned ? "#e74c3c" : "#2ecc71";
+                let userId = u.uid || "6LJ8QB";
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                        <div>
+                            <span style="font-size:14px; font-weight:bold; color:#fff;">${u.name}</span>
+                            <span style="font-size:11px; color:#888; background:#2b263e; padding:2px 6px; border-radius:4px; margin-left:6px;">${userId}</span>
+                        </div>
+                        <span style="font-size:12px; font-weight:bold; color:${statusColor};">${statusText}</span>
+                    </div>
+
+                    <div style="font-size:11px; color:#aaa; margin-bottom: 6px;">
+                        친구 <b style="color:#fff;">${u.friendsCount || 0}명</b> · 받은 요청 <b style="color:#fff;">${u.recvReqCount || 0}</b> · 보낸 요청 <b style="color:#fff;">${u.sendReqCount || 0}</b>
+                    </div>
+
+                    <div style="font-size:11px; color:#aaa; margin-bottom: 10px;">
+                        마지막 접속 <b style="color:#fff;">${u.lastAccess || '지금 접속 중'}</b> · 플레이 타임 <b style="color:#fff;">${u.playTime || 0}분</b>
+                    </div>
+
+                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                        <button onclick="copyToClipboard('${userId}')" style="background:#2b263e; color:#fff; border:1px solid #4a4463; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer;">아이디 복사</button>
+                        <input type="number" id="ban-time-${index}" value="0" min="0" placeholder="0" style="width:35px; padding:5px; font-size:11px; text-align:center; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;"> 시간
+                        <input type="number" id="ban-min-${index}" value="0" min="0" placeholder="0" style="width:35px; padding:5px; font-size:11px; text-align:center; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;"> 분
+                        <input type="text" id="ban-reason-${index}" placeholder="추방 사유 (선택)" style="flex:1; min-width:100px; padding:5px; font-size:11px; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;">
+                        <button onclick="executeCustomBan(${index})" style="background:#8b263e; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:bold; cursor:pointer;">추방</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 3. 아이디 복사 기능 함수
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("아이디가 복사되었습니다: " + text);
+            });
+        }
+
     </script>
 </body> 
     </html>
