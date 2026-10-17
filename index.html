@@ -1433,6 +1433,7 @@
         let bossObstacles = [];
         let bossWideBlocks = [];
         let isDefending = false;
+        let bossTextDialog = { text: "", color: "#3498db", size: 24, x: 0, y: 0, visible: false };
 
         let moveDirection = 0;
 
@@ -2838,6 +2839,7 @@
                 p2.vx = 0; p2.vy = 0;
                 p2.radius = 45;
                 bossTimerFrames = 0;
+                bossTextDialog.visible = false;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
@@ -3058,7 +3060,7 @@
                         if (pr.type === 'iceball') p2.freezeTimer = 30;
                         projectiles.splice(i, 1);
                         updateHpBars();
-                    checkGameOver();
+                        checkGameOver();
                         continue;
                     }
                     if (pr.x < 0 || pr.x > canvas.width || pr.y < 0 || pr.y > canvas.height) {
@@ -3083,20 +3085,41 @@
                             damage: 15 
                         });
                     }
+
+                    if (bossTimerFrames >= 200 && bossTimerFrames < 350) {
+                        bossTextDialog = {
+                            text: "좀하네 ㅋ\n이번에는 못피할걸",
+                            color: "#3498db",
+                            size: 24,
+                            x: p2.x + 55,
+                            y: p2.y,
+                            visible: true
+                        };
+                    } else if (bossTimerFrames >= 350 && bossTimerFrames <= 480) {
+                        bossTextDialog = {
+                            text: "이제 시작 할게 ㅋ",
+                            color: "#e74c3c",
+                            size: 26,
+                            x: p2.x + 55,
+                            y: p2.y,
+                            visible: true
+                        };
+                    } else {
+                        bossTextDialog.visible = false;
+                    }
                 } 
                 // 2단계: 꽉 채우는 가로 블록 4번 낙하 (480프레임 이후)
                 else {
+                    bossTextDialog.visible = false;
                     let relFrame = bossTimerFrames - 480;
-                    // 총 4번 반복, 120프레임(약 2초) 간격 혹은 60프레임(1초) 간격으로 1초 낙하 블록 생성
-                    // 블록 높이: 40px (약 1cm), 속도: canvas.height / 60프레임 (1초만에 화면 끝까지 낙하)
-                    let blockInterval = 90; // 1.5초마다 하나씩 총 4개 생성
+                    let blockInterval = 90; 
                     if (Math.floor(relFrame) % blockInterval < speedMultiplier && bossWideBlocks.length < 4) {
                         bossWideBlocks.push({
                             x: 0,
                             y: -40,
                             width: canvas.width,
                             height: 40,
-                            speed: (canvas.height / 60) * speedMultiplier, // 1초만에 상단에서 하단까지 도달
+                            speed: (canvas.height / 60) * speedMultiplier, 
                             damage: 35,
                             hitProcessed: false
                         });
@@ -3126,7 +3149,6 @@
                 let wb = bossWideBlocks[i];
                 wb.y += wb.speed;
                 
-                // 충돌 체크 (플레이어가 블록 영역 내에 있는지)
                 if (!wb.hitProcessed &&
                     p1.x + p1.radius > wb.x && p1.x - p1.radius < wb.x + wb.width &&
                     p1.y + p1.radius > wb.y && p1.y - p1.radius < wb.y + wb.height) {
@@ -3409,6 +3431,19 @@
                 ctx.strokeRect(wb.x, wb.y, wb.width, wb.height);
                 ctx.restore();
             });
+
+            if (bossTextDialog.visible) {
+                ctx.save();
+                ctx.font = `bold ${bossTextDialog.size}px sans-serif`;
+                ctx.fillStyle = bossTextDialog.color;
+                ctx.textAlign = "left";
+                ctx.textBaseline = "middle";
+                let lines = bossTextDialog.text.split('\n');
+                lines.forEach((line, idx) => {
+                    ctx.fillText(line, bossTextDialog.x, bossTextDialog.y + (idx * (bossTextDialog.size + 6)));
+                });
+                ctx.restore();
+            }
 
             if (isCountingDown) {
                 ctx.save();
