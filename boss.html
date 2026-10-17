@@ -189,8 +189,8 @@
 </head>
 <body>
 
-    <!-- 🎵 사용자 제공 링크 적용 오디오 태그 -->
-    <audio id="sans-bgm-audio" src="https://www.tt.site/t/ZSgYjo2wV/" loop preload="auto" crossorigin="anonymous"></audio>
+    <!-- 🎵 모바일 차단 없는 안정적인 샌즈 Megalovania 정식 MP3 링크 -->
+    <audio id="sans-bgm-audio" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
 
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
@@ -252,10 +252,11 @@
             const screen = document.getElementById('countdown-screen');
             const audio = document.getElementById('sans-bgm-audio');
 
+            // 버튼 클릭 인터랙션을 통해 모바일 브라우저의 오디오 재생 제한을 즉시 해제
             if (audio) {
                 audio.currentTime = 0;
                 audio.play().then(() => {
-                    console.log("재생 성공!");
+                    console.log("노래 재생 성공!");
                 }).catch(e => {
                     console.log("재생 차단됨:", e);
                 });
