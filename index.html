@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>릴리 볼 파이트</title>
+    <title>릴리 볼 파이트 - 할로윈 에디션</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * {
@@ -12,7 +12,7 @@
             -webkit-user-select: none;
         }
         body {
-            background-color: #ffffff;
+            background-color: #1a0826;
             font-family: sans-serif;
             margin: 0;
             padding: 10px;
@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            color: #ffffff;
         }
         
         .notice-banner {
@@ -33,7 +34,7 @@
             padding: 10px 15px;
             border-radius: 8px;
             margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(211, 84, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -48,11 +49,11 @@
         .container {
             width: 100%;
             max-width: 580px;
-            background: #ffffff;
-            border: 3px solid #e67e22;
+            background: #2b113a;
+            border: 3px solid #ff7518;
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+            box-shadow: 0 4px 20px rgba(255, 117, 24, 0.4);
             text-align: center;
             position: relative;
         }
@@ -64,7 +65,7 @@
             right: 15px;
             font-size: 11px;
             font-weight: bold;
-            color: #d35400;
+            color: #ffaa00;
             z-index: 25;
         }
 
@@ -194,18 +195,19 @@
         .modal-box {
             width: 100%;
             max-width: 360px;
-            background: #ffffff;
-            border: 3px solid #e67e22;
+            background: #2b113a;
+            border: 3px solid #ff7518;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
             position: relative;
+            color: #fff;
         }
 
         .brown-info-box {
-            background: #5d4037;
-            border: 3px solid #3e2723;
+            background: #421959;
+            border: 3px solid #68268a;
             border-radius: 10px;
             padding: 18px 15px;
             color: #ffffff;
@@ -223,7 +225,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px dashed #795548;
+            border-bottom: 1px dashed #8e44ad;
             padding-bottom: 8px;
         }
         .profile-info-row:last-child {
@@ -257,8 +259,8 @@
         }
 
         .mail-brown-box {
-            background: #5d4037;
-            border: 3px solid #3e2723;
+            background: #421959;
+            border: 3px solid #68268a;
             border-radius: 10px;
             padding: 15px;
             color: #ffffff;
@@ -276,8 +278,8 @@
             color: #ffe0b2;
         }
         .mail-item {
-            background: #795548;
-            border: 2px solid #4e342e;
+            background: #5b237a;
+            border: 2px solid #3d1454;
             border-radius: 8px;
             padding: 10px 12px;
             display: flex;
@@ -320,21 +322,21 @@
             flex: 1;
             padding: 10px;
             border-radius: 8px;
-            border: 2px solid #bdc3c7;
-            background: #ecf0f1;
+            border: 2px solid #8e44ad;
+            background: #3c1952;
             font-size: 13px;
             font-weight: bold;
             cursor: pointer;
-            color: #2c3e50;
+            color: #d1d8e0;
         }
         .ranking-tab-btn.active {
             background: #8e44ad;
             color: #ffffff;
-            border-color: #6c3483;
+            border-color: #ff7518;
         }
         .ranking-list-box {
-            background: #5d4037;
-            border: 3px solid #3e2723;
+            background: #421959;
+            border: 3px solid #68268a;
             border-radius: 10px;
             padding: 10px;
             color: #ffffff;
@@ -343,8 +345,8 @@
             overflow-y: auto;
         }
         .ranking-item {
-            background: #795548;
-            border: 2px solid #4e342e;
+            background: #5b237a;
+            border: 2px solid #3d1454;
             border-radius: 8px;
             padding: 8px 10px;
             display: flex;
@@ -396,9 +398,9 @@
             color: #f1c40f;
         }
 
-        h2 { color: #d35400; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        .version-text { font-size: 11px; color: #7f8c8d; margin-bottom: 10px; font-weight: bold; }
-        .desc { font-size: 13px; color: #7f8c8d; margin-bottom: 10px; }
+        h2 { color: #ff7518; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
+        .version-text { font-size: 11px; color: #a29bfe; margin-bottom: 10px; font-weight: bold; }
+        .desc { font-size: 13px; color: #d1d8e0; margin-bottom: 10px; }
         
         .currency-container {
             display: flex;
@@ -411,35 +413,35 @@
         .coin-box {
             display: inline-flex;
             align-items: center;
-            background: #fef9e7;
+            background: #3b200b;
             border: 2px solid #f1c40f;
             border-radius: 20px;
             padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
-            color: #d68910;
+            color: #f1c40f;
         }
         .trophy-box {
             display: inline-flex;
             align-items: center;
-            background: #eef9ff;
+            background: #0f2738;
             border: 2px solid #3498db;
             border-radius: 20px;
             padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
-            color: #2980b9;
+            color: #3498db;
         }
         .myball-btn-box {
             display: inline-flex;
             align-items: center;
-            background: #f3e5f5;
+            background: #321342;
             border: 2px solid #9b59b6;
             border-radius: 20px;
             padding: 6px 12px;
             font-size: 12px;
             font-weight: bold;
-            color: #8e44ad;
+            color: #e0aaff;
             cursor: pointer;
         }
         .coin-icon {
@@ -453,32 +455,33 @@
             text-align: center;
             line-height: 12px;
             font-size: 10px;
-            color: #fff;
+            color: #000;
         }
 
         input[type="text"], input[type="password"], input[type="number"], select {
             width: 100%;
             padding: 10px 12px;
             font-size: 13px;
-            border: 2px solid #bdc3c7;
+            border: 2px solid #8e44ad;
             border-radius: 8px;
             outline: none;
             text-align: left !important;
             margin-bottom: 8px;
             box-sizing: border-box;
-            background: #fff;
+            background: #1a0826;
+            color: #fff;
             user-select: auto;
             -webkit-user-select: auto;
         }
         input[type="text"]:focus, input[type="password"]:focus, select:focus { 
-            border-color: #e67e22; 
+            border-color: #ff7518; 
         }
         
         .error {
             min-height: 18px;
             font-size: 12px;
             font-weight: bold;
-            color: #e74c3c;
+            color: #ff4757;
             margin-bottom: 6px;
         }
         .btn {
@@ -514,16 +517,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #ffffff;
-            border: 2px solid #bdc3c7;
+            background: #3d1b52;
+            border: 2px solid #8e44ad;
             border-radius: 8px;
             padding: 12px 15px;
         }
-        .shop-item.owned { border-color: #27ae60; background: #eafaf1; }
-        .shop-item.equipped { border-color: #2980b9; background: #ebf5fb; }
+        .shop-item.owned { border-color: #27ae60; background: #1c3d2b; }
+        .shop-item.equipped { border-color: #3498db; background: #183852; }
         .shop-info { text-align: left; }
-        .shop-name { font-weight: bold; font-size: 14px; color: #2c3e50; }
-        .shop-desc { font-size: 11px; color: #7f8c8d; }
+        .shop-name { font-weight: bold; font-size: 14px; color: #ffffff; }
+        .shop-desc { font-size: 11px; color: #d1d8e0; }
         .shop-action-btn {
             padding: 8px 14px;
             font-size: 12px;
@@ -540,17 +543,17 @@
         .timer-box {
             font-size: 24px;
             font-weight: bold;
-            color: #e74c3c;
+            color: #ff4757;
             margin-bottom: 15px;
         }
 
         .room-box {
-            background: #ecf0f1;
+            background: #3d1b52;
             padding: 10px;
             border-radius: 8px;
             font-size: 18px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #ff7518;
             margin-bottom: 10px;
             letter-spacing: 3px;
         }
@@ -561,16 +564,16 @@
             max-width: 540px;
             aspect-ratio: 1 / 1;
             margin: 0 auto 12px auto;
-            border: 3px solid #2c3e50;
-            border-radius: 8px;
+            border: 3px solid #ff7518;
+            border-radius: 12px;
             overflow: hidden;
-            background-color: #ffffff;
+            background-color: #11051b;
+            box-shadow: 0 0 15px rgba(255, 117, 24, 0.5);
         }
         canvas {
             width: 100%;
             height: 100%;
             display: block;
-            background: #ffffff;
         }
         .speed-btn {
             position: absolute;
@@ -585,7 +588,7 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 20;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
         .speed-btn.active {
             background: #c0392b;
@@ -621,8 +624,9 @@
             position: relative;
             width: 100%;
             height: 22px;
-            background: #e0e0e0;
-            border: 2.5px solid #2c3e50;
+            background: #3d1b52;
+            border: 2.5px solid #ff7518;
+            border-radius: 6px;
             overflow: hidden;
             margin-bottom: 8px;
         }
@@ -648,52 +652,52 @@
             align-items: center;
             font-size: 12px;
             font-weight: bold;
-            color: #000000;
+            color: #ffffff;
             z-index: 5;
             pointer-events: none;
+            text-shadow: 1px 1px 2px #000;
         }
 
         .fancy-chat-btn {
             margin-top: 0;
             width: 52px;
             height: 52px;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f3f6 100%);
-            border: 2.5px solid #2c3e50;
+            background: linear-gradient(135deg, #3d1b52 0%, #68268a 100%);
+            border: 2.5px solid #ff7518;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             transition: all 0.15s ease-in-out;
             outline: none;
         }
         .fancy-chat-btn:active {
             transform: scale(0.92);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         .chat-icon-svg {
             width: 26px;
             height: 26px;
-            fill: #2c3e50;
+            fill: #ff7518;
         }
 
         .chat-modal-box {
             width: 100%;
             max-width: 380px;
-            background: #ffffff;
-            border: 3px solid #2980b9;
+            background: #2b113a;
+            border: 3px solid #ff7518;
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             height: 480px;
         }
         .chat-log-area {
             flex: 1;
-            background: #f8f9fa;
-            border: 2px solid #bdc3c7;
+            background: #1a0826;
+            border: 2px solid #8e44ad;
             border-radius: 8px;
             padding: 10px;
             overflow-y: auto;
@@ -718,7 +722,7 @@
         }
         .chat-sender {
             font-size: 10px;
-            color: #7f8c8d;
+            color: #a29bfe;
             margin-bottom: 2px;
             font-weight: bold;
         }
@@ -731,13 +735,13 @@
             word-break: break-all;
         }
         .chat-msg-row.me .chat-bubble {
-            background: #3498db;
+            background: #8e44ad;
             color: white;
             border-bottom-right-radius: 2px;
         }
         .chat-msg-row.other .chat-bubble {
-            background: #e2e8f0;
-            color: #2d3748;
+            background: #3d1b52;
+            color: #ffffff;
             border-bottom-left-radius: 2px;
         }
 
@@ -746,24 +750,20 @@
             gap: 4px;
             flex-wrap: wrap;
             margin-bottom: 8px;
-            background: #edf2f7;
+            background: #3d1b52;
             padding: 6px;
             border-radius: 8px;
-            border: 1px solid #cbd5e0;
+            border: 1px solid #8e44ad;
         }
         .quick-chat-btn {
-            background: #ffffff;
-            border: 1.5px solid #cbd5e0;
+            background: #1a0826;
+            border: 1.5px solid #8e44ad;
             border-radius: 6px;
             padding: 5px 8px;
             font-size: 11px;
             font-weight: bold;
-            color: #2d3748;
+            color: #ffffff;
             cursor: pointer;
-            transition: background 0.1s;
-        }
-        .quick-chat-btn:active {
-            background: #e2e8f0;
         }
 
         .admin-window {
@@ -869,9 +869,6 @@
             background: #e91e63 !important;
             border-color: #ff4081 !important;
         }
-        .admin-small-btn:active {
-            background: #e91e63;
-        }
         .admin-slider-container {
             margin-bottom: 8px;
         }
@@ -942,7 +939,7 @@
             </div>
 
             <div style="display: flex; gap: 4px; align-items: center;">
-                <button class="quick-chat-btn" style="background:#edf2f7; border-color:#cbd5e0; white-space:nowrap; padding:9px 8px;" onclick="toggleQuickChatPanel()">⚡ 빠른 채팅</button>
+                <button class="quick-chat-btn" style="white-space:nowrap; padding:9px 8px;" onclick="toggleQuickChatPanel()">⚡ 빠른 채팅</button>
                 <input type="text" id="chat-msg-input" placeholder="메시지 입력..." style="margin-bottom:0; flex:1;" onkeyup="if(event.key==='Enter') sendChatMessage()">
                 <button class="btn-claim" style="padding:10px 14px; font-size:13px;" onclick="sendChatMessage()">전송</button>
             </div>
@@ -1050,11 +1047,11 @@
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
-            <div class="version-text">릴리 볼 파이트 v1.4</div>
-            <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
+            <div class="version-text">릴리 볼 파이트 v1.4 (할로윈)</div>
+            <div style="font-size: 12px; color: #ff7518; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
                 최대 10글자까지 입력할 수 있으며,<br>
-                <span style="color: #c0392b;">한 번 정하면 절대 변경할 수 없습니다!</span><br>
-                <span style="font-size: 11px; color: #27ae60;">(중복되는 이름은 쓸 수 있습니다)</span>
+                <span style="color: #ff4757;">한 번 정하면 절대 변경할 수 없습니다!</span><br>
+                <span style="font-size: 11px; color: #2ecc71;">(중복되는 이름은 쓸 수 있습니다)</span>
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
@@ -1099,8 +1096,8 @@
             <button class="ranking-nav-btn" onclick="showRankingBoard()">🏆 랭킹보드</button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
-        <div class="version-text">v1.4 버전</div>
-        <div class="error" id="lobby-error-msg" style="color: #e74c3c; font-size: 13px; font-weight: bold; margin-bottom: 6px; min-height: 18px;"></div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
+        <div class="error" id="lobby-error-msg" style="color: #ff4757; font-size: 13px; font-weight: bold; margin-bottom: 6px; min-height: 18px;"></div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
@@ -1121,7 +1118,7 @@
             <h2>📬 우편함 📬</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.4 버전</div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">도착한 우편이 있습니다!</div>
@@ -1134,7 +1131,7 @@
             <h2>🏆 명예의 전당 🏆</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.4 버전 (실시간 순위)</div>
+        <div class="version-text">v1.4 할로윈 에디션 (실시간 순위)</div>
         
         <div class="ranking-tab-container">
             <button class="ranking-tab-btn active" id="rank-tab-trophy" onclick="switchRankingTab('trophy')">🏆 트로피 랭킹</button>
@@ -1148,7 +1145,7 @@
 
     <div class="container hidden" id="myball-screen">
         <h2>⚽ 나의 공 보관함 ⚽</h2>
-        <div class="version-text">v1.4 버전</div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="currency-container" style="margin-top: 5px;">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-shop">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-shop">0</span>개</div>
@@ -1162,7 +1159,7 @@
 
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
-        <div class="version-text">v1.4 버전</div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-friend">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-friend">0</span>개</div>
@@ -1186,7 +1183,7 @@
 
     <div class="container hidden" id="group-screen">
         <h2>👥 그룹 대기실 👥</h2>
-        <div class="version-text">v1.4 버전</div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="desc">그룹 코드 입력</div>
         <div class="error" id="group-error"></div>
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
@@ -1205,14 +1202,14 @@
             <h2>⚔️ 출전 준비 ⚔️</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.4 버전</div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
     </div>
 
     <div class="container hidden" id="game-screen">
-        <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
+        <div class="boss-event-date-text hidden" id="game-event-date">🎃 할로윈 이벤트 중!</div>
         <div class="canvas-container">
             <canvas id="gameCanvas" width="540" height="540"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
@@ -1227,13 +1224,13 @@
                 ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">오른쪽 ▶</button>
         </div>
 
-        <div class="label" id="p1-label" style="color: #2980b9;">Player 1 (블루)</div>
+        <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
         <div class="hp-bar">
             <div class="hp-fill" id="p1-hp"></div>
             <div class="hp-text" id="p1-hp-text">200 / 200</div>
         </div>
 
-        <div class="label" id="p2-label" style="color: #c0392b;">Player 2 (레드)</div>
+        <div class="label" id="p2-label" style="color: #ff4757;">Player 2 (레드)</div>
         <div class="hp-bar">
             <div class="hp-fill p2" id="p2-hp"></div>
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
@@ -1317,6 +1314,19 @@
         let iceFallBlocks = [];
         let fireFallBlocks = [];
         let specialAttackEntities = [];
+
+        // 🎃 화려한 할로윈 배경 요소
+        let halloweenProps = [];
+        for(let i = 0; i < 15; i++) {
+            halloweenProps.push({
+                x: Math.random() * 540,
+                y: Math.random() * 540,
+                type: ['pumpkin', 'ghost', 'bat', 'star'][Math.floor(Math.random() * 4)],
+                speed: 0.3 + Math.random() * 0.5,
+                size: 15 + Math.random() * 15,
+                floatOffset: Math.random() * Math.PI * 2
+            });
+        }
 
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 15, 21, 30, 0).getTime(); 
@@ -1717,7 +1727,7 @@
                     mergeUsers(parsedUsers);
                 } catch(e){}
             }
-            if (savedUsername) {
+            if (savedUsername && savedUsername.trim() !== "") {
                 let match = registeredUsers.find(u => u.name === savedUsername);
                 if (!match) {
                     registeredUsers.push({ name: savedUsername, coins: userCoins, trophies: userTrophies, banUntil: 0, banTimeStr: "" });
@@ -2048,7 +2058,6 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        // 🌟 요청하신 공들 및 능력치/설정 반영 (볼 크기 1.5배: 기본 radius 36)
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '체력: 200, 데미지 없음', price: 0, hp: 200, damage: 0, owned: true, equipped: true },
             { id: 'mrbeast', name: '미스터 비스트 볼', desc: '미스터 비스트 이미지 공', price: 1500, hp: 300, damage: 15, owned: false, equipped: false },
@@ -2142,6 +2151,7 @@
             return false;
         }
 
+        // 🌟 플레이 하기 클릭 시 전체 유저 DB 등록 및 UI 연동 업데이트
         function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
@@ -2164,11 +2174,13 @@
 
             savedUsername = val;
             
+            // 즉각적인 글로벌 유저 등록
             syncGlobalUsers();
             saveData();
             
             renderAdminUserList();
             renderAdminGiftUserSelect();
+            renderRankingList();
 
             document.getElementById('name-modal').classList.add('hidden');
             document.getElementById('lobby-screen').classList.remove('hidden');
@@ -2187,7 +2199,6 @@
             document.getElementById('profile-modal').classList.add('hidden');
         }
 
-        // 🌟 볼 크기 1.5배 확대 반영 (기본 반지름 36)
         let p1 = { 
             x: 130, y: 270, radius: 36, color: '#2980b9', vx: 2.0, vy: 2.0, hp: 200, maxHp: 200,
             type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
@@ -2313,7 +2324,7 @@
         function joinGroupRoom() {
             let code = document.getElementById('group-code-input').value.trim();
             if (code.length !== 4 || isNaN(code)) {
-                document.getElementById('group-error').style.color = "#e74c3c";
+                document.getElementById('group-error').style.color = "#ff4757";
                 document.getElementById('group-error').innerText = "올바른 4자리 코드를 입력해주세요!";
                 return;
             }
@@ -2402,7 +2413,7 @@
             });
 
             peer.on('error', (e) => {
-                err.style.color = "#e74c3c";
+                err.style.color = "#ff4757";
                 err.innerText = "방 생성 오류. 다시 '방 생성하기'를 눌러주세요.";
             });
         }
@@ -2620,7 +2631,7 @@
             document.getElementById('join-container').classList.remove('hidden');
             document.getElementById('room-input').value = "";
             const err = document.getElementById('friend-error');
-            err.style.color = "#e74c3c";
+            err.style.color = "#ff4757";
             err.innerText = "";
         }
 
@@ -2645,7 +2656,7 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.radius = isBossMode ? 20 : 36; // 1.5배 큰 볼 크기 (반지름 36)
+            p1.radius = isBossMode ? 20 : 36;
             p1.x = 130; 
             p1.y = 270;
             let v1 = getRandomVelocity();
@@ -2728,25 +2739,20 @@
             if (!isBossMode) {
                 let now = Date.now();
 
-                // 1) 기본 투사체 주기별 발사
                 if (p1.type === 'fire' && now - p1.lastProjTime > 2000) {
                     p1.lastProjTime = now;
-                    // 내 볼보다 조금 작은 화염볼 (반지름 p1.radius * 0.7)
                     projectiles.push({ type: 'fireball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 0.7, damage: 15, target: p2 });
                 } else if (p1.type === 'ice' && now - p1.lastProjTime > 3000) {
                     p1.lastProjTime = now;
-                    // 내 볼 사이즈 만한 얼음 (반지름 p1.radius)
                     projectiles.push({ type: 'iceball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius, damage: 15, target: p2 });
                 } else if (p1.type === 'pokemon' && now - p1.lastProjTime > 2500) {
                     p1.lastProjTime = now;
                     projectiles.push({ type: 'pokeball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.04, vy: (p2.y - p1.y)*0.04, radius: 14, damage: 30, target: p2 });
                 } else if (p1.type === 'dongryong' && now - p1.lastProjTime > 2500) {
                     p1.lastProjTime = now;
-                    // '쉿' 텍스트 (내 볼 사이즈의 2배 크기 효과)
                     specialAttackEntities.push({ type: 'shh_text', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 2, damage: 20, target: p2 });
                 }
 
-                // 2) 특수 기술 발동 주기
                 let skillInterval = 8000;
                 if (p1.type === 'fire') skillInterval = 6000;
                 else if (p1.type === 'ice') skillInterval = 8000;
@@ -2758,14 +2764,12 @@
                     p1.lastSkillTime = now;
 
                     if (p1.type === 'fire') {
-                        // 큰 화염볼 3개 (내 볼보다 4배 더 커서 지름 4배 -> 반지름 4배 = p1.radius * 4)
                         let hugeR = p1.radius * 4;
                         fireFallBlocks.push({ x: canvas.width * 0.25, y: -100, radius: hugeR, speed: 3, damage: 20 });
                         fireFallBlocks.push({ x: canvas.width * 0.50, y: -100, radius: hugeR, speed: 3, damage: 20 });
                         fireFallBlocks.push({ x: canvas.width * 0.75, y: -100, radius: hugeR, speed: 3, damage: 20 });
                     } 
                     else if (p1.type === 'ice') {
-                        // 얼음 4개 (왼쪽 2개, 오른쪽 2개, 경기장을 꽉 채울 정도의 큰 얼음)
                         let hugeIceR = 55;
                         iceFallBlocks.push({ x: 80, y: -80, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
                         iceFallBlocks.push({ x: 200, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
@@ -2773,7 +2777,6 @@
                         iceFallBlocks.push({ x: 460, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
                     } 
                     else if (p1.type === 'pokemon') {
-                        // 2초간 포켓몬볼 50개 이상 폭풍 낙하 (개당 데미지 2)
                         for(let i=0; i<55; i++) {
                             specialAttackEntities.push({
                                 type: 'pokeball_storm',
@@ -2787,7 +2790,6 @@
                         }
                     } 
                     else if (p1.type === 'dongryong') {
-                        // 어몽어스 벤트 칼 찌르기 (75 데미지)
                         specialAttackEntities.push({
                             type: 'amongus_assassinate',
                             x: p2.x, y: p2.y - 80,
@@ -2797,7 +2799,6 @@
                         });
                     } 
                     else if (p1.type === 'sangsampany') {
-                        // 쓱싹쓱싹 행주 기술 (90 데미지) + 미용티슈 볼 소환 폭발 (100 데미지)
                         specialAttackEntities.push({
                             type: 'sangsampany_combo',
                             targetPlayer: p2,
@@ -2828,7 +2829,6 @@
                     if (p2.y + p2.radius > canvas.height) { p2.y = canvas.height - p2.radius - 2; p2.vy *= -1; }
                 }
 
-                // 엔티티 업데이트 (투사체, 기술 등)
                 for (let i = specialAttackEntities.length - 1; i >= 0; i--) {
                     let se = specialAttackEntities[i];
                     if (se.type === 'pokeball_storm') {
@@ -2847,7 +2847,7 @@
                     else if (se.type === 'amongus_assassinate' || se.type === 'sangsampany_combo') {
                         se.timer -= speedMultiplier;
                         if (se.timer <= 0) {
-                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : 190; // 행주(90) + 미용티슈(100) = 190 혹은 각각 적용
+                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : 190;
                             se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - hitDmg);
                             specialAttackEntities.splice(i, 1);
                             updateHpBars();
@@ -2878,7 +2878,7 @@
                     let dy = ib.y - p2.y;
                     if (Math.sqrt(dx*dx + dy*dy) < ib.radius + p2.radius) {
                         p2.hp = Math.max(0, p2.hp - ib.damage);
-                        if (ib.freeze) p2.freezeTimer = 60; // 1초 얼림 (60프레임)
+                        if (ib.freeze) p2.freezeTimer = 60;
                         iceFallBlocks.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
@@ -2965,7 +2965,6 @@
                 if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
             }
 
-            // 🌟 모든 공들 충돌 시 매번 각각 10 데미지 입기 반영
             if (!isBossMode) {
                 let dx = p2.x - p1.x;
                 let dy = p2.y - p1.y;
@@ -2984,7 +2983,6 @@
                     p2.x += nx * overlap / 2;
                     p2.y += ny * overlap / 2;
 
-                    // 박을 때마다 10 데미지 + 고유 데미지 추가
                     p1.hp = Math.max(0, p1.hp - (10 + p2.damage));
                     p2.hp = Math.max(0, p2.hp - (10 + p1.damage));
 
@@ -3031,7 +3029,6 @@
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.clip(); 
 
-            // 미스터 비스트 볼(mrbeast) 장착 시 character.jpg 이미지 렌더링
             if (p.type === 'mrbeast' && characterImg.complete && characterImg.naturalWidth !== 0) {
                 ctx.drawImage(characterImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
             } else {
@@ -3048,18 +3045,68 @@
             ctx.closePath();
         }
 
+        // 🎃 화려한 할로윈 배경 렌더링 함수
+        function drawHalloweenBackground() {
+            // 몽환적인 야간 밤하늘 그라데이션
+            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#0f051d');
+            grad.addColorStop(0.5, '#2b0a3d');
+            grad.addColorStop(1, '#11051b');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 보름달 (달)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(450, 80, 40, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffec99';
+            ctx.shadowColor = '#ffaa00';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.restore();
+
+            // 배경 장식 요소들 (호박, 유령, 박쥐) 움직임 업데이트 및 그리기
+            halloweenProps.forEach(prop => {
+                prop.y += prop.speed;
+                if (prop.y > canvas.height + 30) {
+                    prop.y = -30;
+                    prop.x = Math.random() * canvas.width;
+                }
+                let floatX = prop.x + Math.sin(Date.now() * 0.002 + prop.floatOffset) * 15;
+
+                ctx.save();
+                ctx.font = `${prop.size}px sans-serif`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                if (prop.type === 'pumpkin') {
+                    ctx.fillText('🎃', floatX, prop.y);
+                } else if (prop.type === 'ghost') {
+                    ctx.fillText('👻', floatX, prop.y);
+                } else if (prop.type === 'bat') {
+                    ctx.fillText('🦇', floatX, prop.y);
+                } else {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillText('✨', floatX, prop.y);
+                }
+                ctx.restore();
+            });
+        }
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 🎃 화려한 할로윈 배경 연출
+            drawHalloweenBackground();
 
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
-            // 특수 효과 및 텍스트 렌더링 (쉿, 쓱싹쓱싹, 어몽어스 암살 등)
             specialAttackEntities.forEach(se => {
                 if (se.type === 'amongus_assassinate') {
                     ctx.save();
                     ctx.font = "bold 18px sans-serif";
-                    ctx.fillStyle = "#e74c3c";
+                    ctx.fillStyle = "#ff4757";
                     ctx.textAlign = "center";
                     ctx.fillText("🔪 어몽어스 암살!", se.targetPlayer.x, se.targetPlayer.y - se.targetPlayer.radius - 10);
                     ctx.restore();
@@ -3107,7 +3154,7 @@
                 if (pr.type === 'shh_text') {
                     ctx.save();
                     ctx.font = "bold 24px sans-serif";
-                    ctx.fillStyle = "#2c3e50";
+                    ctx.fillStyle = "#ffffff";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText("쉿", pr.x, pr.y);
@@ -3147,7 +3194,7 @@
 
             if (isCountingDown) {
                 ctx.save();
-                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 ctx.font = "900 90px sans-serif";
@@ -3163,7 +3210,7 @@
 
             if (gameOverState) {
                 ctx.save();
-                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 ctx.font = "900 52px sans-serif";
@@ -3178,7 +3225,7 @@
                     textColor = "#2ecc71";
                 } else if (gameOverState === 'lose') {
                     resultText = "패배";
-                    textColor = "#e74c3c";
+                    textColor = "#ff4757";
                 } else {
                     resultText = "무승부 ㅠ";
                     textColor = "#f1c40f";
@@ -3203,4 +3250,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                            </html>
