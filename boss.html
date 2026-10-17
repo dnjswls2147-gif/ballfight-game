@@ -204,6 +204,9 @@
 </head>
 <body>
 
+    <!-- 🎵 안정적인 공개 오디오 스트림 소스 -->
+    <audio id="sans-bgm-audio" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
+
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
         <button class="start-btn" onclick="startCountdown()">보스전 시작!</button>
@@ -261,91 +264,41 @@
         let p1 = { x: 170, y: 310, radius: 12, hp: 200, maxHp: 200 };
         let p2 = { hp: 750, maxHp: 750 };
 
-        // 🎵 모바일 차단 없는 웹 오디오 신시사이저 (메갈로바니아 멜로디 루프)
-        let audioCtx = null;
-        let bgmInterval = null;
-        let isBgmPlaying = false;
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        // 샌즈 메갈로바니아 핵심 음계 패턴 (주파수 Hz)
-        const notes = [
-            587.33, 587.33, 880, 783.99, 698.46, 622.25, 698.46, 622.25,
-            523.25, 523.25, 880, 783.99, 698.46, 622.25, 698.46, 622.25,
-            493.88, 493.88, 880, 783.99, 698.46, 622.25, 698.46, 622.25,
-            466.16, 466.16, 880, 783.99, 698.46, 622.25, 698.46, 622.25
-        ];
-        let noteIndex = 0;
-
-        function playTone(freq) {
-            if (!audioCtx) return;
-            try {
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = 'sawtooth'; // 칩튠/게임 감성의 거친 사운드
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.19);
-            } catch(e) {}
-        }
-
-        function startBGM() {
-            initAudio();
-            if (isBgmPlaying) return;
-            isBgmPlaying = true;
-            noteIndex = 0;
-
-            bgmInterval = setInterval(() => {
-                if (!isBgmPlaying) return;
-                playTone(notes[noteIndex]);
-                noteIndex = (noteIndex + 1) % notes.length;
-            }, 190); // 템포
-
+        function toggleBGM() {
+            const audio = document.getElementById('sans-bgm-audio');
             const btn = document.getElementById('bgm-btn');
-            if (btn) {
-                btn.innerText = "🔊 BGM 끄기";
-                btn.style.background = "#e74c3c";
-            }
-        }
+            if (!audio) return;
 
-        function stopBGM() {
-            isBgmPlaying = false;
-            if (bgmInterval) {
-                clearInterval(bgmInterval);
-                bgmInterval = null;
-            }
-            const btn = document.getElementById('bgm-btn');
-            if (btn) {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    btn.innerText = "🔊 BGM 끄기";
+                    btn.style.background = "#e74c3c";
+                }).catch(err => {
+                    alert("브라우저 재생 차단됨: 화면을 터치한 후 다시 눌러주세요.");
+                });
+            } else {
+                audio.pause();
                 btn.innerText = "🔊 BGM 켜기";
                 btn.style.background = "#27ae60";
             }
         }
 
-        function toggleBGM() {
-            if (isBgmPlaying) {
-                stopBGM();
-            } else {
-                startBGM();
-            }
-        }
-
         function startCountdown() {
             const screen = document.getElementById('countdown-screen');
-            startBGM(); // 버튼 누르는 즉시 음악 재생 시작!
+            const audio = document.getElementById('sans-bgm-audio');
+
+            if (audio) {
+                audio.play().then(() => {
+                    const btn = document.getElementById('bgm-btn');
+                    if(btn) {
+                        btn.innerText = "🔊 BGM 끄기";
+                        btn.style.background = "#e74c3c";
+                    }
+                }).catch(e => {
+                    console.log("자동 재생 제한 우회 필요:", e);
+                });
+            }
+
             screen.style.display = 'none';
             gameStarted = true;
         }
@@ -416,7 +369,8 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
-                stopBGM();
+                const audio = document.getElementById('sans-bgm-audio');
+                if (audio) audio.pause();
 
                 if (p1.hp > 0 && p2.hp <= 0) {
                     gameOverState = 'win';
