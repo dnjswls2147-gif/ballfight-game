@@ -1257,11 +1257,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v30';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v30';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v30';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v30';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v30';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v31';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v31';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v31';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v31';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v31';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1274,9 +1274,9 @@
             "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
         ];
 
-        // 🌟 업로드해주신 미스터 비스트 이미지 11868.jpg 연결!
-        const mrBeastImg = new Image();
-        mrBeastImg.src = "11868.jpg"; 
+        // 🌟 방금 업로드하신 character.jpg 이미지 연결
+        const customCharacterImg = new Image();
+        customCharacterImg.src = "character.jpg"; 
 
         let savedUsername = "";
         let registeredUsers = []; 
@@ -2049,10 +2049,10 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        // 🌟 미스터 비스트 볼 데이터 연동 (id: mrbeast_img)
+        // 🌟 새로 업로드한 character.jpg를 사용하는 커스텀 볼 등록
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: false },
-            { id: 'mrbeast_img', name: '미스터비스트 이미지 볼', desc: '업로드하신 로고 이미지 캐릭터 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: true },
+            { id: 'custom_character', name: '커스텀 캐릭터 볼', desc: '내 사진 이미지 공 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 폭풍 폭격', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
@@ -2735,9 +2735,9 @@
                     radius: 20, speed: 7 * speedMultiplier, damage: 30,
                     targetPlayer: enemy
                 });
-            } else if (type === 'mrbeast_img') {
+            } else if (type === 'custom_character') {
                 specialAttackEntities.push({
-                    type: 'mrbeast_dance',
+                    type: 'custom_skill',
                     x: enemy.x, y: -50,
                     radius: 30, speed: 8 * speedMultiplier, damage: 35,
                     targetPlayer: enemy
@@ -2807,7 +2807,7 @@
 
                 for (let i = specialAttackEntities.length - 1; i >= 0; i--) {
                     let se = specialAttackEntities[i];
-                    if (se.type === 'amongus' || se.type === 'mrbeast_dance') {
+                    if (se.type === 'amongus' || se.type === 'custom_skill') {
                         se.y += se.speed;
                     } else if (se.type === 'suseumi') {
                         se.x += se.vx;
@@ -3010,9 +3010,9 @@
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.clip(); 
 
-            // 🌟 미스터 비스트 이미지를 원형 공으로 정상 출력
-            if (p.type === 'mrbeast_img' && mrBeastImg.complete && mrBeastImg.naturalWidth !== 0) {
-                ctx.drawImage(mrBeastImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+            // 🌟 character.jpg 이미지를 원형 공으로 정상 출력
+            if (p.type === 'custom_character' && customCharacterImg.complete && customCharacterImg.naturalWidth !== 0) {
+                ctx.drawImage(customCharacterImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
             } else {
                 ctx.fillStyle = p.color;
                 ctx.fill();
@@ -3047,7 +3047,7 @@
                 ctx.beginPath();
                 ctx.arc(se.x, se.y, se.radius, 0, Math.PI * 2);
                 if (se.type === 'amongus') ctx.fillStyle = '#e74c3c';
-                else if (se.type === 'mrbeast_dance') ctx.fillStyle = '#f39c12';
+                else if (se.type === 'custom_skill') ctx.fillStyle = '#f39c12';
                 else ctx.fillStyle = '#27ae60';
                 ctx.fill();
                 ctx.strokeStyle = '#ffffff';
@@ -3169,4 +3169,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
