@@ -17,10 +17,34 @@
             margin: 0;
             padding: 10px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
+        
+        .notice-banner {
+            width: 100%;
+            max-width: 580px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .container {
             width: 100%;
             max-width: 580px;
@@ -742,7 +766,6 @@
             background: #e2e8f0;
         }
 
-        /* ---------------- 어드민 패널 스타일 ---------------- */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -862,6 +885,11 @@
 </head>
 <body>
 
+    <div id="top-notice-banner" class="notice-banner hidden">
+        <span>📢 [공지]</span>
+        <span id="notice-banner-text">공지사항이 들어갑니다.</span>
+    </div>
+
     <div id="maintenance-screen" class="hidden">
         <h1>🚨 지금 점검 중입니다!</h1>
         <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
@@ -894,7 +922,6 @@
         </div>
     </div>
 
-    <!-- 실시간 채팅 모달 -->
     <div class="modal-overlay hidden" id="chat-modal">
         <div class="chat-modal-box">
             <div class="header-row">
@@ -922,7 +949,6 @@
         </div>
     </div>
 
-    <!-- 어드민 패널 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
@@ -942,8 +968,8 @@
                     <div class="admin-section-title">공지 / 투표 공지</div>
                     <input type="text" id="admin-notice-input" placeholder="공지사항 입력..." style="margin-bottom:4px; font-size:10px; padding:5px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
                     <div class="admin-btn-row">
-                        <button class="admin-small-btn" style="background:#e67e22;" onclick="alert('공지가 등록되었습니다!')">등록</button>
-                        <button class="admin-small-btn" style="background:#c0392b;" onclick="alert('공지가 삭제되었습니다!')">삭제</button>
+                        <button class="admin-small-btn" style="background:#e67e22;" onclick="publishAdminNotice()">등록</button>
+                        <button class="admin-small-btn" style="background:#c0392b;" onclick="deleteAdminNotice()">삭제</button>
                     </div>
 
                     <div class="admin-section-title">빠른 조작</div>
@@ -1032,8 +1058,7 @@
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
-            <button class="btn btn-ai" id="btn-save-name" onclick="saveInitialUsername()">이름으로 쓰기</button>
-            <button class="btn btn-friend hidden" id="btn-play-after-name" onclick="closeNameModalAndPlay()">플레이 하기</button>
+            <button class="btn btn-friend" id="btn-save-name" onclick="saveInitialUsernameAndPlay()" style="margin-top:10px; font-size:18px; padding:14px;">플레이 하기</button>
         </div>
     </div>
 
@@ -1232,10 +1257,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v28';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v28';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v28';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v28';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v30';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v30';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v30';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v30';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v30';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1248,14 +1274,15 @@
             "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
         ];
 
-        // 🌟 업로드해주신 미스터비스트 이미지 객체 생성 및 로드
+        // 🌟 업로드해주신 미스터 비스트 이미지 11868.jpg 연결!
         const mrBeastImg = new Image();
-        mrBeastImg.src = "11870.jpg"; // 업로드된 이미지 파일명 지정
+        mrBeastImg.src = "11868.jpg"; 
 
         let savedUsername = "";
         let registeredUsers = []; 
         let globalMails = []; 
         let claimedMailIds = []; 
+        let activeNotice = "";
         let isAdminLoggedIn = false;
         let isBypassedByPassword = false;
         let selectedGiftType = 'coin';
@@ -1538,6 +1565,37 @@
                 }
             }
         });
+
+        function publishAdminNotice() {
+            const text = document.getElementById('admin-notice-input').value.trim();
+            if (!text) {
+                alert("공지사항 내용을 입력하세요!");
+                return;
+            }
+            activeNotice = text;
+            localStorage.setItem(GLOBAL_NOTICE_KEY, text);
+            updateNoticeBanner();
+            alert("상단 공지사항이 등록되었습니다!");
+        }
+
+        function deleteAdminNotice() {
+            activeNotice = "";
+            localStorage.removeItem(GLOBAL_NOTICE_KEY);
+            updateNoticeBanner();
+            document.getElementById('admin-notice-input').value = "";
+            alert("상단 공지사항이 삭제되었습니다!");
+        }
+
+        function updateNoticeBanner() {
+            const banner = document.getElementById('top-notice-banner');
+            const bannerText = document.getElementById('notice-banner-text');
+            if (activeNotice && activeNotice.trim() !== "") {
+                bannerText.innerText = activeNotice;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
 
         function switchAdminTab(tabName) {
             document.getElementById('admin-tab-main').classList.add('hidden');
@@ -1991,10 +2049,10 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        // 🌟 나의 공 보관함 리스트에 미스터비스트 이미지 볼 추가
+        // 🌟 미스터 비스트 볼 데이터 연동 (id: mrbeast_img)
         let ballsData = [
-            { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
-            { id: 'mrbeast_img', name: '미스터비스트 이미지 볼', desc: '업로드하신 로고 이미지 캐릭터 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: false },
+            { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: false },
+            { id: 'mrbeast_img', name: '미스터비스트 이미지 볼', desc: '업로드하신 로고 이미지 캐릭터 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: true },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 폭풍 폭격', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
@@ -2052,6 +2110,12 @@
                 try { claimedMailIds = JSON.parse(savedClaimedIds); } catch(e) {}
             }
 
+            const savedNotice = localStorage.getItem(GLOBAL_NOTICE_KEY);
+            if (savedNotice) {
+                activeNotice = savedNotice;
+                updateNoticeBanner();
+            }
+
             syncGlobalUsers();
             checkMaintenanceStatus();
 
@@ -2079,7 +2143,7 @@
             return false;
         }
 
-        function saveInitialUsername() {
+        function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
             const val = input.value.trim();
@@ -2099,25 +2163,17 @@
                 return;
             }
 
-            syncGlobalUsers();
             savedUsername = val;
             
-            if (!registeredUsers.some(u => u.name === val)) {
-                registeredUsers.push({ name: val, coins: userCoins, trophies: userTrophies, banUntil: 0, banTimeStr: "" });
-            }
-            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
-
+            syncGlobalUsers();
             saveData();
-            err.innerText = "";
-            document.getElementById('btn-save-name').classList.add('hidden');
-            document.getElementById('btn-play-after-name').classList.remove('hidden');
-            checkMailRedDot();
-            alert(`이름 [ ${val} ]이(가) 저장되었습니다!`);
-        }
+            
+            renderAdminUserList();
+            renderAdminGiftUserSelect();
 
-        function closeNameModalAndPlay() {
             document.getElementById('name-modal').classList.add('hidden');
             document.getElementById('lobby-screen').classList.remove('hidden');
+            checkMailRedDot();
         }
 
         function openProfileModal() {
@@ -2679,7 +2735,7 @@
                     radius: 20, speed: 7 * speedMultiplier, damage: 30,
                     targetPlayer: enemy
                 });
-            } else if (type === 'mrbeast') {
+            } else if (type === 'mrbeast_img') {
                 specialAttackEntities.push({
                     type: 'mrbeast_dance',
                     x: enemy.x, y: -50,
@@ -2919,7 +2975,6 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
         }
 
-        // 🌟 업로드한 이미지를 원형 공 캐릭터로 완벽 렌더링하는 함수
         function drawPlayer(p, isPlayer1) {
             if (p.type === 'boss') {
                 ctx.beginPath();
@@ -2953,10 +3008,10 @@
             ctx.save();
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.clip(); // 원형 클리핑
+            ctx.clip(); 
 
+            // 🌟 미스터 비스트 이미지를 원형 공으로 정상 출력
             if (p.type === 'mrbeast_img' && mrBeastImg.complete && mrBeastImg.naturalWidth !== 0) {
-                // 업로드한 미스터비스트 이미지로 원 안을 가득 채움
                 ctx.drawImage(mrBeastImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
             } else {
                 ctx.fillStyle = p.color;
@@ -2964,7 +3019,6 @@
             }
             ctx.restore();
 
-            // 외곽선 테두리
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.lineWidth = 2.5;
@@ -3115,4 +3169,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                            </html>
+    </html>
