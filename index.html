@@ -766,12 +766,13 @@
             cursor: pointer;
         }
 
+        /* 🌟 스크린샷 스타일 어드민 유저 관리 카드 디자인 */
         .admin-window {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 360px;
+            width: 380px;
             background: #1e1b29;
             border: 2px solid #e91e63;
             border-radius: 12px;
@@ -835,7 +836,7 @@
         .admin-content {
             flex: 1;
             font-size: 11px;
-            max-height: 310px;
+            max-height: 320px;
             overflow-y: auto;
             padding-right: 2px;
         }
@@ -875,6 +876,71 @@
         .admin-slider-container input {
             width: 100%;
             accent-color: #e91e63;
+        }
+
+        /* 🌟 유저 카드 스타일 */
+        .admin-user-card {
+            background: #262137;
+            border: 1px solid #3e3857;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+        .admin-user-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .admin-user-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+        }
+        .admin-user-name:hover {
+            color: #ff7518;
+            text-decoration: underline;
+        }
+        .admin-user-status {
+            font-size: 10px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .admin-user-status.banned {
+            color: #e74c3c;
+        }
+        .admin-user-sub {
+            font-size: 9px;
+            color: #9c96b8;
+            margin-bottom: 6px;
+        }
+        .admin-user-action-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .admin-user-action-row input {
+            width: 32px !important;
+            padding: 3px !important;
+            font-size: 9px !important;
+            margin-bottom: 0 !important;
+            text-align: center !important;
+            background: #1a0826 !important;
+            border: 1px solid #4a4463 !important;
+            color: #fff !important;
+            border-radius: 3px !important;
+        }
+        .admin-ban-btn {
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
@@ -955,7 +1021,7 @@
             <div class="admin-sidebar">
                 <button class="admin-tab-btn active" onclick="switchAdminTab('main')">메인</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('char')">캐릭터</button>
-                <button class="admin-tab-btn" onclick="switchAdminTab('manage')">관리</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('manage')">유저</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('mail')">우편</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('coupon')">쿠폰</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
@@ -972,7 +1038,6 @@
                     <div class="admin-section-title">빠른 조작</div>
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" onclick="retryGame()">다시 시작</button>
-                        <button class="admin-small-btn" onclick="alert('카운트다운 건너뜀')">카운트다운</button>
                         <button class="admin-small-btn" onclick="showLobby()">게임 종료</button>
                     </div>
 
@@ -1009,7 +1074,7 @@
                 </div>
 
                 <div id="admin-tab-manage" class="hidden">
-                    <div class="admin-section-title">유저 밴 / 정지 관리</div>
+                    <div class="admin-section-title">👥 전체 플레이어 목록</div>
                     <div id="admin-user-list-container"></div>
                 </div>
 
@@ -1254,11 +1319,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v32';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v32';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v32';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v32';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v32';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v33';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v33';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v33';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v33';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v33';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1275,6 +1340,7 @@
         characterImg.src = "character.jpg"; 
 
         let savedUsername = "";
+        let sessionStartTime = Date.now();
         let registeredUsers = []; 
         let globalMails = []; 
         let claimedMailIds = []; 
@@ -1703,7 +1769,7 @@
                         coins: u.coins || 0,
                         trophies: u.trophies || 0,
                         banUntil: u.banUntil || 0,
-                        banTimeStr: u.banTimeStr || ""
+                        startTime: u.startTime || Date.now()
                     });
                 } else {
                     let match = registeredUsers.find(existing => existing.name === u.name);
@@ -1711,7 +1777,6 @@
                         match.coins = u.coins !== undefined ? u.coins : match.coins;
                         match.trophies = u.trophies !== undefined ? u.trophies : match.trophies;
                         match.banUntil = u.banUntil || match.banUntil;
-                        match.banTimeStr = u.banTimeStr || match.banTimeStr;
                     }
                 }
             });
@@ -1729,7 +1794,13 @@
             if (savedUsername && savedUsername.trim() !== "") {
                 let match = registeredUsers.find(u => u.name === savedUsername);
                 if (!match) {
-                    registeredUsers.push({ name: savedUsername, coins: userCoins, trophies: userTrophies, banUntil: 0, banTimeStr: "" });
+                    registeredUsers.push({ 
+                        name: savedUsername, 
+                        coins: userCoins, 
+                        trophies: userTrophies, 
+                        banUntil: 0, 
+                        startTime: sessionStartTime 
+                    });
                 } else {
                     match.coins = userCoins;
                     match.trophies = userTrophies;
@@ -1738,6 +1809,7 @@
             }
         }
 
+        // 🌟 스크린샷과 동일한 카드 스타일의 유저 목록 렌더링
         function renderAdminUserList() {
             syncGlobalUsers();
             const container = document.getElementById('admin-user-list-container');
@@ -1745,26 +1817,50 @@
             container.innerHTML = '';
 
             if (registeredUsers.length === 0) {
-                container.innerHTML = `<div style="color: #b2bec3; font-size:10px; padding:4px 0;">등록된 유저가 없습니다.</div>`;
+                container.innerHTML = `<div style="color: #b2bec3; font-size:10px; padding:6px 0;">등록된 플레이어가 없습니다.</div>`;
                 return;
             }
 
             registeredUsers.forEach((u, index) => {
-                let row = document.createElement('div');
-                row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #2d2a3e; padding: 5px 6px; border-radius: 4px; margin-bottom: 4px; font-size:10px;";
+                let card = document.createElement('div');
+                card.className = 'admin-user-card';
 
                 let isBanned = u.banUntil && u.banUntil > Date.now();
-                let statusText = isBanned ? `<span style="color:#e74c3c;">(정지)</span>` : `<span style="color:#2ecc71;">(정상)</span>`;
+                let statusClass = isBanned ? "admin-user-status banned" : "admin-user-status";
+                let statusText = isBanned ? "정지됨" : "온라인";
 
-                row.innerHTML = `
-                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:4px;">
-                        <b>${u.name}</b> ${statusText}
+                let playTimeMinutes = Math.floor((Date.now() - (u.startTime || Date.now())) / 60000);
+
+                card.innerHTML = `
+                    <div class="admin-user-card-top">
+                        <span class="admin-user-name" onclick="openUserProfile('${u.name}')"><b>${u.name}</b></span>
+                        <span class="${statusClass}">${statusText}</span>
                     </div>
-                    <button onclick="banUser(${index})" style="background:#e74c3c; color:#fff; border:none; padding:3px 5px; border-radius:3px; font-size:9px; cursor:pointer; margin-right:2px;">밴</button>
-                    <button onclick="unbanUser(${index})" style="background:#27ae60; color:#fff; border:none; padding:3px 5px; border-radius:3px; font-size:9px; cursor:pointer;">해제</button>
+                    <div class="admin-user-sub">플레이 타임 ${playTimeMinutes}분</div>
+                    <div class="admin-user-action-row">
+                        <input type="number" id="ban-time-${index}" value="0" min="0"> 시간
+                        <input type="number" id="ban-min-${index}" value="0" min="0"> 분
+                        <button class="admin-ban-btn" onclick="executeCustomBan(${index})">밴(추방)</button>
+                    </div>
                 `;
-                container.appendChild(row);
+                container.appendChild(card);
             });
+        }
+
+        function executeCustomBan(index) {
+            let hoursInput = parseInt(document.getElementById(`ban-time-${index}`).value) || 0;
+            let minsInput = parseInt(document.getElementById(`ban-min-${index}`).value) || 0;
+            let totalMs = (hoursInput * 3600 + minsInput * 60) * 1000;
+
+            if (totalMs <= 0) {
+                totalMs = 7 * 24 * 3600 * 1000; // 기본 7일 정지
+            }
+
+            registeredUsers[index].banUntil = Date.now() + totalMs;
+            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
+            saveData();
+            renderAdminUserList();
+            alert(`${registeredUsers[index].name} 님이 정지되었습니다.`);
         }
 
         function renderAdminGiftUserSelect() {
@@ -1828,22 +1924,6 @@
             checkMailRedDot();
             document.getElementById('admin-gift-amount').value = '';
             alert(`[${targetVal}] 님께 ${typeName} ${amountVal}개 우편 발송 완료!`);
-        }
-
-        function banUser(index) {
-            registeredUsers[index].banUntil = Date.now() + 7 * 24 * 3600 * 1000; 
-            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
-            saveData();
-            renderAdminUserList();
-            alert(`${registeredUsers[index].name}님이 밴 되었습니다.`);
-        }
-
-        function unbanUser(index) {
-            registeredUsers[index].banUntil = 0;
-            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
-            saveData();
-            renderAdminUserList();
-            alert(`${registeredUsers[index].name}님의 밴이 해제되었습니다.`);
         }
 
         function adminSetHp(target, hp) {
@@ -2072,6 +2152,7 @@
                 coins: userCoins,
                 trophies: userTrophies,
                 username: savedUsername,
+                sessionStartTime: sessionStartTime,
                 balls: ballsData,
                 mailClaimed: mailClaimed
             };
@@ -2088,6 +2169,7 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
+                    if (parsed.sessionStartTime !== undefined) sessionStartTime = parsed.sessionStartTime;
                     if (parsed.username !== undefined && parsed.username.trim() !== "" && !parsed.username.startsWith("유저_")) {
                         savedUsername = parsed.username;
                         hasRealUsername = true;
@@ -2150,6 +2232,7 @@
             return false;
         }
 
+        // 🌟 플레이 하기 누르는 순간 즉시 플레이어 목록(어드민/랭킹/선물)에 정식 등록
         function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
@@ -2171,6 +2254,7 @@
             }
 
             savedUsername = val;
+            sessionStartTime = Date.now();
             
             syncGlobalUsers();
             saveData();
@@ -3002,7 +3086,6 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
         }
 
-        // 🌟 내 볼 초록색 테두리 + 노란색 기술 쿨타임 표시 복원
         function drawPlayer(p, isPlayer1) {
             if (p.type === 'boss') {
                 ctx.beginPath();
@@ -3035,7 +3118,6 @@
             }
             ctx.restore();
 
-            // 1. 기본 테두리
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.lineWidth = 3;
@@ -3043,16 +3125,14 @@
             ctx.stroke();
             ctx.closePath();
 
-            // 2. 🟢 내 공(Player 1) 외곽 초록색 표시링
             if (isPlayer1) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
                 ctx.lineWidth = 3.5;
-                ctx.strokeStyle = "#2ecc71"; // 선명한 초록색
+                ctx.strokeStyle = "#2ecc71";
                 ctx.stroke();
                 ctx.closePath();
 
-                // 3. 🟡 스킬/기술 노란색 게이지 표시링 (시간 기반 게이지)
                 let skillInterval = 8000;
                 if (p.type === 'fire') skillInterval = 6000;
                 else if (p.type === 'pokemon') skillInterval = 9000;
@@ -3063,13 +3143,12 @@
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius + 7, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = "#f1c40f"; // 노란색 스킬 게이지
+                ctx.strokeStyle = "#f1c40f";
                 ctx.stroke();
                 ctx.closePath();
             }
         }
 
-        // 🎃 경기장 할로윈 배경 및 격자 패턴 렌더링
         function drawHalloweenBackground() {
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, '#0f051d');
@@ -3078,7 +3157,6 @@
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 선명한 경기장 라인/격자망 패턴
             ctx.save();
             ctx.strokeStyle = "rgba(255, 117, 24, 0.15)";
             ctx.lineWidth = 1;
@@ -3090,7 +3168,6 @@
             }
             ctx.restore();
 
-            // 보름달
             ctx.save();
             ctx.beginPath();
             ctx.arc(450, 80, 40, 0, Math.PI * 2);
@@ -3100,7 +3177,6 @@
             ctx.fill();
             ctx.restore();
 
-            // 배경 할로윈 스티커(호박, 유령, 박쥐)
             halloweenProps.forEach(prop => {
                 prop.y += prop.speed;
                 if (prop.y > canvas.height + 30) {
@@ -3284,4 +3360,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                        </html>
+</html>
