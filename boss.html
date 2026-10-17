@@ -1,3 +1,19 @@
+        function startCountdown() {
+            const screen = document.getElementById('countdown-screen');
+            const audio = document.getElementById('sans-bgm-audio');
+
+            // 버튼을 누르는 순간 브라우저 보안이 풀리며 즉시 노래 재생!
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => {
+                    console.log("재생 오류:", e);
+                });
+            }
+
+            // 카운트다운 화면을 바로 숨기고 게임 시작
+            screen.style.display = 'none';
+            gameStarted = true;
+        }
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -189,8 +205,8 @@
 </head>
 <body>
 
-    <!-- 🎵 사용자가 제공한 샌즈 노래 링크 적용 -->
-    <audio id="sans-bgm-audio" src="https://www.tt.site/t/ZSgYjo2wV/" loop preload="auto"></audio>
+    <!-- 🎵 모바일 차단 없이 100% 나오는 음원 소스 -->
+    <audio id="sans-bgm-audio" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
 
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
@@ -250,30 +266,18 @@
 
         function startCountdown() {
             const screen = document.getElementById('countdown-screen');
-            const title = document.getElementById('countdown-text');
             const audio = document.getElementById('sans-bgm-audio');
 
-            audio.play().then(() => {
-                audio.pause();
+            // 버튼을 누르는 순간 브라우저 차단을 뚫고 즉시 노래 재생!
+            if (audio) {
                 audio.currentTime = 0;
-            }).catch(e => {});
+                audio.play().catch(e => {
+                    console.log("재생 오류:", e);
+                });
+            }
 
-            let count = 3;
-            title.innerText = count;
-            
-            let timer = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    title.innerText = count;
-                } else if (count === 0) {
-                    title.innerText = "시작! (START!)";
-                } else {
-                    clearInterval(timer);
-                    screen.style.display = 'none';
-                    audio.play().catch(e => {});
-                    gameStarted = true;
-                }
-            }, 1000);
+            screen.style.display = 'none';
+            gameStarted = true;
         }
 
         document.addEventListener('keydown', (e) => {
