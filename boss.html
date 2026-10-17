@@ -189,8 +189,8 @@
 </head>
 <body>
 
-    <!-- 🎵 모바일 차단 없는 확실한 Megalovania 음원 링크 -->
-    <audio id="sans-bgm-video" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
+    <!-- 🎵 사용자가 제공한 샌즈 노래 링크 적용 -->
+    <audio id="sans-bgm-audio" src="https://www.tt.site/t/ZSgYjo2wV/" loop preload="auto"></audio>
 
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
@@ -251,7 +251,7 @@
         function startCountdown() {
             const screen = document.getElementById('countdown-screen');
             const title = document.getElementById('countdown-text');
-            const audio = document.getElementById('sans-bgm-video');
+            const audio = document.getElementById('sans-bgm-audio');
 
             audio.play().then(() => {
                 audio.pause();
@@ -343,7 +343,7 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
-                const audio = document.getElementById('sans-bgm-video');
+                const audio = document.getElementById('sans-bgm-audio');
                 if (audio) audio.pause();
 
                 if (p1.hp > 0 && p2.hp <= 0) {
