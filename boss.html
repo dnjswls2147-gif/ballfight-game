@@ -59,6 +59,21 @@
             display: block;
             background: #ffffff;
         }
+        .bgm-btn {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            background: #27ae60;
+            color: white;
+            border: 2px solid #1e8449;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
         .speed-btn {
             position: absolute;
             right: 8px;
@@ -189,8 +204,8 @@
 </head>
 <body>
 
-    <!-- 🎵 모바일 차단 없는 안정적인 샌즈 Megalovania 정식 MP3 링크 -->
-    <audio id="sans-bgm-audio" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
+    <!-- 🎵 사용자가 업로드한 video_1.mp4 파일을 오디오 소스로 직접 연동 -->
+    <audio id="sans-bgm-audio" src="video_1.mp4" loop preload="auto"></audio>
 
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
@@ -201,6 +216,7 @@
         <h2>😈 릴리 볼 파이트 - 보스전</h2>
         <div class="boss-event-date-text">10월15일~10월22일</div>
         <div class="canvas-container">
+            <button class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔊 BGM 켜기</button>
             <canvas id="gameCanvas" width="340" height="340"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
@@ -248,17 +264,39 @@
         let p1 = { x: 170, y: 310, radius: 12, hp: 200, maxHp: 200 };
         let p2 = { hp: 750, maxHp: 750 };
 
+        function toggleBGM() {
+            const audio = document.getElementById('sans-bgm-audio');
+            const btn = document.getElementById('bgm-btn');
+            if (!audio) return;
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    btn.innerText = "🔊 BGM 끄기";
+                    btn.style.background = "#e74c3c";
+                }).catch(err => {
+                    alert("재생이 차단되었습니다. 화면을 터치한 후 다시 눌러주세요.");
+                });
+            } else {
+                audio.pause();
+                btn.innerText = "🔊 BGM 켜기";
+                btn.style.background = "#27ae60";
+            }
+        }
+
         function startCountdown() {
             const screen = document.getElementById('countdown-screen');
             const audio = document.getElementById('sans-bgm-audio');
 
-            // 버튼 클릭 인터랙션을 통해 모바일 브라우저의 오디오 재생 제한을 즉시 해제
             if (audio) {
                 audio.currentTime = 0;
                 audio.play().then(() => {
-                    console.log("노래 재생 성공!");
+                    const btn = document.getElementById('bgm-btn');
+                    if(btn) {
+                        btn.innerText = "🔊 BGM 끄기";
+                        btn.style.background = "#e74c3c";
+                    }
                 }).catch(e => {
-                    console.log("재생 차단됨:", e);
+                    console.log("자동 재생 제한:", e);
                 });
             }
 
@@ -470,8 +508,6 @@
 
         function loop() {
             update();
-            draw();
-            requestAnimationFrame(loop);
         }
 
         requestAnimationFrame(loop);
