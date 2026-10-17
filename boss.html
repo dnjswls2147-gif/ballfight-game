@@ -1,40 +1,50 @@
+<button onclick="startBossCountdown()">보스전 시작</button>
 
+<div id="countdown"></div>
+
+<video id="bossMusic"
+       src="sans.mp4"
+       preload="auto"
+       playsinline
+       style="display:none">
+</video>
+
+<script>
 let bossStarting = false;
 
 async function startBossCountdown() {
   if (bossStarting) return;
   bossStarting = true;
 
-  const countdown = document.getElementById("countdown");
   const music = document.getElementById("bossMusic");
+  const display = document.getElementById("countdown");
 
-  countdown.style.display = "flex";
+  // 먼저 사용자 터치로 재생을 준비
+  music.muted = true;
+  music.currentTime = 0;
 
-  for (let i = 3; i >= 1; i--) {
-    countdown.textContent = i;
-    await new Promise(resolve =>
-      setTimeout(resolve, 1000)
-    );
-  }
-
-  countdown.textContent = "BOSS FIGHT!";
-  
   try {
     await music.play();
   } catch (error) {
-    console.log("음악 재생에 실패했어.", error);
+    display.textContent = "노래 파일을 확인해 줘!";
+    bossStarting = false;
+    return;
   }
 
-  await new Promise(resolve =>
-    setTimeout(resolve, 800)
-  );
+  for (const number of ["3", "2", "1"]) {
+    display.textContent = number;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
 
-  countdown.style.display = "none";
+  display.textContent = "보스전 시작!";
 
-  // 여기에 기존 보스전 시작 함수를 연결해 줘.
+  music.muted = false;
+
+  // 기존 게임의 보스전 시작 함수가 있다면 연결
   if (typeof startBossFight === "function") {
     startBossFight();
   }
 
   bossStarting = false;
 }
+</script>
