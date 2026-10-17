@@ -169,7 +169,7 @@
         }
         .modal-box {
             width: 100%;
-            max-width: 340px;
+            max-width: 360px;
             background: #ffffff;
             border: 3px solid #e67e22;
             border-radius: 12px;
@@ -629,6 +629,122 @@
             pointer-events: none;
         }
 
+        /* 고급 채팅 버튼 스타일 */
+        .fancy-chat-btn {
+            margin-top: 0;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f3f6 100%);
+            border: 2.5px solid #2c3e50;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.15s ease-in-out;
+            outline: none;
+        }
+        .fancy-chat-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .chat-icon-svg {
+            width: 26px;
+            height: 26px;
+            fill: #2c3e50;
+        }
+
+        /* 실시간 채팅 모달 UI */
+        .chat-modal-box {
+            width: 100%;
+            max-width: 380px;
+            background: #ffffff;
+            border: 3px solid #2980b9;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+        }
+        .chat-log-area {
+            flex: 1;
+            background: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .chat-msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+        .chat-msg-row.me {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .chat-msg-row.other {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .chat-sender {
+            font-size: 10px;
+            color: #7f8c8d;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+        .chat-bubble {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.3;
+            word-break: break-all;
+        }
+        .chat-msg-row.me .chat-bubble {
+            background: #3498db;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-msg-row.other .chat-bubble {
+            background: #e2e8f0;
+            color: #2d3748;
+            border-bottom-left-radius: 2px;
+        }
+
+        /* 빠른 채팅 버튼 패널 */
+        .quick-chat-panel {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            background: #edf2f7;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+        }
+        .quick-chat-btn {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #2d3748;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .quick-chat-btn:active {
+            background: #e2e8f0;
+        }
+
         .admin-window {
             position: fixed;
             top: 50%;
@@ -773,6 +889,35 @@
             <div class="error" id="admin-auth-error"></div>
             <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkAdminPassword()">
             <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
+        </div>
+    </div>
+
+    <!-- 실시간 채팅 모달 -->
+    <div class="modal-overlay hidden" id="chat-modal">
+        <div class="chat-modal-box">
+            <div class="header-row">
+                <h2>💬 실시간 친구 채팅</h2>
+                <button class="btn-close-x" onclick="closeChatModal()">X</button>
+            </div>
+            
+            <div class="chat-log-area" id="chat-log-area">
+                <div style="font-size:11px; color:#a0aec0; text-align:center; margin: auto 0;">채팅에 입장했습니다.<br>매너 채팅을 지켜주세요!</div>
+            </div>
+
+            <!-- 빠른 채팅 선택 창 -->
+            <div class="quick-chat-panel hidden" id="quick-chat-panel">
+                <button class="quick-chat-btn" onclick="selectQuickChat('안녕하세요!')">안녕하세요!</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('안녕히계세요!')">안녕히계세요!</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('굿 게임')">굿 게임</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('gg')">gg</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('쉽네요')">쉽네요</button>
+            </div>
+
+            <div style="display: flex; gap: 4px; align-items: center;">
+                <button class="quick-chat-btn" style="background:#edf2f7; border-color:#cbd5e0; white-space:nowrap; padding:9px 8px;" onclick="toggleQuickChatPanel()">⚡ 빠른 채팅</button>
+                <input type="text" id="chat-msg-input" placeholder="메시지 입력..." style="margin-bottom:0; flex:1;" onkeyup="if(event.key==='Enter') sendChatMessage()">
+                <button class="btn-claim" style="padding:10px 14px; font-size:13px;" onclick="sendChatMessage()">전송</button>
+            </div>
         </div>
     </div>
 
@@ -1017,7 +1162,6 @@
 
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
-        <div style="font-size:11px; color:#95a5a6; font-weight:bold; margin-bottom:4px;">created by ball_fight_tiktok</div>
         <div class="canvas-container">
             <canvas id="gameCanvas" width="540" height="540"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
@@ -1046,12 +1190,15 @@
 
         <div style="display: flex; gap: 8px; margin-top: 15px; align-items: center;">
             <button class="btn btn-retry hidden" id="btn-game-retry" onclick="retryGame()" style="margin-top: 0; flex: 1;">🔄 다시 플레이</button>
-            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 2; background-color: #e74c3c; border: 2px solid #c0392b; font-size:16px; padding:14px; border-radius:10px;">🚪 나가기 🏃</button>
-            <button style="margin-top: 0; width: 50px; height: 50px; background: #ffffff; border: 2px solid #2c3e50; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center;" onclick="alert('💬 채팅 기능 준비중!')">💬</button>
-        </div>
-        <div style="font-size: 10px; color: #7f8c8d; margin-top: 10px; line-height: 1.3;">
-            ⚠️ 인게임 화면을 녹화 후 영상으로 사용하는 행위는 엄격히 금지됩니다<br>
-            <a href="#" onclick="alert('도움말: 공을 부딪혀 상대 체력을 깎으세요!')" style="color: #2980b9; font-weight: bold; text-decoration: none;">도움말 ↓</a>
+            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 2; background-color: #e74c3c; border: 2px solid #c0392b; font-size:16px; padding:14px; border-radius:10px;">🏠 로비로 가기</button>
+            <button class="fancy-chat-btn" onclick="handleChatButtonClick()">
+                <svg class="chat-icon-svg" viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
+                    <circle cx="8" cy="10" r="1.2"/>
+                    <circle cx="12" cy="10" r="1.2"/>
+                    <circle cx="16" cy="10" r="1.2"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -1280,6 +1427,71 @@
 
         function closeAdminPanel() {
             document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        /* 채팅 시스템 관련 함수 */
+        function handleChatButtonClick() {
+            if (nextGameMode !== 'friend') {
+                alert("🚫 AI 매칭 및 보스전에서는 채팅을 이용할 수 없습니다!\n(친구 플레이 전용 기능)");
+                return;
+            }
+            document.getElementById('chat-modal').classList.remove('hidden');
+        }
+
+        function closeChatModal() {
+            document.getElementById('chat-modal').classList.add('hidden');
+            document.getElementById('quick-chat-panel').classList.add('hidden');
+        }
+
+        function toggleQuickChatPanel() {
+            const panel = document.getElementById('quick-chat-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function selectQuickChat(text) {
+            document.getElementById('chat-msg-input').value = text;
+            document.getElementById('quick-chat-panel').classList.add('hidden');
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendChatMessage(savedUsername || "나", text, true);
+
+            if (conn && conn.open) {
+                conn.send({
+                    type: 'CHAT_MSG',
+                    sender: savedUsername || "친구",
+                    text: text
+                });
+            }
+
+            input.value = '';
+        }
+
+        function appendChatMessage(sender, text, isMe) {
+            const logArea = document.getElementById('chat-log-area');
+            
+            const initMsg = logArea.querySelector('div[style*="text-align:center"]');
+            if (initMsg) initMsg.remove();
+
+            const row = document.createElement('div');
+            row.className = `chat-msg-row ${isMe ? 'me' : 'other'}`;
+            
+            row.innerHTML = `
+                <div class="chat-sender">${sender}</div>
+                <div class="chat-bubble">${escapeHtml(text)}</div>
+            `;
+            
+            logArea.appendChild(row);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         document.addEventListener('keydown', (e) => {
@@ -1778,7 +1990,7 @@
                 document.getElementById('lobby-screen').classList.add('hidden');
             } else {
                 if (!checkUserBanStatus(savedUsername)) {
-                    document.getElementById('name-modal').classList.add('hidden');
+                    document.getElementById('name-modal').classList.remove('hidden');
                     document.getElementById('lobby-screen').classList.remove('hidden');
                 }
             }
@@ -2101,6 +2313,8 @@
                 else btn.classList.remove('active');
             } else if (data.type === 'RETRY_GAME') {
                 startCountdownAndGame();
+            } else if (data.type === 'CHAT_MSG') {
+                appendChatMessage(data.sender, data.text, false);
             }
         }
 
@@ -2269,6 +2483,8 @@
             resetGameState();
             updateCoinsUI();
             checkMailRedDot();
+            closeChatModal();
+
             document.getElementById('btn-game-retry').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.add('hidden');
