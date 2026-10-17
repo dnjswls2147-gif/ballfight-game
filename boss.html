@@ -189,8 +189,8 @@
 </head>
 <body>
 
-    <!-- 안정적인 외부 MP3 소스 -->
-    <audio id="sans-bgm-audio" src="https://ia800301.us.archive.org/11/items/Megalovania_201701/Megalovania.mp3" loop preload="auto"></audio>
+    <!-- 🎵 사용자 제공 링크 적용 오디오 태그 -->
+    <audio id="sans-bgm-audio" src="https://www.tt.site/t/ZSgYjo2wV/" loop preload="auto" crossorigin="anonymous"></audio>
 
     <div id="countdown-screen">
         <h1 id="countdown-text">😈 L 보스전 준비!</h1>
@@ -252,18 +252,13 @@
             const screen = document.getElementById('countdown-screen');
             const audio = document.getElementById('sans-bgm-audio');
 
-            // 사용자의 터치 즉시 오디오 로드 및 재생 시도
             if (audio) {
-                audio.muted = false;
-                audio.volume = 1.0;
-                let playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        // 정상 재생 시작
-                    }).catch(error => {
-                        console.log("자동 재생 제한 우회 시도:", error);
-                    });
-                }
+                audio.currentTime = 0;
+                audio.play().then(() => {
+                    console.log("재생 성공!");
+                }).catch(e => {
+                    console.log("재생 차단됨:", e);
+                });
             }
 
             screen.style.display = 'none';
