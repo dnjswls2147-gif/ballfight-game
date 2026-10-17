@@ -12,7 +12,7 @@
             -webkit-user-select: none;
         }
         body {
-            background-color: #1a0826;
+            background-color: #12041a;
             font-family: sans-serif;
             margin: 0;
             padding: 10px;
@@ -1315,7 +1315,6 @@
         let fireFallBlocks = [];
         let specialAttackEntities = [];
 
-        // 🎃 화려한 할로윈 배경 요소
         let halloweenProps = [];
         for(let i = 0; i < 15; i++) {
             halloweenProps.push({
@@ -2151,7 +2150,6 @@
             return false;
         }
 
-        // 🌟 플레이 하기 클릭 시 전체 유저 DB 등록 및 UI 연동 업데이트
         function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
@@ -2174,7 +2172,6 @@
 
             savedUsername = val;
             
-            // 즉각적인 글로벌 유저 등록
             syncGlobalUsers();
             saveData();
             
@@ -3005,6 +3002,7 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
         }
 
+        // 🌟 내 볼 초록색 테두리 + 노란색 기술 쿨타임 표시 복원
         function drawPlayer(p, isPlayer1) {
             if (p.type === 'boss') {
                 ctx.beginPath();
@@ -3037,17 +3035,42 @@
             }
             ctx.restore();
 
+            // 1. 기본 테두리
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.lineWidth = 3;
             ctx.strokeStyle = isPlayer1 ? "#3498db" : "#c0392b";
             ctx.stroke();
             ctx.closePath();
+
+            // 2. 🟢 내 공(Player 1) 외곽 초록색 표시링
+            if (isPlayer1) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = "#2ecc71"; // 선명한 초록색
+                ctx.stroke();
+                ctx.closePath();
+
+                // 3. 🟡 스킬/기술 노란색 게이지 표시링 (시간 기반 게이지)
+                let skillInterval = 8000;
+                if (p.type === 'fire') skillInterval = 6000;
+                else if (p.type === 'pokemon') skillInterval = 9000;
+
+                let timePassed = Date.now() - p.lastSkillTime;
+                let progress = Math.min(1, timePassed / skillInterval);
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 7, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#f1c40f"; // 노란색 스킬 게이지
+                ctx.stroke();
+                ctx.closePath();
+            }
         }
 
-        // 🎃 화려한 할로윈 배경 렌더링 함수
+        // 🎃 경기장 할로윈 배경 및 격자 패턴 렌더링
         function drawHalloweenBackground() {
-            // 몽환적인 야간 밤하늘 그라데이션
             let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, '#0f051d');
             grad.addColorStop(0.5, '#2b0a3d');
@@ -3055,7 +3078,19 @@
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 보름달 (달)
+            // 선명한 경기장 라인/격자망 패턴
+            ctx.save();
+            ctx.strokeStyle = "rgba(255, 117, 24, 0.15)";
+            ctx.lineWidth = 1;
+            for(let x=0; x<canvas.width; x+=45) {
+                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y=0; y<canvas.height; y+=45) {
+                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            ctx.restore();
+
+            // 보름달
             ctx.save();
             ctx.beginPath();
             ctx.arc(450, 80, 40, 0, Math.PI * 2);
@@ -3065,7 +3100,7 @@
             ctx.fill();
             ctx.restore();
 
-            // 배경 장식 요소들 (호박, 유령, 박쥐) 움직임 업데이트 및 그리기
+            // 배경 할로윈 스티커(호박, 유령, 박쥐)
             halloweenProps.forEach(prop => {
                 prop.y += prop.speed;
                 if (prop.y > canvas.height + 30) {
@@ -3096,7 +3131,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 🎃 화려한 할로윈 배경 연출
             drawHalloweenBackground();
 
             drawPlayer(p1, true);
@@ -3250,4 +3284,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                            </html>
+                        </html>
