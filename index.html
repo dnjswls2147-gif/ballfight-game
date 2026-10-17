@@ -742,7 +742,7 @@
             background: #e2e8f0;
         }
 
-        /* ---------------- 영상 속 완벽 일치 어드민 패널 스타일 ---------------- */
+        /* ---------------- 어드민 패널 스타일 ---------------- */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -922,7 +922,7 @@
         </div>
     </div>
 
-    <!-- 영상과 100% 동일한 리메이크된 어드민 패널 -->
+    <!-- 어드민 패널 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
@@ -938,7 +938,6 @@
                 <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
             </div>
             <div class="admin-content">
-                <!-- 메인 탭 -->
                 <div id="admin-tab-main">
                     <div class="admin-section-title">공지 / 투표 공지</div>
                     <input type="text" id="admin-notice-input" placeholder="공지사항 입력..." style="margin-bottom:4px; font-size:10px; padding:5px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
@@ -963,7 +962,6 @@
                     </div>
                 </div>
 
-                <!-- 캐릭터 탭 -->
                 <div id="admin-tab-char" class="hidden">
                     <div class="admin-section-title">플레이어 선택</div>
                     <div class="admin-btn-row">
@@ -987,13 +985,11 @@
                     <button class="admin-small-btn" style="width:100%; background:#27ae60;" onclick="applyCustomStats()">능력치 적용</button>
                 </div>
 
-                <!-- 관리 탭 -->
                 <div id="admin-tab-manage" class="hidden">
                     <div class="admin-section-title">유저 밴 / 정지 관리</div>
                     <div id="admin-user-list-container"></div>
                 </div>
 
-                <!-- 우편 탭 -->
                 <div id="admin-tab-mail" class="hidden">
                     <div class="admin-section-title">우편함 선물 발송</div>
                     <select id="admin-gift-target-user" style="padding:4px; font-size:10px; margin-bottom:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
@@ -1007,7 +1003,6 @@
                     <button class="admin-small-btn" style="width:100%; background:#e67e22;" onclick="sendAdminGift()">우편 발송</button>
                 </div>
 
-                <!-- 쿠폰 탭 -->
                 <div id="admin-tab-coupon" class="hidden">
                     <div class="admin-section-title">쿠폰 생성</div>
                     <input type="text" id="coupon-code-input" placeholder="쿠폰 코드 입력" style="margin-bottom:4px; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
@@ -1015,7 +1010,6 @@
                     <button class="admin-small-btn" style="width:100%; background:#8e44ad;" onclick="alert('쿠폰이 생성되었습니다!')">쿠폰 등록</button>
                 </div>
 
-                <!-- 설정 탭 -->
                 <div id="admin-tab-screen" class="hidden">
                     <div class="admin-section-title">패널 투명도</div>
                     <div class="admin-slider-container">
@@ -1238,10 +1232,10 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v27';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v27';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v27';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v27';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v28';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v28';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v28';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v28';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1253,6 +1247,10 @@
             "미친", "미친놈", "미친년", "바보", "멍청이", "꺼져", "닥쳐", "새끼", "쌍놈", "씨블",
             "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
         ];
+
+        // 🌟 업로드해주신 미스터비스트 이미지 객체 생성 및 로드
+        const mrBeastImg = new Image();
+        mrBeastImg.src = "11870.jpg"; // 업로드된 이미지 파일명 지정
 
         let savedUsername = "";
         let registeredUsers = []; 
@@ -1505,18 +1503,15 @@
 
         function appendChatMessage(sender, text, isMe) {
             const logArea = document.getElementById('chat-log-area');
-            
             const initMsg = logArea.querySelector('div[style*="text-align:center"]');
             if (initMsg) initMsg.remove();
 
             const row = document.createElement('div');
             row.className = `chat-msg-row ${isMe ? 'me' : 'other'}`;
-            
             row.innerHTML = `
                 <div class="chat-sender">${sender}</div>
                 <div class="chat-bubble">${escapeHtml(text)}</div>
             `;
-            
             logArea.appendChild(row);
             logArea.scrollTop = logArea.scrollHeight;
         }
@@ -1544,7 +1539,6 @@
             }
         });
 
-        // 영상과 일치하는 어드민 패널 탭 제어 함수들
         function switchAdminTab(tabName) {
             document.getElementById('admin-tab-main').classList.add('hidden');
             document.getElementById('admin-tab-char').classList.add('hidden');
@@ -1812,12 +1806,10 @@
         function isMailValid() {
             const now = new Date().getTime();
             const hasDefaultMail = !mailClaimed && (now < EXPIRY_TIME);
-            
             const hasUnclaimedGlobalGifts = globalMails.some(m => 
                 (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
                 !claimedMailIds.includes(m.id)
             );
-
             return hasDefaultMail || hasUnclaimedGlobalGifts;
         }
 
@@ -1999,13 +1991,14 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
+        // 🌟 나의 공 보관함 리스트에 미스터비스트 이미지 볼 추가
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
+            { id: 'mrbeast_img', name: '미스터비스트 이미지 볼', desc: '업로드하신 로고 이미지 캐릭터 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: false },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 폭풍 폭격', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
             { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 어몽어스 습격', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 & 미스터비스트 댄스 내리찍기', price: 1500, hp: 300, damage: 10, owned: false, equipped: false },
             { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 350, 데미지: 15 & 수세미/대나무 투척', price: 3000, hp: 350, damage: 15, owned: false, equipped: false }
         ];
 
@@ -2107,7 +2100,6 @@
             }
 
             syncGlobalUsers();
-
             savedUsername = val;
             
             if (!registeredUsers.some(u => u.name === val)) {
@@ -2312,7 +2304,6 @@
                 });
 
                 conn.on('data', handleNetworkData);
-
                 conn.on('error', (e) => {
                     err.innerText = "방을 찾을 수 없습니다! 방 번호를 확인하세요.";
                 });
@@ -2341,9 +2332,7 @@
             peer = new Peer('lily-ball-room-' + createdCode);
             isHost = true;
 
-            peer.on('open', (id) => {
-                console.log("방 개설 완료 Peer ID:", id);
-            });
+            peer.on('open', (id) => {});
 
             peer.on('connection', (c) => {
                 conn = c;
@@ -2486,7 +2475,6 @@
 
         function toggleSpeed() {
             if (!gameStarted) return;
-
             if (nextGameMode === 'friend') {
                 const confirmChoice = confirm("⚡ 친구에게 2배속 요청이 들어왔습니다.\n승인하시겠습니까?");
                 if (!confirmChoice) {
@@ -2514,7 +2502,6 @@
 
         function showFriendMenu() {
             if (!checkUserHasName()) return;
-
             resetRoom();
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('friend-screen').classList.remove('hidden');
@@ -2643,7 +2630,6 @@
             }
             
             p2.freezeTimer = 0;
-
             projectiles = [];
             iceFallBlocks = [];
             fireFallBlocks = [];
@@ -2658,7 +2644,6 @@
                 btn.innerText = "⚡ 2X 배속";
                 btn.classList.remove('active');
             }
-
             updateHpBars();
         }
 
@@ -2681,7 +2666,6 @@
                 } else {
                     gameOverState = 'draw';
                 }
-
                 document.getElementById('btn-game-retry').classList.remove('hidden');
             }
         }
@@ -2717,12 +2701,10 @@
         function update() {
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
-
             if (nextGameMode === 'friend' && !isHost) return;
 
             if (!isBossMode) {
                 let now = Date.now();
-
                 p1.skillGauge = Math.min(p1.maxSkillGauge, p1.skillGauge + 0.3 * speedMultiplier);
                 if (p1.skillGauge >= p1.maxSkillGauge) {
                     triggerSpecialSkill(p1, p2);
@@ -2750,7 +2732,6 @@
                 } else {
                     p1.x += p1.vx * speedMultiplier; 
                     p1.y += p1.vy * speedMultiplier;
-                    
                     if (p1.x - p1.radius < 0) { p1.x = p1.radius + 2; p1.vx *= -1; }
                     if (p1.x + p1.radius > canvas.width) { p1.x = canvas.width - p1.radius - 2; p1.vx *= -1; }
                     if (p1.y - p1.radius < 0) { p1.y = p1.radius + 2; p1.vy *= -1; }
@@ -2762,7 +2743,6 @@
                 } else {
                     p2.x += p2.vx * speedMultiplier; 
                     p2.y += p2.vy * speedMultiplier;
-                    
                     if (p2.x - p2.radius < 0) { p2.x = p2.radius + 2; p2.vx *= -1; }
                     if (p2.x + p2.radius > canvas.width) { p2.x = canvas.width - p2.radius - 2; p2.vx *= -1; }
                     if (p2.y - p2.radius < 0) { p2.y = p2.radius + 2; p2.vy *= -1; }
@@ -2777,7 +2757,6 @@
                         se.x += se.vx;
                         se.y += se.vy;
                     }
-
                     let dx = se.x - se.targetPlayer.x;
                     let dy = se.y - se.targetPlayer.y;
                     if (Math.sqrt(dx*dx + dy*dy) < se.radius + se.targetPlayer.radius) {
@@ -2845,7 +2824,6 @@
                 if (moveDirection !== 0) {
                     p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 6 * speedMultiplier));
                 }
-
                 bossTimerFrames += speedMultiplier;
 
                 if (bossTimerFrames <= 480) {
@@ -2889,7 +2867,6 @@
             for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
                 let bto = bossTextObstacles[i];
                 bto.y += bto.speed;
-
                 let hitX = bto.x - bto.width / 2;
                 if (p1.x + p1.radius > hitX && p1.x - p1.radius < hitX + bto.width &&
                     p1.y + p1.radius > bto.y && p1.y - p1.radius < bto.y + bto.height) {
@@ -2942,34 +2919,7 @@
             if (p2TextEl) p2TextEl.innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
         }
 
-        function drawPokeballGraphic(x, y, radius) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.clip();
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(x - radius, y - radius, radius * 2, radius);
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x - radius, y, radius * 2, radius);
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(x - radius, y - radius * 0.15, radius * 2, radius * 0.3);
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 0.35, 0, Math.PI * 2);
-            ctx.fillStyle = "#2c3e50";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 0.22, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffffff";
-            ctx.fill();
-            ctx.restore();
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#2c3e50";
-            ctx.stroke();
-            ctx.closePath();
-        }
-
+        // 🌟 업로드한 이미지를 원형 공 캐릭터로 완벽 렌더링하는 함수
         function drawPlayer(p, isPlayer1) {
             if (p.type === 'boss') {
                 ctx.beginPath();
@@ -3000,18 +2950,27 @@
                 ctx.restore();
             }
 
-            if (p.type === 'pokemon') {
-                drawPokeballGraphic(p.x, p.y, p.radius);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.clip(); // 원형 클리핑
+
+            if (p.type === 'mrbeast_img' && mrBeastImg.complete && mrBeastImg.naturalWidth !== 0) {
+                // 업로드한 미스터비스트 이미지로 원 안을 가득 채움
+                ctx.drawImage(mrBeastImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
             } else {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fillStyle = p.color;
                 ctx.fill();
-                ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-                ctx.closePath();
             }
+            ctx.restore();
+
+            // 외곽선 테두리
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = isPlayer1 ? "#3498db" : "#c0392b";
+            ctx.stroke();
+            ctx.closePath();
 
             if (isPlayer1) {
                 ctx.beginPath();
@@ -3156,4 +3115,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+                            </html>
