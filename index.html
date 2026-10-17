@@ -12,7 +12,7 @@
             -webkit-user-select: none;
         }
         body {
-            background-color: #2c163a;
+            background-color: #ffffff;
             font-family: sans-serif;
             margin: 0;
             padding: 10px;
@@ -23,8 +23,8 @@
         }
         .container {
             width: 100%;
-            max-width: 440px;
-            background: #fff8e8;
+            max-width: 520px;
+            background: #ffffff;
             border: 3px solid #e67e22;
             border-radius: 12px;
             padding: 15px;
@@ -170,7 +170,7 @@
         .modal-box {
             width: 100%;
             max-width: 340px;
-            background: #fff8e8;
+            background: #ffffff;
             border: 3px solid #e67e22;
             border-radius: 12px;
             padding: 20px;
@@ -534,7 +534,7 @@
         .canvas-container {
             position: relative;
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
             aspect-ratio: 1 / 1;
             margin: 0 auto 12px auto;
             border: 3px solid #2c3e50;
@@ -1018,7 +1018,7 @@
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
         <div class="canvas-container">
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <canvas id="gameCanvas" width="480" height="480"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
@@ -1855,11 +1855,11 @@
         }
 
         let p1 = { 
-            x: 100, y: 200, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
+            x: 120, y: 240, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
         let p2 = { 
-            x: 300, y: 200, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
+            x: 360, y: 240, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
 
@@ -2312,10 +2312,10 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.radius = isBossMode ? 12 : 24; 
+            p1.radius = isBossMode ? 14 : 26; 
             
-            p1.x = 100; 
-            p1.y = 200;
+            p1.x = 120; 
+            p1.y = 240;
             
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
@@ -2325,24 +2325,24 @@
             moveDirection = 0;
 
             if (isBossMode) {
-                p1.x = 200;
-                p1.y = 360;
+                p1.x = 240;
+                p1.y = 420;
                 p2.type = 'boss';
                 p2.maxHp = 750;
                 p2.hp = 750;
                 p2.damage = 0;
-                p2.x = 200; p2.y = 60;
+                p2.x = 240; p2.y = 70;
                 p2.vx = 0; p2.vy = 0;
-                p2.radius = 35;
+                p2.radius = 38;
                 bossTimerFrames = 0;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
                 p2.hp = 200;
                 p2.damage = 10;
-                p2.x = 300; 
-                p2.y = 200; 
-                p2.radius = 24;
+                p2.x = 360; 
+                p2.y = 240; 
+                p2.radius = 26;
                 let v2 = getRandomVelocity();
                 p2.vx = v2.vx; p2.vy = v2.vy;
             }
@@ -2421,7 +2421,6 @@
                     p1.x += p1.vx * speedMultiplier; 
                     p1.y += p1.vy * speedMultiplier;
                     
-                    // 벽 충돌 및 낌 방지 강제 보정
                     if (p1.x - p1.radius < 0) { p1.x = p1.radius + 2; p1.vx *= -1; }
                     if (p1.x + p1.radius > canvas.width) { p1.x = canvas.width - p1.radius - 2; p1.vx *= -1; }
                     if (p1.y - p1.radius < 0) { p1.y = p1.radius + 2; p1.vy *= -1; }
@@ -2434,14 +2433,12 @@
                     p2.x += p2.vx * speedMultiplier; 
                     p2.y += p2.vy * speedMultiplier;
                     
-                    // 벽 충돌 및 낌 방지 강제 보정
                     if (p2.x - p2.radius < 0) { p2.x = p2.radius + 2; p2.vx *= -1; }
                     if (p2.x + p2.radius > canvas.width) { p2.x = canvas.width - p2.radius - 2; p2.vx *= -1; }
                     if (p2.y - p2.radius < 0) { p2.y = p2.radius + 2; p2.vy *= -1; }
                     if (p2.y + p2.radius > canvas.height) { p2.y = canvas.height - p2.radius - 2; p2.vy *= -1; }
                 }
 
-                // 화염구 충돌
                 for (let i = fireFallBlocks.length - 1; i >= 0; i--) {
                     let fb = fireFallBlocks[i];
                     fb.y += fb.speed * speedMultiplier;
@@ -2457,7 +2454,6 @@
                     if (fb.y > canvas.height + 20) fireFallBlocks.splice(i, 1);
                 }
 
-                // 얼음구 충돌
                 for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
                     let ib = iceFallBlocks[i];
                     ib.y += ib.speed * speedMultiplier;
@@ -2474,7 +2470,6 @@
                     if (ib.y > canvas.height + 20) iceFallBlocks.splice(i, 1);
                 }
 
-                // 포켓몬 폭풍 투사체 충돌
                 for (let i = projectiles.length - 1; i >= 0; i--) {
                     let pr = projectiles[i];
                     pr.x += pr.vx * speedMultiplier;
@@ -2495,7 +2490,7 @@
 
             } else {
                 if (moveDirection !== 0) {
-                    p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 5 * speedMultiplier));
+                    p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 6 * speedMultiplier));
                 }
 
                 bossTimerFrames += speedMultiplier;
@@ -2506,7 +2501,7 @@
                             x: 15 + Math.random() * (canvas.width - 30),
                             y: -15,
                             radius: 12, 
-                            speed: (4.5 + Math.random() * 3.5) * speedMultiplier,
+                            speed: (5.0 + Math.random() * 3.5) * speedMultiplier,
                             damage: 15 
                         });
                     }
@@ -2514,10 +2509,10 @@
                 else if (bossTimerFrames > 480 && bossTimerFrames <= 1680) {
                     let relFrame = bossTimerFrames - 480;
                     if (Math.abs(relFrame - 0) < speedMultiplier) {
-                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 4.0 * speedMultiplier, damage: 50 });
                     }
                     if (Math.abs(relFrame - 120) < speedMultiplier) {
-                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 3.5 * speedMultiplier, damage: 50 });
+                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 4.0 * speedMultiplier, damage: 50 });
                     }
                 }
             }
@@ -2554,7 +2549,6 @@
                 if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
             }
 
-            // 공끼리 충돌 시 겹쳐서 끼는 현상 방지 (안티 스턱 오버랩 해제)
             if (!isBossMode) {
                 let dx = p2.x - p1.x;
                 let dy = p2.y - p1.y;
@@ -2565,7 +2559,7 @@
                     p1.vx = p2.vx; p1.vy = p2.vy;
                     p2.vx = tempVx; p2.vy = tempVy;
 
-                    let overlap = (p1.radius + p2.radius) - dist + 1; // 여유 공간 추가
+                    let overlap = (p1.radius + p2.radius) - dist + 1;
                     let nx = dx / (dist || 1);
                     let ny = dy / (dist || 1);
                     p1.x -= nx * overlap / 2;
@@ -2634,7 +2628,7 @@
                 ctx.stroke();
                 ctx.closePath();
 
-                ctx.font = "900 30px sans-serif";
+                ctx.font = "900 34px sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -2705,7 +2699,7 @@
                 ctx.stroke();
                 ctx.closePath();
 
-                ctx.font = "10px sans-serif";
+                ctx.font = "12px sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -2714,7 +2708,7 @@
 
             bossTextObstacles.forEach(bto => {
                 ctx.save();
-                ctx.font = bto.text === 'L' ? "900 65px sans-serif" : "900 45px sans-serif";
+                ctx.font = bto.text === 'L' ? "900 75px sans-serif" : "900 50px sans-serif";
                 ctx.fillStyle = "#e74c3c";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -2727,10 +2721,10 @@
 
             if (isCountingDown) {
                 ctx.save();
-                ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "900 72px sans-serif";
+                ctx.font = "900 84px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.strokeStyle = "#000000";
@@ -2743,10 +2737,10 @@
 
             if (gameOverState) {
                 ctx.save();
-                ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "900 42px sans-serif";
+                ctx.font = "900 48px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
 
