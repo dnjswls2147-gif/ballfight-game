@@ -1706,12 +1706,12 @@
 
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: true },
-            { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 주기적으로 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 주기적으로 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
-            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 강력한 체력과 공격력', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
-            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300, 높은 체력 보유', price: 1500, hp: 300, damage: 10, owned: false, equipped: false },
-            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 350, 데미지: 15 최고의 스탯', price: 3000, hp: 350, damage: 15, owned: false, equipped: false }
+            { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 폭풍 폭격', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
+            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 어몽어스 습격', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력: 300 & 미스터비스트 댄스 내리찍기', price: 1500, hp: 300, damage: 0, owned: false, equipped: false },
+            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 350, 데미지: 15 & 수세미/대나무 투척', price: 3000, hp: 350, damage: 15, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -1856,11 +1856,11 @@
 
         let p1 = { 
             x: 80, y: 170, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, freezeTimer: 0, lastSkillTime: Date.now()
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
         let p2 = { 
             x: 260, y: 170, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, freezeTimer: 0, lastSkillTime: Date.now()
+            type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
 
         function updateCoinsUI() {
@@ -2081,8 +2081,8 @@
                 friendName = data.name;
             } else if (data.type === 'GAME_SYNC') {
                 if (!isHost) {
-                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp;
-                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp;
+                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp; p1.skillGauge = data.p1.skillGauge;
+                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp; p2.skillGauge = data.p2.skillGauge;
                     gameOverState = data.gameOverState;
                     updateHpBars();
                 }
@@ -2312,16 +2312,18 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.radius = isBossMode ? 12 : 24; 
-            
             p1.x = 80; 
             p1.y = 170;
+            p1.radius = isBossMode ? 12 : 24; 
             
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
             p1.vy = isBossMode ? 0 : v1.vy;
+            p1.skillGauge = 0;
+            p1.lastIceAttackTime = Date.now();
+            p1.lastShhTime = Date.now();
+            p1.lastSuseumiTime = Date.now();
             p1.freezeTimer = 0;
-            p1.lastSkillTime = Date.now();
             moveDirection = 0;
 
             if (isBossMode) {
@@ -2340,15 +2342,15 @@
                 p2.maxHp = 200;
                 p2.hp = 200;
                 p2.damage = 10;
-                p2.x = 260; 
-                p2.y = 170; 
+                p2.x = 260; p2.y = 170; 
                 p2.radius = 24;
                 let v2 = getRandomVelocity();
                 p2.vx = v2.vx; p2.vy = v2.vy;
             }
             
+            p2.skillGauge = 0;
+            p2.lastShhTime = Date.now();
             p2.freezeTimer = 0;
-            p2.lastSkillTime = Date.now();
 
             projectiles = [];
             iceFallBlocks = [];
@@ -2391,47 +2393,6 @@
             }
         }
 
-        function triggerBallSkill(p, target) {
-            let now = Date.now();
-            if (now - p.lastSkillTime < 5000) return;
-            p.lastSkillTime = now;
-
-            if (p.type === 'fire') {
-                for (let i = 0; i < 3; i++) {
-                    fireFallBlocks.push({
-                        x: target.x + (Math.random() * 60 - 30),
-                        y: -20 - (i * 30),
-                        radius: 12,
-                        speed: 4,
-                        damage: 15,
-                        owner: p
-                    });
-                }
-            } else if (p.type === 'ice') {
-                iceFallBlocks.push({
-                    x: target.x,
-                    y: -30,
-                    radius: 20,
-                    speed: 3.5,
-                    damage: 20,
-                    owner: p
-                });
-            } else if (p.type === 'pokemon') {
-                for (let i = 0; i < 5; i++) {
-                    let angle = (Math.PI * 2 / 5) * i;
-                    projectiles.push({
-                        x: p.x,
-                        y: p.y,
-                        vx: Math.cos(angle) * 4,
-                        vy: Math.sin(angle) * 4,
-                        radius: 8,
-                        damage: 10,
-                        owner: p
-                    });
-                }
-            }
-        }
-
         function update() {
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
@@ -2439,8 +2400,24 @@
             if (nextGameMode === 'friend' && !isHost) return;
 
             if (!isBossMode) {
-                triggerBallSkill(p1, p2);
-                triggerBallSkill(p2, p1);
+                let now = Date.now();
+
+                // P1 스킬 처리
+                if (p1.type === 'fire' && now - p1.lastIceAttackTime > 8000) {
+                    p1.lastIceAttackTime = now;
+                    for(let i=0; i<3; i++) {
+                        fireFallBlocks.push({ x: p2.x + (Math.random()*60-30), y: -20, radius: 10, speed: 4, damage: 10 });
+                    }
+                } else if (p1.type === 'ice' && now - p1.lastIceAttackTime > 12000) {
+                    p1.lastIceAttackTime = now;
+                    iceFallBlocks.push({ x: p2.x, y: -30, radius: 16, speed: 3, damage: 20 });
+                } else if (p1.type === 'pokemon' && now - p1.lastIceAttackTime > 8000) {
+                    p1.lastIceAttackTime = now;
+                    for(let i=0; i<4; i++) {
+                        let angle = (Math.PI * 2 / 4) * i;
+                        projectiles.push({ x: p1.x, y: p1.y, vx: Math.cos(angle)*3, vy: Math.sin(angle)*3, radius: 8, damage: 12 });
+                    }
+                }
 
                 if (p1.freezeTimer > 0) {
                     p1.freezeTimer -= speedMultiplier;
@@ -2460,54 +2437,54 @@
                     if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
                 }
 
+                // 화염구 충돌
                 for (let i = fireFallBlocks.length - 1; i >= 0; i--) {
-                    let f = fireFallBlocks[i];
-                    f.y += f.speed * speedMultiplier;
-                    let target = (f.owner === p1) ? p2 : p1;
-                    let dx = f.x - target.x;
-                    let dy = f.y - target.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < f.radius + target.radius) {
-                        target.hp = Math.max(0, target.hp - f.damage);
+                    let fb = fireFallBlocks[i];
+                    fb.y += fb.speed * speedMultiplier;
+                    let dx = fb.x - p2.x;
+                    let dy = fb.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < fb.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - fb.damage);
                         fireFallBlocks.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
                         continue;
                     }
-                    if (f.y > canvas.height + 30) fireFallBlocks.splice(i, 1);
+                    if (fb.y > canvas.height + 20) fireFallBlocks.splice(i, 1);
                 }
 
+                // 얼음구 충돌
                 for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
-                    let ic = iceFallBlocks[i];
-                    ic.y += ic.speed * speedMultiplier;
-                    let target = (ic.owner === p1) ? p2 : p1;
-                    let dx = ic.x - target.x;
-                    let dy = ic.y - target.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < ic.radius + target.radius) {
-                        target.hp = Math.max(0, target.hp - ic.damage);
-                        target.freezeTimer = 60;
+                    let ib = iceFallBlocks[i];
+                    ib.y += ib.speed * speedMultiplier;
+                    let dx = ib.x - p2.x;
+                    let dy = ib.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < ib.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - ib.damage);
+                        p2.freezeTimer = 60; // 1초간 얼음
                         iceFallBlocks.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
                         continue;
                     }
-                    if (ic.y > canvas.height + 30) iceFallBlocks.splice(i, 1);
+                    if (ib.y > canvas.height + 20) iceFallBlocks.splice(i, 1);
                 }
 
+                // 포켓몬 폭풍 투사체 충돌
                 for (let i = projectiles.length - 1; i >= 0; i--) {
                     let pr = projectiles[i];
                     pr.x += pr.vx * speedMultiplier;
                     pr.y += pr.vy * speedMultiplier;
-                    let target = (pr.owner === p1) ? p2 : p1;
-                    let dx = pr.x - target.x;
-                    let dy = pr.y - target.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < pr.radius + target.radius) {
-                        target.hp = Math.max(0, target.hp - pr.damage);
+                    let dx = pr.x - p2.x;
+                    let dy = pr.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < pr.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - pr.damage);
                         projectiles.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
                         continue;
                     }
-                    if (pr.x < -20 || pr.x > canvas.width + 20 || pr.y < -20 || pr.y > canvas.height + 20) {
+                    if (pr.x < 0 || pr.x > canvas.width || pr.y < 0 || pr.y > canvas.height) {
                         projectiles.splice(i, 1);
                     }
                 }
@@ -2689,17 +2666,17 @@
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
-            fireFallBlocks.forEach(f => {
+            fireFallBlocks.forEach(fb => {
                 ctx.beginPath();
-                ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+                ctx.arc(fb.x, fb.y, fb.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#e67e22';
                 ctx.fill();
                 ctx.closePath();
             });
 
-            iceFallBlocks.forEach(ic => {
+            iceFallBlocks.forEach(ib => {
                 ctx.beginPath();
-                ctx.arc(ic.x, ic.y, ic.radius, 0, Math.PI * 2);
+                ctx.arc(ib.x, ib.y, ib.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#3498db';
                 ctx.fill();
                 ctx.closePath();
@@ -2708,7 +2685,7 @@
             projectiles.forEach(pr => {
                 ctx.beginPath();
                 ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#f1c40f';
+                ctx.fillStyle = '#9b59b6';
                 ctx.fill();
                 ctx.closePath();
             });
@@ -2801,4 +2778,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
