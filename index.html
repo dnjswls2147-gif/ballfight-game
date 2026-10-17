@@ -1050,7 +1050,7 @@
     <div class="modal-overlay hidden" id="name-modal">
         <div class="modal-box">
             <h2>👤 이름을 정하세요</h2>
-            <div class="version-text">릴리 볼 파이트 v1.3</div>
+            <div class="version-text">릴리 볼 파이트 v1.4</div>
             <div style="font-size: 12px; color: #e74c3c; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
                 최대 10글자까지 입력할 수 있으며,<br>
                 <span style="color: #c0392b;">한 번 정하면 절대 변경할 수 없습니다!</span><br>
@@ -1068,7 +1068,7 @@
                 <h2 id="profile-modal-title">👤 프로필 조회</h2>
                 <button class="btn-close-x" onclick="closeProfileModal()">X</button>
             </div>
-            <div class="version-text">릴리 볼 파이트 v1.3</div>
+            <div class="version-text">릴리 볼 파이트 v1.4</div>
             
             <div class="brown-info-box">
                 <div class="profile-info-row">
@@ -1099,7 +1099,7 @@
             <button class="ranking-nav-btn" onclick="showRankingBoard()">🏆 랭킹보드</button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         <div class="error" id="lobby-error-msg" style="color: #e74c3c; font-size: 13px; font-weight: bold; margin-bottom: 6px; min-height: 18px;"></div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
@@ -1121,7 +1121,7 @@
             <h2>📬 우편함 📬</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">도착한 우편이 있습니다!</div>
@@ -1134,7 +1134,7 @@
             <h2>🏆 명예의 전당 🏆</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.3 버전 (실시간 순위)</div>
+        <div class="version-text">v1.4 버전 (실시간 순위)</div>
         
         <div class="ranking-tab-container">
             <button class="ranking-tab-btn active" id="rank-tab-trophy" onclick="switchRankingTab('trophy')">🏆 트로피 랭킹</button>
@@ -1148,7 +1148,7 @@
 
     <div class="container hidden" id="myball-screen">
         <h2>⚽ 나의 공 보관함 ⚽</h2>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         <div class="currency-container" style="margin-top: 5px;">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-shop">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-shop">0</span>개</div>
@@ -1162,7 +1162,7 @@
 
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-friend">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-friend">0</span>개</div>
@@ -1186,7 +1186,7 @@
 
     <div class="container hidden" id="group-screen">
         <h2>👥 그룹 대기실 👥</h2>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         <div class="desc">그룹 코드 입력</div>
         <div class="error" id="group-error"></div>
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
@@ -1205,7 +1205,7 @@
             <h2>⚔️ 출전 준비 ⚔️</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.3 버전</div>
+        <div class="version-text">v1.4 버전</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
@@ -1257,11 +1257,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v31';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v31';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v31';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v31';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v31';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v32';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v32';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v32';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v32';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v32';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1274,9 +1274,8 @@
             "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
         ];
 
-        // 🌟 방금 업로드하신 character.jpg 이미지 연결
-        const customCharacterImg = new Image();
-        customCharacterImg.src = "character.jpg"; 
+        const characterImg = new Image();
+        characterImg.src = "character.jpg"; 
 
         let savedUsername = "";
         let registeredUsers = []; 
@@ -2049,15 +2048,15 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        // 🌟 새로 업로드한 character.jpg를 사용하는 커스텀 볼 등록
+        // 🌟 요청하신 공들 및 능력치/설정 반영 (볼 크기 1.5배: 기본 radius 36)
         let ballsData = [
-            { id: 'standard', name: '기본 볼', desc: '기본 공 (체력: 200, 데미지: 10)', price: 0, hp: 200, damage: 10, owned: true, equipped: false },
-            { id: 'custom_character', name: '커스텀 캐릭터 볼', desc: '내 사진 이미지 공 (체력: 300, 데미지: 15)', price: 0, hp: 300, damage: 15, owned: true, equipped: true },
-            { id: 'fire', name: '화염 볼', desc: '체력: 200, 데미지: 15 & 8초마다 화염구 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 250, 데미지: 15 & 12초마다 20데미지 얼음 폭격', price: 100, hp: 250, damage: 15, owned: false, equipped: false },
-            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 300, 데미지: 20 & 8초마다 폭풍 폭격', price: 300, hp: 300, damage: 20, owned: false, equipped: false },
-            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 300, 데미지: 15 & 어몽어스 습격', price: 1000, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 350, 데미지: 15 & 수세미/대나무 투척', price: 3000, hp: 350, damage: 15, owned: false, equipped: false }
+            { id: 'standard', name: '기본 볼', desc: '체력: 200, 데미지 없음', price: 0, hp: 200, damage: 0, owned: true, equipped: true },
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '미스터 비스트 이미지 공', price: 1500, hp: 300, damage: 15, owned: false, equipped: false },
+            { id: 'fire', name: '화염 볼', desc: '체력: 200, 2초마다 화염구 & 6초마다 거대 화염볼 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'ice', name: '아이스 볼', desc: '체력: 200, 3초마다 얼음 & 8초마다 경기장 덮치는 대형 얼음 폭격', price: 100, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 250, 2.5초마다 포켓몬볼 투척 & 9초마다 50개 폭풍 낙하', price: 350, hp: 250, damage: 30, owned: false, equipped: false },
+            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 250, 2.5초마다 쉿 텍스트 & 8초마다 어몽어스 암살 (75뎀)', price: 1000, hp: 250, damage: 20, owned: false, equipped: false },
+            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 250, 8초마다 쓱싹쓱싹 행주 & 미용티슈 소환 폭발 (100뎀)', price: 3000, hp: 250, damage: 0, owned: false, equipped: false }
         ];
 
         function saveData() {
@@ -2188,13 +2187,14 @@
             document.getElementById('profile-modal').classList.add('hidden');
         }
 
+        // 🌟 볼 크기 1.5배 확대 반영 (기본 반지름 36)
         let p1 = { 
-            x: 130, y: 270, radius: 24, color: '#2980b9', vx: 2.5, vy: 2.5, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, maxSkillGauge: 100, lastIceAttackTime: 0, freezeTimer: 0 
+            x: 130, y: 270, radius: 36, color: '#2980b9', vx: 2.0, vy: 2.0, hp: 200, maxHp: 200,
+            type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
         };
         let p2 = { 
-            x: 410, y: 270, radius: 24, color: '#c0392b', vx: -2.5, vy: -2.5, hp: 200, maxHp: 200,
-            type: 'standard', damage: 10, skillGauge: 0, maxSkillGauge: 100, lastIceAttackTime: 0, freezeTimer: 0 
+            x: 410, y: 270, radius: 36, color: '#c0392b', vx: -2.0, vy: -2.0, hp: 200, maxHp: 200,
+            type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
         };
 
         function updateCoinsUI() {
@@ -2412,8 +2412,8 @@
                 friendName = data.name;
             } else if (data.type === 'GAME_SYNC') {
                 if (!isHost) {
-                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp; p1.skillGauge = data.p1.skillGauge;
-                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp; p2.skillGauge = data.p2.skillGauge;
+                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp;
+                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp;
                     gameOverState = data.gameOverState;
                     updateHpBars();
                 }
@@ -2630,7 +2630,7 @@
 
         function getRandomVelocity() {
             let angle = Math.random() * Math.PI * 2;
-            let speed = 2.0 + Math.random() * 1.2;
+            let speed = 2.0 + Math.random() * 1.0;
             let vx = Math.cos(angle) * speed;
             let vy = Math.sin(angle) * speed;
             if (Math.abs(vx) < 1.0) vx = vx > 0 ? 1.5 : -1.5;
@@ -2645,17 +2645,14 @@
             p1.maxHp = equipped.hp;
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
-            p1.radius = isBossMode ? 14 : 26; 
-            p1.skillGauge = 0;
-            p1.maxSkillGauge = 100;
-            
+            p1.radius = isBossMode ? 20 : 36; // 1.5배 큰 볼 크기 (반지름 36)
             p1.x = 130; 
             p1.y = 270;
-            
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
             p1.vy = isBossMode ? 0 : v1.vy;
-            p1.lastIceAttackTime = Date.now();
+            p1.lastSkillTime = Date.now();
+            p1.lastProjTime = Date.now();
             p1.freezeTimer = 0;
             moveDirection = 0;
 
@@ -2668,19 +2665,16 @@
                 p2.damage = 0;
                 p2.x = 270; p2.y = 75;
                 p2.vx = 0; p2.vy = 0;
-                p2.radius = 40;
-                p2.skillGauge = 0;
+                p2.radius = 45;
                 bossTimerFrames = 0;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
                 p2.hp = 200;
-                p2.damage = 10;
+                p2.damage = 0;
                 p2.x = 410; 
                 p2.y = 270; 
-                p2.radius = 26;
-                p2.skillGauge = 0;
-                p2.maxSkillGauge = 100;
+                p2.radius = 36;
                 let v2 = getRandomVelocity();
                 p2.vx = v2.vx; p2.vy = v2.vy;
             }
@@ -2726,34 +2720,6 @@
             }
         }
 
-        function triggerSpecialSkill(player, enemy) {
-            let type = player.type;
-            if (type === 'dongryong') {
-                specialAttackEntities.push({
-                    type: 'amongus',
-                    x: enemy.x, y: -40,
-                    radius: 20, speed: 7 * speedMultiplier, damage: 30,
-                    targetPlayer: enemy
-                });
-            } else if (type === 'custom_character') {
-                specialAttackEntities.push({
-                    type: 'custom_skill',
-                    x: enemy.x, y: -50,
-                    radius: 30, speed: 8 * speedMultiplier, damage: 35,
-                    targetPlayer: enemy
-                });
-            } else if (type === 'sangsampany') {
-                specialAttackEntities.push({
-                    type: 'suseumi',
-                    x: player.x, y: player.y,
-                    vx: (enemy.x - player.x) * 0.05 * speedMultiplier,
-                    vy: (enemy.y - player.y) * 0.05 * speedMultiplier,
-                    radius: 18, damage: 25,
-                    targetPlayer: enemy
-                });
-            }
-        }
-
         function update() {
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
@@ -2761,25 +2727,82 @@
 
             if (!isBossMode) {
                 let now = Date.now();
-                p1.skillGauge = Math.min(p1.maxSkillGauge, p1.skillGauge + 0.3 * speedMultiplier);
-                if (p1.skillGauge >= p1.maxSkillGauge) {
-                    triggerSpecialSkill(p1, p2);
-                    p1.skillGauge = 0;
+
+                // 1) 기본 투사체 주기별 발사
+                if (p1.type === 'fire' && now - p1.lastProjTime > 2000) {
+                    p1.lastProjTime = now;
+                    // 내 볼보다 조금 작은 화염볼 (반지름 p1.radius * 0.7)
+                    projectiles.push({ type: 'fireball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 0.7, damage: 15, target: p2 });
+                } else if (p1.type === 'ice' && now - p1.lastProjTime > 3000) {
+                    p1.lastProjTime = now;
+                    // 내 볼 사이즈 만한 얼음 (반지름 p1.radius)
+                    projectiles.push({ type: 'iceball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius, damage: 15, target: p2 });
+                } else if (p1.type === 'pokemon' && now - p1.lastProjTime > 2500) {
+                    p1.lastProjTime = now;
+                    projectiles.push({ type: 'pokeball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.04, vy: (p2.y - p1.y)*0.04, radius: 14, damage: 30, target: p2 });
+                } else if (p1.type === 'dongryong' && now - p1.lastProjTime > 2500) {
+                    p1.lastProjTime = now;
+                    // '쉿' 텍스트 (내 볼 사이즈의 2배 크기 효과)
+                    specialAttackEntities.push({ type: 'shh_text', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 2, damage: 20, target: p2 });
                 }
 
-                if (p1.type === 'fire' && now - p1.lastIceAttackTime > 8000) {
-                    p1.lastIceAttackTime = now;
-                    for(let i=0; i<3; i++) {
-                        fireFallBlocks.push({ x: p2.x + (Math.random()*60-30), y: -20, radius: 10, speed: 4, damage: 10 });
-                    }
-                } else if (p1.type === 'ice' && now - p1.lastIceAttackTime > 12000) {
-                    p1.lastIceAttackTime = now;
-                    iceFallBlocks.push({ x: p2.x, y: -30, radius: 16, speed: 3, damage: 20 });
-                } else if (p1.type === 'pokemon' && now - p1.lastIceAttackTime > 8000) {
-                    p1.lastIceAttackTime = now;
-                    for(let i=0; i<4; i++) {
-                        let angle = (Math.PI * 2 / 4) * i;
-                        projectiles.push({ x: p1.x, y: p1.y, vx: Math.cos(angle)*3, vy: Math.sin(angle)*3, radius: 8, damage: 12 });
+                // 2) 특수 기술 발동 주기
+                let skillInterval = 8000;
+                if (p1.type === 'fire') skillInterval = 6000;
+                else if (p1.type === 'ice') skillInterval = 8000;
+                else if (p1.type === 'pokemon') skillInterval = 9000;
+                else if (p1.type === 'dongryong') skillInterval = 8000;
+                else if (p1.type === 'sangsampany') skillInterval = 8000;
+
+                if (now - p1.lastSkillTime > skillInterval) {
+                    p1.lastSkillTime = now;
+
+                    if (p1.type === 'fire') {
+                        // 큰 화염볼 3개 (내 볼보다 4배 더 커서 지름 4배 -> 반지름 4배 = p1.radius * 4)
+                        let hugeR = p1.radius * 4;
+                        fireFallBlocks.push({ x: canvas.width * 0.25, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                        fireFallBlocks.push({ x: canvas.width * 0.50, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                        fireFallBlocks.push({ x: canvas.width * 0.75, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                    } 
+                    else if (p1.type === 'ice') {
+                        // 얼음 4개 (왼쪽 2개, 오른쪽 2개, 경기장을 꽉 채울 정도의 큰 얼음)
+                        let hugeIceR = 55;
+                        iceFallBlocks.push({ x: 80, y: -80, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 200, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 340, y: -80, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 460, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                    } 
+                    else if (p1.type === 'pokemon') {
+                        // 2초간 포켓몬볼 50개 이상 폭풍 낙하 (개당 데미지 2)
+                        for(let i=0; i<55; i++) {
+                            specialAttackEntities.push({
+                                type: 'pokeball_storm',
+                                x: Math.random() * canvas.width,
+                                y: -10 - Math.random() * 400,
+                                speed: (4 + Math.random() * 5) * speedMultiplier,
+                                radius: 10,
+                                damage: 2,
+                                targetPlayer: p2
+                            });
+                        }
+                    } 
+                    else if (p1.type === 'dongryong') {
+                        // 어몽어스 벤트 칼 찌르기 (75 데미지)
+                        specialAttackEntities.push({
+                            type: 'amongus_assassinate',
+                            x: p2.x, y: p2.y - 80,
+                            targetPlayer: p2,
+                            damage: 75,
+                            timer: 40
+                        });
+                    } 
+                    else if (p1.type === 'sangsampany') {
+                        // 쓱싹쓱싹 행주 기술 (90 데미지) + 미용티슈 볼 소환 폭발 (100 데미지)
+                        specialAttackEntities.push({
+                            type: 'sangsampany_combo',
+                            targetPlayer: p2,
+                            timer: 60
+                        });
                     }
                 }
 
@@ -2805,25 +2828,31 @@
                     if (p2.y + p2.radius > canvas.height) { p2.y = canvas.height - p2.radius - 2; p2.vy *= -1; }
                 }
 
+                // 엔티티 업데이트 (투사체, 기술 등)
                 for (let i = specialAttackEntities.length - 1; i >= 0; i--) {
                     let se = specialAttackEntities[i];
-                    if (se.type === 'amongus' || se.type === 'custom_skill') {
+                    if (se.type === 'pokeball_storm') {
                         se.y += se.speed;
-                    } else if (se.type === 'suseumi') {
-                        se.x += se.vx;
-                        se.y += se.vy;
-                    }
-                    let dx = se.x - se.targetPlayer.x;
-                    let dy = se.y - se.targetPlayer.y;
-                    if (Math.sqrt(dx*dx + dy*dy) < se.radius + se.targetPlayer.radius) {
-                        se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - se.damage);
-                        specialAttackEntities.splice(i, 1);
-                        updateHpBars();
-                        checkGameOver();
-                        continue;
-                    }
-                    if (se.y > canvas.height + 50 || se.x < -50 || se.x > canvas.width + 50) {
-                        specialAttackEntities.splice(i, 1);
+                        let dx = se.x - se.targetPlayer.x;
+                        let dy = se.y - se.targetPlayer.y;
+                        if (Math.sqrt(dx*dx + dy*dy) < se.radius + se.targetPlayer.radius) {
+                            se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - se.damage);
+                            specialAttackEntities.splice(i, 1);
+                            updateHpBars();
+                            checkGameOver();
+                            continue;
+                        }
+                        if (se.y > canvas.height + 20) specialAttackEntities.splice(i, 1);
+                    } 
+                    else if (se.type === 'amongus_assassinate' || se.type === 'sangsampany_combo') {
+                        se.timer -= speedMultiplier;
+                        if (se.timer <= 0) {
+                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : 190; // 행주(90) + 미용티슈(100) = 190 혹은 각각 적용
+                            se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - hitDmg);
+                            specialAttackEntities.splice(i, 1);
+                            updateHpBars();
+                            checkGameOver();
+                        }
                     }
                 }
 
@@ -2839,7 +2868,7 @@
                         checkGameOver();
                         continue;
                     }
-                    if (fb.y > canvas.height + 20) fireFallBlocks.splice(i, 1);
+                    if (fb.y > canvas.height + 120) fireFallBlocks.splice(i, 1);
                 }
 
                 for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
@@ -2849,13 +2878,13 @@
                     let dy = ib.y - p2.y;
                     if (Math.sqrt(dx*dx + dy*dy) < ib.radius + p2.radius) {
                         p2.hp = Math.max(0, p2.hp - ib.damage);
-                        p2.freezeTimer = 60;
+                        if (ib.freeze) p2.freezeTimer = 60; // 1초 얼림 (60프레임)
                         iceFallBlocks.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
                         continue;
                     }
-                    if (ib.y > canvas.height + 20) iceFallBlocks.splice(i, 1);
+                    if (ib.y > canvas.height + 120) iceFallBlocks.splice(i, 1);
                 }
 
                 for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -2866,6 +2895,7 @@
                     let dy = pr.y - p2.y;
                     if (Math.sqrt(dx*dx + dy*dy) < pr.radius + p2.radius) {
                         p2.hp = Math.max(0, p2.hp - pr.damage);
+                        if (pr.type === 'iceball') p2.freezeTimer = 30;
                         projectiles.splice(i, 1);
                         updateHpBars();
                         checkGameOver();
@@ -2935,6 +2965,7 @@
                 if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
             }
 
+            // 🌟 모든 공들 충돌 시 매번 각각 10 데미지 입기 반영
             if (!isBossMode) {
                 let dx = p2.x - p1.x;
                 let dy = p2.y - p1.y;
@@ -2953,8 +2984,9 @@
                     p2.x += nx * overlap / 2;
                     p2.y += ny * overlap / 2;
 
-                    p1.hp = Math.max(0, p1.hp - p2.damage);
-                    p2.hp = Math.max(0, p2.hp - p1.damage);
+                    // 박을 때마다 10 데미지 + 고유 데미지 추가
+                    p1.hp = Math.max(0, p1.hp - (10 + p2.damage));
+                    p2.hp = Math.max(0, p2.hp - (10 + p1.damage));
 
                     updateHpBars();
                     checkGameOver();
@@ -2994,25 +3026,14 @@
                 return;
             }
 
-            if (isPlayer1 && p.maxSkillGauge > 0) {
-                let ratio = p.skillGauge / p.maxSkillGauge;
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius + 6, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * ratio));
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = "#f1c40f";
-                ctx.stroke();
-                ctx.restore();
-            }
-
             ctx.save();
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.clip(); 
 
-            // 🌟 character.jpg 이미지를 원형 공으로 정상 출력
-            if (p.type === 'custom_character' && customCharacterImg.complete && customCharacterImg.naturalWidth !== 0) {
-                ctx.drawImage(customCharacterImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+            // 미스터 비스트 볼(mrbeast) 장착 시 character.jpg 이미지 렌더링
+            if (p.type === 'mrbeast' && characterImg.complete && characterImg.naturalWidth !== 0) {
+                ctx.drawImage(characterImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
             } else {
                 ctx.fillStyle = p.color;
                 ctx.fill();
@@ -3021,19 +3042,10 @@
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 3;
             ctx.strokeStyle = isPlayer1 ? "#3498db" : "#c0392b";
             ctx.stroke();
             ctx.closePath();
-
-            if (isPlayer1) {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius + 2, 0, Math.PI * 2);
-                ctx.lineWidth = 2.5;
-                ctx.strokeStyle = "#2ecc71";
-                ctx.stroke();
-                ctx.closePath();
-            }
         }
 
         function draw() {
@@ -3042,19 +3054,23 @@
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
+            // 특수 효과 및 텍스트 렌더링 (쉿, 쓱싹쓱싹, 어몽어스 암살 등)
             specialAttackEntities.forEach(se => {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(se.x, se.y, se.radius, 0, Math.PI * 2);
-                if (se.type === 'amongus') ctx.fillStyle = '#e74c3c';
-                else if (se.type === 'custom_skill') ctx.fillStyle = '#f39c12';
-                else ctx.fillStyle = '#27ae60';
-                ctx.fill();
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.closePath();
-                ctx.restore();
+                if (se.type === 'amongus_assassinate') {
+                    ctx.save();
+                    ctx.font = "bold 18px sans-serif";
+                    ctx.fillStyle = "#e74c3c";
+                    ctx.textAlign = "center";
+                    ctx.fillText("🔪 어몽어스 암살!", se.targetPlayer.x, se.targetPlayer.y - se.targetPlayer.radius - 10);
+                    ctx.restore();
+                } else if (se.type === 'sangsampany_combo') {
+                    ctx.save();
+                    ctx.font = "bold 20px sans-serif";
+                    ctx.fillStyle = "#3498db";
+                    ctx.textAlign = "center";
+                    ctx.fillText("🧽 쓱싹쓱싹 행주 & 미용티슈 폭발!", canvas.width / 2, 50);
+                    ctx.restore();
+                }
             });
 
             fireFallBlocks.forEach(fb => {
@@ -3062,6 +3078,9 @@
                 ctx.arc(fb.x, fb.y, fb.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#e67e22';
                 ctx.fill();
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 4;
+                ctx.stroke();
                 ctx.closePath();
             });
 
@@ -3070,15 +3089,30 @@
                 ctx.arc(ib.x, ib.y, ib.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#3498db';
                 ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
                 ctx.closePath();
             });
 
             projectiles.forEach(pr => {
                 ctx.beginPath();
                 ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#9b59b6';
+                if (pr.type === 'fireball') ctx.fillStyle = '#e67e22';
+                else if (pr.type === 'iceball') ctx.fillStyle = '#3498db';
+                else if (pr.type === 'pokeball') ctx.fillStyle = '#e74c3c';
                 ctx.fill();
                 ctx.closePath();
+
+                if (pr.type === 'shh_text') {
+                    ctx.save();
+                    ctx.font = "bold 24px sans-serif";
+                    ctx.fillStyle = "#2c3e50";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("쉿", pr.x, pr.y);
+                    ctx.restore();
+                }
             });
 
             bossObstacles.forEach(bo => {
@@ -3169,4 +3203,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
