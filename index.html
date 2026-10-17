@@ -766,7 +766,7 @@
             cursor: pointer;
         }
 
-        /* 🌟 스크린샷 스타일 어드민 유저 관리 카드 디자인 */
+        /* 🌟 어드민 패널 및 유저 카드 UI */
         .admin-window {
             position: fixed;
             top: 50%;
@@ -878,13 +878,13 @@
             accent-color: #e91e63;
         }
 
-        /* 🌟 유저 카드 스타일 */
+        /* 🌟 유저 관리 카드 UI 디테일 (사유 작성 및 밴 해제 추가) */
         .admin-user-card {
             background: #262137;
             border: 1px solid #3e3857;
             border-radius: 8px;
             padding: 8px 10px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-align: left;
         }
         .admin-user-card-top {
@@ -916,13 +916,14 @@
             color: #9c96b8;
             margin-bottom: 6px;
         }
-        .admin-user-action-row {
+        .admin-time-row {
             display: flex;
             gap: 4px;
             align-items: center;
+            margin-bottom: 4px;
         }
-        .admin-user-action-row input {
-            width: 32px !important;
+        .admin-time-row input[type="number"] {
+            width: 36px !important;
             padding: 3px !important;
             font-size: 9px !important;
             margin-bottom: 0 !important;
@@ -932,15 +933,37 @@
             color: #fff !important;
             border-radius: 3px !important;
         }
+        .admin-reason-input {
+            width: 100% !important;
+            padding: 4px 6px !important;
+            font-size: 9px !important;
+            margin-bottom: 6px !important;
+            background: #1a0826 !important;
+            border: 1px solid #4a4463 !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
         .admin-ban-btn {
             background: #c0392b;
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 3px 8px;
+            padding: 4px 8px;
             font-size: 10px;
             font-weight: bold;
             cursor: pointer;
+            flex: 1;
+        }
+        .admin-unban-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
         }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
@@ -1319,11 +1342,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v33';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v33';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v33';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v33';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v33';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v35';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v35';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v35';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v35';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v35';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1763,21 +1786,21 @@
         function mergeUsers(incomingUsers) {
             if (!Array.isArray(incomingUsers)) return;
             incomingUsers.forEach(u => {
-                if (!registeredUsers.some(existing => existing.name === u.name)) {
+                let match = registeredUsers.find(existing => existing.name === u.name);
+                if (!match) {
                     registeredUsers.push({
                         name: u.name,
                         coins: u.coins || 0,
                         trophies: u.trophies || 0,
                         banUntil: u.banUntil || 0,
+                        banReason: u.banReason || "",
                         startTime: u.startTime || Date.now()
                     });
                 } else {
-                    let match = registeredUsers.find(existing => existing.name === u.name);
-                    if (match) {
-                        match.coins = u.coins !== undefined ? u.coins : match.coins;
-                        match.trophies = u.trophies !== undefined ? u.trophies : match.trophies;
-                        match.banUntil = u.banUntil || match.banUntil;
-                    }
+                    match.coins = u.coins !== undefined ? u.coins : match.coins;
+                    match.trophies = u.trophies !== undefined ? u.trophies : match.trophies;
+                    match.banUntil = u.banUntil !== undefined ? u.banUntil : match.banUntil;
+                    match.banReason = u.banReason !== undefined ? u.banReason : match.banReason;
                 }
             });
             localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
@@ -1799,6 +1822,7 @@
                         coins: userCoins, 
                         trophies: userTrophies, 
                         banUntil: 0, 
+                        banReason: "",
                         startTime: sessionStartTime 
                     });
                 } else {
@@ -1809,7 +1833,7 @@
             }
         }
 
-        // 🌟 스크린샷과 동일한 카드 스타일의 유저 목록 렌더링
+        // 🌟 유저 관리 카드 UI 렌더링 (사유 작성 및 밴 해제 기능 포함)
         function renderAdminUserList() {
             syncGlobalUsers();
             const container = document.getElementById('admin-user-list-container');
@@ -1827,7 +1851,7 @@
 
                 let isBanned = u.banUntil && u.banUntil > Date.now();
                 let statusClass = isBanned ? "admin-user-status banned" : "admin-user-status";
-                let statusText = isBanned ? "정지됨" : "온라인";
+                let statusText = isBanned ? `정지됨 (${u.banReason ? u.banReason : "사유 없음"})` : "온라인";
 
                 let playTimeMinutes = Math.floor((Date.now() - (u.startTime || Date.now())) / 60000);
 
@@ -1837,10 +1861,16 @@
                         <span class="${statusClass}">${statusText}</span>
                     </div>
                     <div class="admin-user-sub">플레이 타임 ${playTimeMinutes}분</div>
-                    <div class="admin-user-action-row">
+                    
+                    <div class="admin-time-row">
                         <input type="number" id="ban-time-${index}" value="0" min="0"> 시간
                         <input type="number" id="ban-min-${index}" value="0" min="0"> 분
+                    </div>
+                    <input type="text" id="ban-reason-${index}" class="admin-reason-input" placeholder="추방 사유 (선택)" value="${u.banReason || ''}">
+                    
+                    <div style="display: flex; gap: 4px;">
                         <button class="admin-ban-btn" onclick="executeCustomBan(${index})">밴(추방)</button>
+                        <button class="admin-unban-btn" onclick="executeUnban(${index})">밴 해제</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1850,17 +1880,29 @@
         function executeCustomBan(index) {
             let hoursInput = parseInt(document.getElementById(`ban-time-${index}`).value) || 0;
             let minsInput = parseInt(document.getElementById(`ban-min-${index}`).value) || 0;
+            let reasonInput = document.getElementById(`ban-reason-${index}`).value.trim();
+            
             let totalMs = (hoursInput * 3600 + minsInput * 60) * 1000;
 
             if (totalMs <= 0) {
-                totalMs = 7 * 24 * 3600 * 1000; // 기본 7일 정지
+                totalMs = 7 * 24 * 3600 * 1000; // 시간 미입력 시 기본 7일 정지
             }
 
             registeredUsers[index].banUntil = Date.now() + totalMs;
+            registeredUsers[index].banReason = reasonInput;
             localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
             saveData();
             renderAdminUserList();
-            alert(`${registeredUsers[index].name} 님이 정지되었습니다.`);
+            alert(`[${registeredUsers[index].name}] 님이 정지되었습니다.`);
+        }
+
+        function executeUnban(index) {
+            registeredUsers[index].banUntil = 0;
+            registeredUsers[index].banReason = "";
+            localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(registeredUsers));
+            saveData();
+            renderAdminUserList();
+            alert(`[${registeredUsers[index].name}] 님의 밴이 해제되었습니다!`);
         }
 
         function renderAdminGiftUserSelect() {
@@ -2226,13 +2268,13 @@
             if (!name) return false;
             let found = registeredUsers.find(u => u.name === name);
             if (found && found.banUntil && found.banUntil > Date.now()) {
-                alert("정지된 계정입니다.");
+                alert(`정지된 계정입니다.\n사유: ${found.banReason || "없음"}`);
                 return true;
             }
             return false;
         }
 
-        // 🌟 플레이 하기 누르는 순간 즉시 플레이어 목록(어드민/랭킹/선물)에 정식 등록
+        // 🌟 플레이 하기 누르면 즉시 전체 유저 DB에 정식 추가 등록 및 동기화
         function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
@@ -3360,4 +3402,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
