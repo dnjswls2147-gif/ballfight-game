@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>릴리 볼 파이트 - 할로윈 에디션</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- 🌟 실시간 전체 유저 공유를 위한 Firebase 라이브러리 추가 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -42,6 +43,11 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .container {
@@ -83,10 +89,31 @@
             text-align: center;
             padding: 20px;
         }
-        #maintenance-screen.hidden { display: none !important; pointer-events: none !important; }
-        #maintenance-screen h1 { color: #e74c3c; font-size: 30px; margin-bottom: 10px; }
-        #maintenance-screen p { font-size: 16px; color: #bdc3c7; line-height: 1.5; margin-bottom: 25px; }
-        .btn-maint-play { background-color: #e67e22; color: white; border: 2px solid #d35400; border-radius: 10px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        #maintenance-screen.hidden {
+            display: none !important;
+            pointer-events: none !important;
+        }
+        #maintenance-screen h1 {
+            color: #e74c3c;
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        #maintenance-screen p {
+            font-size: 16px;
+            color: #bdc3c7;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        .btn-maint-play {
+            background-color: #e67e22;
+            color: white;
+            border: 2px solid #d35400;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         .top-nav-bar {
             display: flex;
@@ -95,7 +122,7 @@
             margin-bottom: 10px;
             gap: 4px;
         }
-        .profile-btn, .mailbox-btn, .ranking-nav-btn {
+        .profile-btn {
             background: #2980b9;
             color: #fff;
             border: 2px solid #1c5980;
@@ -110,8 +137,37 @@
             flex: 1;
             justify-content: center;
         }
-        .mailbox-btn { background: #d35400; border-color: #a04000; position: relative; }
-        .ranking-nav-btn { background: #8e44ad; border-color: #6c3483; }
+        .mailbox-btn {
+            position: relative;
+            background: #d35400;
+            color: #fff;
+            border: 2px solid #a04000;
+            border-radius: 8px;
+            padding: 8px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+        }
+        .ranking-nav-btn {
+            background: #8e44ad;
+            color: #fff;
+            border: 2px solid #6c3483;
+            border-radius: 8px;
+            padding: 8px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+        }
         .red-dot {
             position: absolute;
             top: -4px;
@@ -125,205 +181,793 @@
 
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: rgba(0, 0, 0, 0.85);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10000000; padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100000000;
+            padding: 20px;
         }
-        .modal-overlay.hidden { display: none !important; pointer-events: none !important; }
+        .modal-overlay.hidden {
+            display: none !important;
+            pointer-events: none !important;
+        }
         .modal-box {
-            width: 100%; max-width: 360px;
-            background: #2b113a; border: 3px solid #ff7518;
-            border-radius: 12px; padding: 20px; text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8); position: relative; color: #fff;
+            width: 100%;
+            max-width: 360px;
+            background: #2b113a;
+            border: 3px solid #ff7518;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            position: relative;
+            color: #fff;
         }
 
         .brown-info-box {
-            background: #421959; border: 3px solid #68268a;
-            border-radius: 10px; padding: 18px 15px; color: #ffffff;
-            margin: 15px 0; width: 100%; box-sizing: border-box; text-align: left;
+            background: #421959;
+            border: 3px solid #68268a;
+            border-radius: 10px;
+            padding: 18px 15px;
+            color: #ffffff;
+            margin: 15px 0;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            text-align: left;
         }
         .profile-info-row {
-            font-size: 15px; font-weight: bold; margin-bottom: 10px; color: #ffe0b2;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px dashed #8e44ad; padding-bottom: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffe0b2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #8e44ad;
+            padding-bottom: 8px;
         }
-        .profile-info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .profile-info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
 
-        .header-row { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 2px; }
+        .header-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 2px;
+        }
         .btn-close-x {
-            position: absolute; right: 0; background: #c0392b; color: #ffffff;
-            border: 2px solid #962d22; border-radius: 6px; width: 36px; height: 36px;
-            font-size: 18px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer;
+            position: absolute;
+            right: 0;
+            background: #c0392b;
+            color: #ffffff;
+            border: 2px solid #962d22;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
         }
 
         .mail-brown-box {
-            background: #421959; border: 3px solid #68268a; border-radius: 10px;
-            padding: 15px; color: #ffffff; margin: 15px 0; width: 100%;
-            max-height: 250px; overflow-y: auto; text-align: left;
+            background: #421959;
+            border: 3px solid #68268a;
+            border-radius: 10px;
+            padding: 15px;
+            color: #ffffff;
+            margin: 15px 0;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            max-height: 250px;
+            overflow-y: auto;
         }
-        .mail-status-title { font-size: 15px; font-weight: bold; margin-bottom: 12px; color: #ffe0b2; }
+        .mail-status-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #ffe0b2;
+        }
         .mail-item {
-            background: #5b237a; border: 2px solid #3d1454; border-radius: 8px;
-            padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
-        }
-        .mail-info-title { font-size: 13px; font-weight: bold; color: #fff; }
-        .mail-info-time { font-size: 11px; color: #ffcc80; margin-top: 3px; }
-        .btn-claim { background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
-
-        .ranking-tab-container { display: flex; gap: 6px; margin-bottom: 10px; }
-        .ranking-tab-btn {
-            flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #8e44ad;
-            background: #3c1952; font-size: 13px; font-weight: bold; cursor: pointer; color: #d1d8e0;
-        }
-        .ranking-tab-btn.active { background: #8e44ad; color: #ffffff; border-color: #ff7518; }
-        
-        .ranking-list-box {
-            background: #421959; border: 3px solid #68268a; border-radius: 10px;
-            padding: 10px; color: #ffffff; margin-bottom: 10px; max-height: 220px; overflow-y: auto;
-        }
-        .ranking-item {
-            background: #5b237a; border: 2px solid #3d1454; border-radius: 8px;
-            padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
-        }
-        .ranking-left { display: flex; align-items: center; gap: 8px; }
-        .ranking-rank { font-size: 14px; font-weight: bold; width: 32px; text-align: center; color: #ffe0b2; }
-        .ranking-rank.top1 { color: #f1c40f; font-size: 16px; }
-        .ranking-rank.top2 { color: #bdc3c7; font-size: 15px; }
-        .ranking-rank.top3 { color: #e67e22; font-size: 15px; }
-        .ranking-username { font-size: 13px; font-weight: bold; color: #ffffff; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ranking-val { font-size: 13px; font-weight: bold; color: #f1c40f; }
-
-        /* 🌟 내 순위 고정 바 스타일 */
-        .my-ranking-bar {
-            background: linear-gradient(135deg, #2980b9, #1c5980);
-            border: 2px solid #3498db;
+            background: #5b237a;
+            border: 2px solid #3d1454;
             border-radius: 8px;
             padding: 10px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .mail-item:last-child {
+            margin-bottom: 0;
+        }
+        .mail-info-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .mail-info-time {
+            font-size: 11px;
+            color: #ffcc80;
+            margin-top: 3px;
+        }
+        .btn-claim {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .ranking-tab-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .ranking-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #8e44ad;
+            background: #3c1952;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #d1d8e0;
+        }
+        .ranking-tab-btn.active {
+            background: #8e44ad;
+            color: #ffffff;
+            border-color: #ff7518;
+        }
+        .ranking-list-box {
+            background: #421959;
+            border: 3px solid #68268a;
+            border-radius: 10px;
+            padding: 10px;
+            color: #ffffff;
             margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .ranking-item {
+            background: #5b237a;
+            border: 2px solid #3d1454;
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .ranking-item:last-child {
+            margin-bottom: 0;
+        }
+        .ranking-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ranking-rank {
+            font-size: 14px;
+            font-weight: bold;
+            width: 28px;
+            text-align: center;
+            color: #ffe0b2;
+        }
+        .ranking-rank.top1 { color: #f1c40f; font-size: 16px; }
+        .ranking-rank.top2 { color: #bdc3c7; font-size: 15px; }
+        .ranking-rank.top3 { color: #e67e22; font-size: 15px; }
+
+        .ranking-profile-btn {
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .ranking-username {
+            font-size: 13px;
+            font-weight: bold;
+            color: #ffffff;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ranking-val {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f1c40f;
         }
 
         h2 { color: #ff7518; margin-bottom: 2px; font-size: 20px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
         .version-text { font-size: 11px; color: #a29bfe; margin-bottom: 10px; font-weight: bold; }
         .desc { font-size: 13px; color: #d1d8e0; margin-bottom: 10px; }
         
-        .currency-container { display: flex; justify-content: center; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
-        .coin-box { display: inline-flex; align-items: center; background: #3b200b; border: 2px solid #f1c40f; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: bold; color: #f1c40f; }
-        .trophy-box { display: inline-flex; align-items: center; background: #0f2738; border: 2px solid #3498db; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: bold; color: #3498db; }
-        .myball-btn-box { display: inline-flex; align-items: center; background: #321342; border: 2px solid #9b59b6; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: bold; color: #e0aaff; cursor: pointer; }
-        .coin-icon { width: 16px; height: 16px; background: #f1c40f; border: 2px solid #d68910; border-radius: 50%; display: inline-block; margin-right: 4px; text-align: center; line-height: 12px; font-size: 10px; color: #000; }
+        .currency-container {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .coin-box {
+            display: inline-flex;
+            align-items: center;
+            background: #3b200b;
+            border: 2px solid #f1c40f;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        .trophy-box {
+            display: inline-flex;
+            align-items: center;
+            background: #0f2738;
+            border: 2px solid #3498db;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .myball-btn-box {
+            display: inline-flex;
+            align-items: center;
+            background: #321342;
+            border: 2px solid #9b59b6;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #e0aaff;
+            cursor: pointer;
+        }
+        .coin-icon {
+            width: 16px;
+            height: 16px;
+            background: #f1c40f;
+            border: 2px solid #d68910;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+            text-align: center;
+            line-height: 12px;
+            font-size: 10px;
+            color: #000;
+        }
 
         input[type="text"], input[type="password"], input[type="number"], select {
-            width: 100%; padding: 10px 12px; font-size: 13px;
-            border: 2px solid #8e44ad; border-radius: 8px; outline: none;
-            text-align: left !important; margin-bottom: 8px; background: #1a0826; color: #fff;
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 13px;
+            border: 2px solid #8e44ad;
+            border-radius: 8px;
+            outline: none;
+            text-align: left !important;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            background: #1a0826;
+            color: #fff;
+            user-select: auto;
+            -webkit-user-select: auto;
         }
-        input[type="text"]:focus, input[type="password"]:focus { border-color: #ff7518; }
+        input[type="text"]:focus, input[type="password"]:focus, select:focus { 
+            border-color: #ff7518; 
+        }
         
-        .error { min-height: 18px; font-size: 12px; font-weight: bold; color: #ff4757; margin-bottom: 6px; }
-        .btn { width: 100%; padding: 16px; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .error {
+            min-height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 6px;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
         .btn-ai { background-color: #27ae60; }
         .btn-friend { background-color: #2980b9; }
         .btn-group { background-color: #8e44ad; }
         .btn-boss { background-color: #e67e22; border: 2px solid #d35400; }
         .btn-admin { background-color: #34495e; border: 1px solid #2c3e50; font-size: 12px; padding: 10px; }
-        .btn-create, .btn-join, .btn-back, .btn-retry { width: 100%; }
+        .btn-create { background-color: #8e44ad; font-size: 14px; padding: 12px; }
+        .btn-join { background-color: #d35400; font-size: 14px; padding: 12px; }
+        .btn-back { background-color: #d35400; font-size: 15px; padding: 14px; }
+        .btn-retry { background-color: #27ae60; font-size: 15px; padding: 14px; }
 
-        .shop-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; max-height: 250px; overflow-y: auto; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; background: #3d1b52; border: 2px solid #8e44ad; border-radius: 8px; padding: 12px 15px; }
+        .shop-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #3d1b52;
+            border: 2px solid #8e44ad;
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
         .shop-item.owned { border-color: #27ae60; background: #1c3d2b; }
         .shop-item.equipped { border-color: #3498db; background: #183852; }
         .shop-info { text-align: left; }
         .shop-name { font-weight: bold; font-size: 14px; color: #ffffff; }
         .shop-desc { font-size: 11px; color: #d1d8e0; }
-        .shop-action-btn { padding: 8px 14px; font-size: 12px; font-weight: bold; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .shop-action-btn {
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
         .btn-buy { background-color: #d35400; }
         .btn-select { background-color: #2980b9; }
         .btn-equipped { background-color: #27ae60; cursor: default; }
 
-        .timer-box { font-size: 24px; font-weight: bold; color: #ff4757; margin-bottom: 15px; }
-        .room-box { background: #3d1b52; padding: 10px; border-radius: 8px; font-size: 18px; font-weight: bold; color: #ff7518; margin-bottom: 10px; letter-spacing: 3px; }
+        .timer-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 15px;
+        }
+
+        .room-box {
+            background: #3d1b52;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff7518;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
         
         .canvas-container {
-            position: relative; width: 100%; max-width: 540px; aspect-ratio: 1 / 1;
-            margin: 0 auto 12px auto; border: 3px solid #ff7518; border-radius: 12px;
-            overflow: hidden; background-color: #11051b; box-shadow: 0 0 15px rgba(255, 117, 24, 0.5);
+            position: relative;
+            width: 100%;
+            max-width: 540px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto 12px auto;
+            border: 3px solid #ff7518;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #11051b;
+            box-shadow: 0 0 15px rgba(255, 117, 24, 0.5);
         }
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
         .speed-btn {
-            position: absolute; right: 8px; bottom: 8px; background: #d35400; color: white;
-            border: 2px solid #a04000; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; z-index: 20;
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: #d35400;
+            color: white;
+            border: 2px solid #a04000;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
-        .speed-btn.active { background: #c0392b; border-color: #962d22; }
+        .speed-btn.active {
+            background: #c0392b;
+            border-color: #962d22;
+        }
 
-        .joystick-container { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; margin-bottom: 10px; }
-        .joystick-btn {
-            flex: 1; padding: 14px 0; background: #e67e22; color: white; border: 2px solid #d35400;
-            border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #a04000;
+        .joystick-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
-        .joystick-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #a04000; }
+        .joystick-btn {
+            flex: 1;
+            padding: 14px 0;
+            background: #e67e22;
+            color: white;
+            border: 2px solid #d35400;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a04000;
+            touch-action: manipulation;
+        }
+        .joystick-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #a04000;
+        }
         
-        .hp-bar { position: relative; width: 100%; height: 22px; background: #3d1b52; border: 2.5px solid #ff7518; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
-        .hp-fill { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background-color: #2980b9; transition: width 0.1s; }
+        .hp-bar {
+            position: relative;
+            width: 100%;
+            height: 22px;
+            background: #3d1b52;
+            border: 2.5px solid #ff7518;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .hp-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #2980b9;
+            transition: width 0.1s;
+        }
         .hp-fill.p2 { background-color: #c0392b; }
-        .hp-text { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; color: #ffffff; z-index: 5; text-shadow: 1px 1px 2px #000; }
+        
+        .hp-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffffff;
+            z-index: 5;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px #000;
+        }
 
         .fancy-chat-btn {
-            width: 52px; height: 52px; background: linear-gradient(135deg, #3d1b52 0%, #68268a 100%);
-            border: 2.5px solid #ff7518; border-radius: 50%; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            margin-top: 0;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #3d1b52 0%, #68268a 100%);
+            border: 2.5px solid #ff7518;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: all 0.15s ease-in-out;
+            outline: none;
         }
-        .chat-icon-svg { width: 26px; height: 26px; fill: #ff7518; }
+        .fancy-chat-btn:active {
+            transform: scale(0.92);
+        }
+        .chat-icon-svg {
+            width: 26px;
+            height: 26px;
+            fill: #ff7518;
+        }
 
         .chat-modal-box {
-            width: 100%; max-width: 380px; background: #2b113a; border: 3px solid #ff7518;
-            border-radius: 12px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); display: flex; flex-direction: column; height: 480px;
+            width: 100%;
+            max-width: 380px;
+            background: #2b113a;
+            border: 3px solid #ff7518;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            height: 480px;
         }
-        .chat-log-area { flex: 1; background: #1a0826; border: 2px solid #8e44ad; border-radius: 8px; padding: 10px; overflow-y: auto; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; text-align: left; }
-        .chat-msg-row { display: flex; flex-direction: column; max-width: 80%; }
-        .chat-msg-row.me { align-self: flex-end; align-items: flex-end; }
-        .chat-msg-row.other { align-self: flex-start; align-items: flex-start; }
-        .chat-sender { font-size: 10px; color: #a29bfe; margin-bottom: 2px; font-weight: bold; }
-        .chat-bubble { padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; word-break: break-all; }
-        .chat-msg-row.me .chat-bubble { background: #8e44ad; color: white; border-bottom-right-radius: 2px; }
-        .chat-msg-row.other .chat-bubble { background: #3d1b52; color: #ffffff; border-bottom-left-radius: 2px; }
+        .chat-log-area {
+            flex: 1;
+            background: #1a0826;
+            border: 2px solid #8e44ad;
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .chat-msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+        .chat-msg-row.me {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .chat-msg-row.other {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .chat-sender {
+            font-size: 10px;
+            color: #a29bfe;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+        .chat-bubble {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.3;
+            word-break: break-all;
+        }
+        .chat-msg-row.me .chat-bubble {
+            background: #8e44ad;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-msg-row.other .chat-bubble {
+            background: #3d1b52;
+            color: #ffffff;
+            border-bottom-left-radius: 2px;
+        }
 
-        .quick-chat-panel { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; background: #3d1b52; padding: 6px; border-radius: 8px; border: 1px solid #8e44ad; }
-        .quick-chat-btn { background: #1a0826; border: 1.5px solid #8e44ad; border-radius: 6px; padding: 5px 8px; font-size: 11px; font-weight: bold; color: #ffffff; cursor: pointer; }
+        .quick-chat-panel {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            background: #3d1b52;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #8e44ad;
+        }
+        .quick-chat-btn {
+            background: #1a0826;
+            border: 1.5px solid #8e44ad;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+            cursor: pointer;
+        }
 
-        /* 어드민 패널 UI */
+        /* 🌟 어드민 패널 및 유저 카드 UI */
         .admin-window {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 380px; background: #1e1b29; border: 2px solid #e91e63;
-            border-radius: 12px; padding: 12px; color: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 10000001;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            background: #1e1b29;
+            border: 2px solid #e91e63;
+            border-radius: 12px;
+            padding: 12px;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            z-index: 100000001;
         }
-        .admin-window.hidden { display: none !important; pointer-events: none !important; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3a354d; padding-bottom: 6px; margin-bottom: 8px; cursor: grab; }
-        .admin-title { font-size: 13px; font-weight: bold; color: #e91e63; display: flex; align-items: center; gap: 6px; }
-        .admin-body { display: flex; gap: 8px; }
-        .admin-sidebar { width: 68px; border-right: 1px solid #3a354d; display: flex; flex-direction: column; gap: 5px; padding-right: 6px; }
-        .admin-tab-btn { background: transparent; border: none; color: #8b85a1; font-size: 11px; font-weight: bold; padding: 7px 4px; border-radius: 4px; cursor: pointer; text-align: left; }
-        .admin-tab-btn.active { background: #2d2640; color: #e91e63; }
-        .admin-content { flex: 1; font-size: 11px; max-height: 320px; overflow-y: auto; padding-right: 2px; }
-        .admin-section-title { color: #ffe0b2; font-size: 11px; font-weight: bold; margin-bottom: 4px; margin-top: 6px; text-align: left; }
-        .admin-btn-row { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
-        .admin-small-btn { background: #2d2a3e; border: 1px solid #4a4463; color: #fff; border-radius: 4px; padding: 5px 6px; font-size: 10px; cursor: pointer; flex: 1; text-align: center; }
+        .admin-window.hidden {
+            display: none !important;
+            pointer-events: none !important;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3a354d;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            cursor: grab;
+        }
+        .admin-header:active {
+            cursor: grabbing;
+        }
+        .admin-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #e91e63;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+        }
+        .admin-body {
+            display: flex;
+            gap: 8px;
+        }
+        .admin-sidebar {
+            width: 68px;
+            border-right: 1px solid #3a354d;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-right: 6px;
+        }
+        .admin-tab-btn {
+            background: transparent;
+            border: none;
+            color: #8b85a1;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 7px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .admin-tab-btn.active {
+            background: #2d2640;
+            color: #e91e63;
+        }
+        .admin-content {
+            flex: 1;
+            font-size: 11px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .admin-section-title {
+            color: #ffe0b2;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            margin-top: 6px;
+            text-align: left;
+        }
+        .admin-btn-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .admin-small-btn {
+            background: #2d2a3e;
+            border: 1px solid #4a4463;
+            color: #fff;
+            border-radius: 4px;
+            padding: 5px 6px;
+            font-size: 10px;
+            cursor: pointer;
+            flex: 1;
+            min-width: 35px;
+            text-align: center;
+        }
+        .admin-small-btn.active-type {
+            background: #e91e63 !important;
+            border-color: #ff4081 !important;
+        }
+        .admin-slider-container {
+            margin-bottom: 8px;
+        }
+        .admin-slider-container input {
+            width: 100%;
+            accent-color: #e91e63;
+        }
 
-        .admin-user-card { background: #262137; border: 1px solid #3e3857; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; text-align: left; }
-        .admin-user-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .admin-user-name { font-size: 12px; font-weight: bold; color: #fff; cursor: pointer; }
-        .admin-user-status { font-size: 10px; font-weight: bold; color: #2ecc71; }
-        .admin-user-status.banned { color: #e74c3c; }
-        .admin-user-sub { font-size: 9px; color: #9c96b8; margin-bottom: 6px; }
-        .admin-time-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
-        .admin-time-row input[type="number"] { width: 36px !important; padding: 3px !important; font-size: 9px !important; margin-bottom: 0 !important; text-align: center !important; background: #1a0826 !important; border: 1px solid #4a4463 !important; color: #fff !important; border-radius: 3px !important; }
-        .admin-reason-input { width: 100% !important; padding: 4px 6px !important; font-size: 9px !important; margin-bottom: 6px !important; background: #1a0826 !important; border: 1px solid #4a4463 !important; color: #fff !important; border-radius: 4px !important; }
-        .admin-ban-btn { background: #c0392b; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; cursor: pointer; flex: 1; }
-        .admin-unban-btn { background: #27ae60; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; cursor: pointer; flex: 1; }
+        .admin-user-card {
+            background: #262137;
+            border: 1px solid #3e3857;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        .admin-user-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .admin-user-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+        }
+        .admin-user-name:hover {
+            color: #ff7518;
+            text-decoration: underline;
+        }
+        .admin-user-status {
+            font-size: 10px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .admin-user-status.banned {
+            color: #e74c3c;
+        }
+        .admin-user-sub {
+            font-size: 9px;
+            color: #9c96b8;
+            margin-bottom: 6px;
+        }
+        .admin-time-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .admin-time-row input[type="number"] {
+            width: 36px !important;
+            padding: 3px !important;
+            font-size: 9px !important;
+            margin-bottom: 0 !important;
+            text-align: center !important;
+            background: #1a0826 !important;
+            border: 1px solid #4a4463 !important;
+            color: #fff !important;
+            border-radius: 3px !important;
+        }
+        .admin-reason-input {
+            width: 100% !important;
+            padding: 4px 6px !important;
+            font-size: 9px !important;
+            margin-bottom: 6px !important;
+            background: #1a0826 !important;
+            border: 1px solid #4a4463 !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+        .admin-ban-btn {
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+        .admin-unban-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
 
         .label { font-size: 12px; font-weight: bold; text-align: left; margin-bottom: 2px; }
     </style>
@@ -332,21 +976,22 @@
 
     <div id="top-notice-banner" class="notice-banner hidden">
         <span>📢 [공지]</span>
-        <span id="notice-banner-text">공지사항</span>
+        <span id="notice-banner-text">공지사항이 들어갑니다.</span>
     </div>
 
     <div id="maintenance-screen" class="hidden">
-        <h1>🚨 점검 중입니다!</h1>
-        <p>잠시 후 다시 접속해 주세요.</p>
+        <h1>🚨 지금 점검 중입니다!</h1>
+        <p>서버 점검 및 업데이트 중입니다.<br>잠시 후 다시 접속해 주세요.</p>
         <button class="btn-maint-play" onclick="openMaintenancePassModal()">플레이 하기</button>
     </div>
 
     <div class="modal-overlay hidden" id="maintenance-pass-modal">
         <div class="modal-box" style="max-width: 300px;">
             <div class="header-row">
-                <h2>🔐 비밀번호 인증</h2>
+                <h2>🔐 개발자 / 점검 우회 인증</h2>
                 <button class="btn-close-x" onclick="closeMaintenancePassModal()">X</button>
             </div>
+            <div class="version-text">비밀번호를 입력하세요</div>
             <div class="error" id="maintenance-pass-error"></div>
             <input type="password" id="maintenance-pass-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkMaintenancePassword()">
             <button class="btn btn-ai" onclick="checkMaintenancePassword()">확인</button>
@@ -359,6 +1004,7 @@
                 <h2>🔒 관리자 인증</h2>
                 <button class="btn-close-x" onclick="closeAdminAuth()">X</button>
             </div>
+            <div class="version-text">개발자 비밀번호를 입력하세요</div>
             <div class="error" id="admin-auth-error"></div>
             <input type="password" id="admin-password-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter') checkAdminPassword()">
             <button class="btn btn-ai" onclick="checkAdminPassword()">확인</button>
@@ -371,23 +1017,27 @@
                 <h2>💬 실시간 친구 채팅</h2>
                 <button class="btn-close-x" onclick="closeChatModal()">X</button>
             </div>
+            
             <div class="chat-log-area" id="chat-log-area">
-                <div style="font-size:11px; color:#a0aec0; text-align:center; margin: auto 0;">채팅에 입장했습니다.</div>
+                <div style="font-size:11px; color:#a0aec0; text-align:center; margin: auto 0;">채팅에 입장했습니다.<br>매너 채팅을 지켜주세요!</div>
             </div>
+
             <div class="quick-chat-panel hidden" id="quick-chat-panel">
                 <button class="quick-chat-btn" onclick="selectQuickChat('안녕하세요!')">안녕하세요!</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('안녕히계세요!')">안녕히계세요!</button>
                 <button class="quick-chat-btn" onclick="selectQuickChat('굿 게임')">굿 게임</button>
                 <button class="quick-chat-btn" onclick="selectQuickChat('gg')">gg</button>
+                <button class="quick-chat-btn" onclick="selectQuickChat('쉽네요')">쉽네요</button>
             </div>
+
             <div style="display: flex; gap: 4px; align-items: center;">
                 <button class="quick-chat-btn" style="white-space:nowrap; padding:9px 8px;" onclick="toggleQuickChatPanel()">⚡ 빠른 채팅</button>
                 <input type="text" id="chat-msg-input" placeholder="메시지 입력..." style="margin-bottom:0; flex:1;" onkeyup="if(event.key==='Enter') sendChatMessage()">
-                <button class="btn-claim" style="padding:10px 14px;" onclick="sendChatMessage()">전송</button>
+                <button class="btn-claim" style="padding:10px 14px; font-size:13px;" onclick="sendChatMessage()">전송</button>
             </div>
         </div>
     </div>
 
-    <!-- 어드민 패널 -->
     <div class="admin-window hidden" id="admin-panel">
         <div class="admin-header" id="admin-header-drag">
             <div class="admin-title">⚙️ 어드민 패널 (이곳을 눌러 이동)</div>
@@ -396,29 +1046,90 @@
         <div class="admin-body">
             <div class="admin-sidebar">
                 <button class="admin-tab-btn active" onclick="switchAdminTab('main')">메인</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('char')">캐릭터</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('manage')">유저</button>
                 <button class="admin-tab-btn" onclick="switchAdminTab('mail')">우편</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('coupon')">쿠폰</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('screen')">설정</button>
             </div>
             <div class="admin-content">
                 <div id="admin-tab-main">
-                    <div class="admin-section-title">공지사항 등록</div>
-                    <input type="text" id="admin-notice-input" placeholder="공지 입력..." style="margin-bottom:4px; font-size:10px; padding:5px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    <div class="admin-section-title">공지 / 투표 공지</div>
+                    <input type="text" id="admin-notice-input" placeholder="공지사항 입력..." style="margin-bottom:4px; font-size:10px; padding:5px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
                     <div class="admin-btn-row">
                         <button class="admin-small-btn" style="background:#e67e22;" onclick="publishAdminNotice()">등록</button>
                         <button class="admin-small-btn" style="background:#c0392b;" onclick="deleteAdminNotice()">삭제</button>
                     </div>
+
+                    <div class="admin-section-title">빠른 조작</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="retryGame()">다시 시작</button>
+                        <button class="admin-small-btn" onclick="showLobby()">게임 종료</button>
+                    </div>
+
+                    <div class="admin-section-title">게임 속도</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="setAdminSpeed(0.5)">x0.5</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(1)">x1</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(2)">x2</button>
+                        <button class="admin-small-btn" onclick="setAdminSpeed(4)">x4</button>
+                    </div>
                 </div>
+
+                <div id="admin-tab-char" class="hidden">
+                    <div class="admin-section-title">플레이어 선택</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn active-type" id="char-1p-btn" onclick="switchAdminCharTarget('1p')">1P</button>
+                        <button class="admin-small-btn" id="char-2p-btn" onclick="switchAdminCharTarget('2p')">2P</button>
+                    </div>
+                    <div class="admin-section-title">체력 / 특수 조작</div>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn" onclick="adminSetHp(currentAdminCharTarget, 9999)">무적</button>
+                        <button class="admin-small-btn" onclick="adminSetHp(currentAdminCharTarget, 0)">즉사</button>
+                    </div>
+                    <div class="admin-section-title">능력치 세팅 (<span id="admin-target-label">1P</span>)</div>
+                    <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
+                        <span>체력:</span>
+                        <input type="number" id="admin-set-hp-input" value="200" style="margin-bottom:0; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    </div>
+                    <div style="display:flex; gap:4px; align-items:center; margin-bottom:6px;">
+                        <span>데미지:</span>
+                        <input type="number" id="admin-set-dmg-input" value="10" style="margin-bottom:0; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    </div>
+                    <button class="admin-small-btn" style="width:100%; background:#27ae60;" onclick="applyCustomStats()">능력치 적용</button>
+                </div>
+
                 <div id="admin-tab-manage" class="hidden">
                     <div class="admin-section-title">👥 실시간 전체 플레이어 목록</div>
                     <div id="admin-user-list-container"></div>
                 </div>
+
                 <div id="admin-tab-mail" class="hidden">
                     <div class="admin-section-title">우편함 선물 발송</div>
                     <select id="admin-gift-target-user" style="padding:4px; font-size:10px; margin-bottom:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
-                        <option value="ALL_USERS">🌐 전체 유저</option>
+                        <option value="ALL_USERS">🌐 전체 유저에게 보내기</option>
                     </select>
-                    <input type="number" id="admin-gift-amount" placeholder="코인 수량" style="margin-bottom:4px; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
-                    <button class="admin-small-btn" style="width:100%; background:#e67e22;" onclick="sendAdminGift()">발송</button>
+                    <div class="admin-btn-row">
+                        <button class="admin-small-btn active-type" id="gift-type-coin-btn" onclick="selectGiftType('coin')">코인</button>
+                        <button class="admin-small-btn" id="gift-type-trophy-btn" onclick="selectGiftType('trophy')">트로피</button>
+                    </div>
+                    <input type="number" id="admin-gift-amount" placeholder="수량 입력" style="margin-bottom:4px; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    <button class="admin-small-btn" style="width:100%; background:#e67e22;" onclick="sendAdminGift()">우편 발송</button>
+                </div>
+
+                <div id="admin-tab-coupon" class="hidden">
+                    <div class="admin-section-title">쿠폰 생성</div>
+                    <input type="text" id="coupon-code-input" placeholder="쿠폰 코드 입력" style="margin-bottom:4px; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    <input type="number" id="coupon-reward-input" placeholder="보상 코인" style="margin-bottom:4px; font-size:10px; padding:4px; background:#2d2a3e; color:#fff; border-color:#4a4463;">
+                    <button class="admin-small-btn" style="width:100%; background:#8e44ad;" onclick="alert('쿠폰이 생성되었습니다!')">쿠폰 등록</button>
+                </div>
+
+                <div id="admin-tab-screen" class="hidden">
+                    <div class="admin-section-title">패널 투명도</div>
+                    <div class="admin-slider-container">
+                        <input type="range" id="admin-opacity-slider" min="0.2" max="1" step="0.1" value="1" oninput="changeAdminOpacity(this.value)">
+                    </div>
+                    <button class="admin-small-btn" style="width:100%" onclick="resetAdminPos()">패널 위치 초기화</button>
                 </div>
             </div>
         </div>
@@ -430,11 +1141,12 @@
             <div class="version-text">릴리 볼 파이트 v1.4 (할로윈)</div>
             <div style="font-size: 12px; color: #ff7518; font-weight: bold; margin-bottom: 12px; line-height: 1.4;">
                 최대 10글자까지 입력할 수 있으며,<br>
-                <span style="color: #ff4757;">한 번 정하면 절대 변경할 수 없습니다!</span>
+                <span style="color: #ff4757;">한 번 정하면 절대 변경할 수 없습니다!</span><br>
+                <span style="font-size: 11px; color: #2ecc71;">(중복되는 이름은 쓸 수 있습니다)</span>
             </div>
             <div class="error" id="modal-error-msg"></div>
             <input type="text" id="init-username-input" placeholder="이름 입력 (최대 10글자)" maxlength="10">
-            <button class="btn btn-friend" onclick="saveInitialUsernameAndPlay()" style="margin-top:10px; font-size:18px; padding:14px;">플레이 하기</button>
+            <button class="btn btn-friend" id="btn-save-name" onclick="saveInitialUsernameAndPlay()" style="margin-top:10px; font-size:18px; padding:14px;">플레이 하기</button>
         </div>
     </div>
 
@@ -444,11 +1156,23 @@
                 <h2 id="profile-modal-title">👤 프로필 조회</h2>
                 <button class="btn-close-x" onclick="closeProfileModal()">X</button>
             </div>
+            <div class="version-text">릴리 볼 파이트 v1.4</div>
+            
             <div class="brown-info-box">
-                <div class="profile-info-row"><span>📛 이름:</span><span id="profile-modal-name">-</span></div>
-                <div class="profile-info-row"><span>🪙 보유 코인:</span><span id="profile-modal-coin">0개</span></div>
-                <div class="profile-info-row"><span>🏆 보유 트로피:</span><span id="profile-modal-trophy">0개</span></div>
+                <div class="profile-info-row">
+                    <span>📛 이름:</span>
+                    <span id="profile-modal-name" style="color: #fff;">-</span>
+                </div>
+                <div class="profile-info-row">
+                    <span>🪙 보유 코인:</span>
+                    <span id="profile-modal-coin" style="color: #f1c40f;">0개</span>
+                </div>
+                <div class="profile-info-row">
+                    <span>🏆 보유 트로피:</span>
+                    <span id="profile-modal-trophy" style="color: #3498db;">0개</span>
+                </div>
             </div>
+            
             <button class="btn btn-back" onclick="closeProfileModal()">닫기</button>
         </div>
     </div>
@@ -456,21 +1180,26 @@
     <div class="container hidden" id="lobby-screen">
         <div class="top-nav-bar">
             <button class="profile-btn" onclick="openProfileModal()">👤 프로필</button>
-            <button class="mailbox-btn" onclick="showMailbox()">📬 우편함<div class="red-dot hidden" id="mail-red-dot"></div></button>
+            <button class="mailbox-btn" onclick="showMailbox()">
+                📬 우편함
+                <div class="red-dot hidden" id="mail-red-dot"></div>
+            </button>
             <button class="ranking-nav-btn" onclick="showRankingBoard()">🏆 랭킹보드</button>
         </div>
         <h2>🎃 릴리 볼 파이트 🎃</h2>
         <div class="version-text">v1.4 할로윈 에디션</div>
+        <div class="error" id="lobby-error-msg" style="color: #ff4757; font-size: 13px; font-weight: bold; margin-bottom: 6px; min-height: 18px;"></div>
         <div class="currency-container">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count">0</span>개</div>
             <div class="myball-btn-box" onclick="showMyBallShop()">⚽ 나의 공</div>
         </div>
-        <button class="btn btn-ai" onclick="startAI()">AI 자동 매칭</button>
-        <button class="btn btn-boss" onclick="startBossMode()">😈 보스 피하기</button>
+
+        <button class="btn btn-ai" onclick="startAI()" style="margin-top: 10px;">AI 자동 매칭</button>
+        <button class="btn btn-boss" onclick="startBossMode()" style="margin-top: 6px;">😈 보스 피하기</button>
         <div style="display: flex; gap: 6px;">
-            <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2;">친구 플레이</button>
-            <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1;">👥 그룹</button>
+            <button class="btn btn-friend" onclick="showFriendMenu()" style="flex: 2; margin-top: 6px;">친구 플레이</button>
+            <button class="btn btn-group" onclick="openGroupMenu()" style="flex: 1; margin-top: 6px;">👥 그룹</button>
         </div>
         <button class="btn btn-admin" onclick="openAdminAuth()" style="margin-top: 12px;">⚙️ 어드민 패널 (F2)</button>
     </div>
@@ -480,19 +1209,20 @@
             <h2>📬 우편함 📬</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
+        
         <div class="mail-brown-box">
             <div class="mail-status-title" id="mail-status-msg">도착한 우편이 있습니다!</div>
             <div id="mail-content-area"></div>
         </div>
     </div>
 
-    <!-- 🏆 랭킹보드 (내 정보 포함) -->
     <div class="container hidden" id="ranking-screen">
         <div class="header-row">
             <h2>🏆 명예의 전당 🏆</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
-        <div class="version-text">v1.4 할로윈 에디션 (실시간 1위~100위)</div>
+        <div class="version-text">v1.4 할로윈 에디션 (실시간 순위)</div>
         
         <div class="ranking-tab-container">
             <button class="ranking-tab-btn active" id="rank-tab-trophy" onclick="switchRankingTab('trophy')">🏆 트로피 랭킹</button>
@@ -501,51 +1231,61 @@
 
         <div class="ranking-list-box" id="ranking-list-container"></div>
 
-        <!-- 하단 고정 내 순위 바 -->
-        <div class="my-ranking-bar" id="my-ranking-bar">
-            <div class="ranking-left">
-                <span class="ranking-rank" id="my-rank-text">-등</span>
-                <span class="ranking-username" id="my-rank-name">나</span>
-            </div>
-            <div class="ranking-val" id="my-rank-val">0개</div>
-        </div>
-
-        <button class="btn btn-back" onclick="showLobby()" style="background-color: #d35400;">로비로 돌아가기</button>
+        <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
     <div class="container hidden" id="myball-screen">
         <h2>⚽ 나의 공 보관함 ⚽</h2>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="currency-container" style="margin-top: 5px;">
             <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-shop">0</span>개</div>
             <div class="trophy-box">🏆 트로피:<span id="trophy-count-shop">0</span>개</div>
         </div>
+        <div class="desc">공을 선택하거나 코인으로 구매하세요!</div>
+        
         <div class="shop-list" id="shop-list-container"></div>
-        <button class="btn btn-back" onclick="showLobby()" style="background-color: #d35400;">로비로 돌아가기</button>
+
+        <button class="btn btn-back" onclick="showLobby()">로비로 돌아가기</button>
     </div>
 
     <div class="container hidden" id="friend-screen">
         <h2>👥 친구 플레이 👥</h2>
+        <div class="version-text">v1.4 할로윈 에디션</div>
+        <div class="currency-container">
+            <div class="coin-box"><span class="coin-icon">C</span> 코인:<span id="coin-count-friend">0</span>개</div>
+            <div class="trophy-box">🏆 트로피:<span id="trophy-count-friend">0</span>개</div>
+        </div>
+        <div class="desc">방을 생성하거나 번호를 입력하세요</div>
         <div class="error" id="friend-error"></div>
+        
         <div style="display: flex; gap: 5px; margin-bottom: 10px;">
             <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createRoom()">방 생성하기 (랜덤 4자리)</button>
             <button class="btn" style="margin-top:0; width:50px; background:#c0392b;" onclick="resetRoom()">X</button>
         </div>
         <div class="room-box hidden" id="room-display">----</div>
+
         <div id="join-container">
             <input type="text" id="room-input" placeholder="방 번호 4자리 입력" maxlength="4">
             <button class="btn btn-join" onclick="joinRoom()">방 번호로 시작하기</button>
         </div>
-        <button class="btn btn-back" onclick="showLobby()" style="background-color: #d35400;">뒤로 가기</button>
+
+        <button class="btn btn-back" onclick="showLobby()">뒤로 가기</button>
     </div>
 
     <div class="container hidden" id="group-screen">
         <h2>👥 그룹 대기실 👥</h2>
+        <div class="version-text">v1.4 할로윈 에디션</div>
+        <div class="desc">그룹 코드 입력</div>
         <div class="error" id="group-error"></div>
-        <button class="btn btn-create" onclick="createGroupRoom()">그룹 방 생성</button>
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button class="btn btn-create" style="margin-top:0; flex:1;" onclick="createGroupRoom()">그룹 방 생성</button>
+        </div>
         <div class="room-box hidden" id="group-room-display">----</div>
-        <input type="text" id="group-code-input" placeholder="그룹 코드 4자리 입력" maxlength="4">
-        <button class="btn btn-join" onclick="joinGroupRoom()">그룹 입장하기</button>
-        <button class="btn btn-back" onclick="showLobby()" style="background-color: #d35400;">로비로 가기</button>
+        <div id="group-join-container">
+            <input type="text" id="group-code-input" placeholder="그룹 코드 4자리 입력" maxlength="4">
+            <button class="btn btn-join" style="background:#8e44ad;" onclick="joinGroupRoom()">그룹 입장하기</button>
+        </div>
+        <button class="btn btn-back" onclick="showLobby()">로비로 가기</button>
     </div>
 
     <div class="container hidden" id="char-select-screen">
@@ -553,6 +1293,7 @@
             <h2>⚔️ 출전 준비 ⚔️</h2>
             <button class="btn-close-x" onclick="showLobby()">X</button>
         </div>
+        <div class="version-text">v1.4 할로윈 에디션</div>
         <div class="timer-box" id="timer-display">10초</div>
         <div class="desc" id="equipped-ball-desc">장착된 공으로 대결합니다!</div>
         <button class="btn btn-ai" onclick="confirmCharacterSelection()">게임 시작</button>
@@ -564,19 +1305,38 @@
             <canvas id="gameCanvas" width="540" height="540"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
+        
         <div class="joystick-container hidden" id="boss-joystick-panel">
-            <button class="joystick-btn" ontouchstart="startMoveLeft(event)" onmousedown="startMoveLeft(event)" ontouchend="stopMove()" onmouseup="stopMove()">◀ 왼쪽</button>
-            <button class="joystick-btn" ontouchstart="startMoveRight(event)" onmousedown="startMoveRight(event)" ontouchend="stopMove()" onmouseup="stopMove()">오른쪽 ▶</button>
+            <button class="joystick-btn" 
+                ontouchstart="startMoveLeft(event)" onmousedown="startMoveLeft(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">◀ 왼쪽</button>
+            <button class="joystick-btn" 
+                ontouchstart="startMoveRight(event)" onmousedown="startMoveRight(event)" 
+                ontouchend="stopMove()" onmouseup="stopMove()" ontouchcancel="stopMove()">오른쪽 ▶</button>
         </div>
+
         <div class="label" id="p1-label" style="color: #3498db;">Player 1 (블루)</div>
-        <div class="hp-bar"><div class="hp-fill" id="p1-hp"></div><div class="hp-text" id="p1-hp-text">200 / 200</div></div>
+        <div class="hp-bar">
+            <div class="hp-fill" id="p1-hp"></div>
+            <div class="hp-text" id="p1-hp-text">200 / 200</div>
+        </div>
+
         <div class="label" id="p2-label" style="color: #ff4757;">Player 2 (레드)</div>
-        <div class="hp-bar"><div class="hp-fill p2" id="p2-hp"></div><div class="hp-text" id="p2-hp-text">200 / 200</div></div>
+        <div class="hp-bar">
+            <div class="hp-fill p2" id="p2-hp"></div>
+            <div class="hp-text" id="p2-hp-text">200 / 200</div>
+        </div>
+
         <div style="display: flex; gap: 8px; margin-top: 15px; align-items: center;">
             <button class="btn btn-retry hidden" id="btn-game-retry" onclick="retryGame()" style="margin-top: 0; flex: 1;">🔄 다시 플레이</button>
-            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 2; background-color: #e74c3c;">🏠 로비로 가기</button>
+            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 2; background-color: #e74c3c; border: 2px solid #c0392b; font-size:16px; padding:14px; border-radius:10px;">🏠 로비로 가기</button>
             <button class="fancy-chat-btn" onclick="handleChatButtonClick()">
-                <svg class="chat-icon-svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>
+                <svg class="chat-icon-svg" viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
+                    <circle cx="8" cy="10" r="1.2"/>
+                    <circle cx="12" cy="10" r="1.2"/>
+                    <circle cx="16" cy="10" r="1.2"/>
+                </svg>
             </button>
         </div>
     </div>
@@ -592,16 +1352,26 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v37';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v37';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v37';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v37';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v37';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v36';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v36';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v36';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v36';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v36';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
 
         let isServerUnderMaintenance = false;
+
+        const badWords = [
+            "시발", "씨발", "시팔", "씨팔", "개새끼", "병신", "븅신", "지랄", "존나", "졸라", 
+            "미친", "미친놈", "미친년", "바보", "멍청이", "꺼져", "닥쳐", "새끼", "쌍놈", "씨블",
+            "섹스", "자지", "보지", "성교", "19금", "야동", "유방", "음란", "조까", "엿먹어", "씹", "fuck", "sex", "bitch"
+        ];
+
+        const characterImg = new Image();
+        characterImg.src = "character.jpg"; 
+
         let savedUsername = "";
         let sessionStartTime = Date.now();
         let registeredUsers = []; 
@@ -617,6 +1387,7 @@
         let isCountingDown = false;
         let countdownValue = 3;
         let countdownInterval = null;
+
         let gameOverState = null; 
         let createdCode = null;
         let remainingTime = 10;
@@ -625,18 +1396,36 @@
         
         let userCoins = 0; 
         let userTrophies = 0;
+        
         let isDoubleSpeed = false;
         let speedMultiplier = 1;
+
         let currentRankingType = 'trophy';
+
         let isBossMode = false;
         let bossTimerFrames = 0; 
         let bossObstacles = [];
         let bossTextObstacles = [];
+
         let moveDirection = 0;
+
         let projectiles = [];
         let iceFallBlocks = [];
         let fireFallBlocks = [];
         let specialAttackEntities = [];
+
+        let halloweenProps = [];
+        for(let i = 0; i < 15; i++) {
+            halloweenProps.push({
+                x: Math.random() * 540,
+                y: Math.random() * 540,
+                type: ['pumpkin', 'ghost', 'bat', 'star'][Math.floor(Math.random() * 4)],
+                speed: 0.3 + Math.random() * 0.5,
+                size: 15 + Math.random() * 15,
+                floatOffset: Math.random() * Math.PI * 2
+            });
+        }
+
         let mailClaimed = false; 
         const EXPIRY_TIME = new Date(2026, 9, 15, 21, 30, 0).getTime(); 
 
@@ -647,7 +1436,9 @@
 
         const adminPanel = document.getElementById('admin-panel');
         const adminHeaderDrag = document.getElementById('admin-header-drag');
-        let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
 
         adminHeaderDrag.addEventListener('mousedown', (e) => {
             isDragging = true;
@@ -655,14 +1446,37 @@
             dragOffsetY = e.clientY - adminPanel.offsetTop;
             adminPanel.style.transform = 'none';
         });
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             adminPanel.style.left = (e.clientX - dragOffsetX) + 'px';
             adminPanel.style.top = (e.clientY - dragOffsetY) + 'px';
         });
-        document.addEventListener('mouseup', () => { isDragging = false; });
 
-        // Firebase 실시간 유저 동기화 수신
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        adminHeaderDrag.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            let touch = e.touches[0];
+            dragOffsetX = touch.clientX - adminPanel.offsetLeft;
+            dragOffsetY = touch.clientY - adminPanel.offsetTop;
+            adminPanel.style.transform = 'none';
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            let touch = e.touches[0];
+            adminPanel.style.left = (touch.clientX - dragOffsetX) + 'px';
+            adminPanel.style.top = (touch.clientY - dragOffsetY) + 'px';
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // 🌟 실시간 데이터베이스 이벤트 수신 (다른 유저 등록 시 자동 갱신)
         db.ref('users').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -697,15 +1511,22 @@
 
         function checkMaintenanceStatus() {
             fetch('status.json?t=' + new Date().getTime())
-                .then(res => res.json())
+                .then(response => {
+                    if (!response.ok) throw new Error("status.json 파일 없음");
+                    return response.json();
+                })
                 .then(data => {
                     if (data && typeof data.maintenance === 'boolean') {
                         isServerUnderMaintenance = data.maintenance;
                         applyMaintenanceUI();
                     }
                 })
-                .catch(err => { isServerUnderMaintenance = false; applyMaintenanceUI(); });
+                .catch(err => {
+                    isServerUnderMaintenance = false;
+                    applyMaintenanceUI();
+                });
         }
+
         setInterval(checkMaintenanceStatus, 2000);
 
         function applyMaintenanceUI() {
@@ -714,8 +1535,16 @@
                 screen.classList.remove('hidden');
                 document.getElementById('name-modal').classList.add('hidden');
                 document.getElementById('lobby-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('friend-screen').classList.add('hidden');
+                document.getElementById('group-screen').classList.add('hidden');
+                document.getElementById('char-select-screen').classList.add('hidden');
+                document.getElementById('myball-screen').classList.add('hidden');
+                document.getElementById('mailbox-screen').classList.add('hidden');
+                document.getElementById('ranking-screen').classList.add('hidden');
             } else {
                 screen.classList.add('hidden');
+                
                 if (savedUsername && savedUsername.trim() !== "" && !savedUsername.startsWith("유저_")) {
                     document.getElementById('name-modal').classList.add('hidden');
                     const isAnyGameScreenActive = 
@@ -737,52 +1566,267 @@
             }
         }
 
-        function openMaintenancePassModal() { document.getElementById('maintenance-pass-modal').classList.remove('hidden'); }
-        function closeMaintenancePassModal() { document.getElementById('maintenance-pass-modal').classList.add('hidden'); }
+        function openMaintenancePassModal() {
+            document.getElementById('maintenance-pass-input').value = "";
+            document.getElementById('maintenance-pass-error').innerText = "";
+            document.getElementById('maintenance-pass-modal').classList.remove('hidden');
+        }
+
+        function closeMaintenancePassModal() {
+            document.getElementById('maintenance-pass-modal').classList.add('hidden');
+        }
+
         function checkMaintenancePassword() {
-            if (document.getElementById('maintenance-pass-input').value.trim() === MAINTENANCE_PASS) {
+            const input = document.getElementById('maintenance-pass-input').value.trim();
+            const err = document.getElementById('maintenance-pass-error');
+
+            if (input === MAINTENANCE_PASS) {
                 isBypassedByPassword = true;
                 closeMaintenancePassModal();
                 applyMaintenanceUI();
-                alert("🔓 인증 성공!");
+                alert("🔓 비밀번호 인증 성공! 게임에 접속합니다.");
             } else {
-                document.getElementById('maintenance-pass-error').innerText = "비밀번호 오류!";
+                err.innerText = "비밀번호가 올바르지 않습니다!";
             }
         }
 
         function openAdminAuth() {
             if (isAdminLoggedIn) {
                 renderAdminUserList();
+                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
                 return;
             }
+            document.getElementById('admin-password-input').value = "";
+            document.getElementById('admin-auth-error').innerText = "";
             document.getElementById('admin-auth-modal').classList.remove('hidden');
         }
-        function closeAdminAuth() { document.getElementById('admin-auth-modal').classList.add('hidden'); }
+
+        function closeAdminAuth() {
+            document.getElementById('admin-auth-modal').classList.add('hidden');
+        }
+
         function checkAdminPassword() {
-            if (document.getElementById('admin-password-input').value.trim() === ADMIN_PASSWORD) {
+            const input = document.getElementById('admin-password-input').value.trim();
+            const err = document.getElementById('admin-auth-error');
+
+            if (input === ADMIN_PASSWORD) {
                 isAdminLoggedIn = true;
                 closeAdminAuth();
+                applyMaintenanceUI(); 
                 renderAdminUserList();
+                renderAdminGiftUserSelect();
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
-                document.getElementById('admin-auth-error').innerText = "비밀번호 오류!";
+                err.innerText = "비밀번호가 올바르지 않습니다!";
             }
         }
-        function closeAdminPanel() { document.getElementById('admin-panel').classList.add('hidden'); }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        function handleChatButtonClick() {
+            if (nextGameMode !== 'friend') {
+                alert("🚫 AI 매칭 및 보스전에서는 채팅을 이용할 수 없습니다!\n(친구 플레이 전용 기능)");
+                return;
+            }
+            document.getElementById('chat-modal').classList.remove('hidden');
+        }
+
+        function closeChatModal() {
+            document.getElementById('chat-modal').classList.add('hidden');
+            document.getElementById('quick-chat-panel').classList.add('hidden');
+        }
+
+        function toggleQuickChatPanel() {
+            const panel = document.getElementById('quick-chat-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function selectQuickChat(text) {
+            document.getElementById('chat-msg-input').value = text;
+            document.getElementById('quick-chat-panel').classList.add('hidden');
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendChatMessage(savedUsername || "나", text, true);
+
+            if (conn && conn.open) {
+                conn.send({
+                    type: 'CHAT_MSG',
+                    sender: savedUsername || "친구",
+                    text: text
+                });
+            }
+
+            input.value = '';
+        }
+
+        function appendChatMessage(sender, text, isMe) {
+            const logArea = document.getElementById('chat-log-area');
+            const initMsg = logArea.querySelector('div[style*="text-align:center"]');
+            if (initMsg) initMsg.remove();
+
+            const row = document.createElement('div');
+            row.className = `chat-msg-row ${isMe ? 'me' : 'other'}`;
+            row.innerHTML = `
+                <div class="chat-sender">${sender}</div>
+                <div class="chat-bubble">${escapeHtml(text)}</div>
+            `;
+            logArea.appendChild(row);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                openAdminAuth();
+            }
+            if (isBossMode && gameStarted) {
+                if (e.key === 'ArrowLeft' || e.key === 'a') moveDirection = -1;
+                if (e.key === 'ArrowRight' || e.key === 'd') moveDirection = 1;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (isBossMode && gameStarted) {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') {
+                    moveDirection = 0;
+                }
+            }
+        });
+
+        function publishAdminNotice() {
+            const text = document.getElementById('admin-notice-input').value.trim();
+            if (!text) {
+                alert("공지사항 내용을 입력하세요!");
+                return;
+            }
+            activeNotice = text;
+            localStorage.setItem(GLOBAL_NOTICE_KEY, text);
+            updateNoticeBanner();
+            alert("상단 공지사항이 등록되었습니다!");
+        }
+
+        function deleteAdminNotice() {
+            activeNotice = "";
+            localStorage.removeItem(GLOBAL_NOTICE_KEY);
+            updateNoticeBanner();
+            document.getElementById('admin-notice-input').value = "";
+            alert("상단 공지사항이 삭제되었습니다!");
+        }
+
+        function updateNoticeBanner() {
+            const banner = document.getElementById('top-notice-banner');
+            const bannerText = document.getElementById('notice-banner-text');
+            if (activeNotice && activeNotice.trim() !== "") {
+                bannerText.innerText = activeNotice;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
 
         function switchAdminTab(tabName) {
             document.getElementById('admin-tab-main').classList.add('hidden');
+            document.getElementById('admin-tab-char').classList.add('hidden');
             document.getElementById('admin-tab-manage').classList.add('hidden');
             document.getElementById('admin-tab-mail').classList.add('hidden');
-            document.querySelectorAll('.admin-tab-btn').forEach(t => t.classList.remove('active'));
+            document.getElementById('admin-tab-coupon').classList.add('hidden');
+            document.getElementById('admin-tab-screen').classList.add('hidden');
 
-            if (tabName === 'main') { document.getElementById('admin-tab-main').classList.remove('hidden'); event.target.classList.add('active'); }
-            else if (tabName === 'manage') { document.getElementById('admin-tab-manage').classList.remove('hidden'); event.target.classList.add('active'); renderAdminUserList(); }
-            else if (tabName === 'mail') { document.getElementById('admin-tab-mail').classList.remove('hidden'); event.target.classList.add('active'); }
+            const tabs = document.querySelectorAll('.admin-tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tabName === 'main') {
+                document.getElementById('admin-tab-main').classList.remove('hidden');
+                tabs[0].classList.add('active');
+            } else if (tabName === 'char') {
+                document.getElementById('admin-tab-char').classList.remove('hidden');
+                tabs[1].classList.add('active');
+            } else if (tabName === 'manage') {
+                document.getElementById('admin-tab-manage').classList.remove('hidden');
+                tabs[2].classList.add('active');
+                renderAdminUserList();
+            } else if (tabName === 'mail') {
+                document.getElementById('admin-tab-mail').classList.remove('hidden');
+                tabs[3].classList.add('active');
+                renderAdminGiftUserSelect();
+            } else if (tabName === 'coupon') {
+                document.getElementById('admin-tab-coupon').classList.remove('hidden');
+                tabs[4].classList.add('active');
+            } else if (tabName === 'screen') {
+                document.getElementById('admin-tab-screen').classList.remove('hidden');
+                tabs[5].classList.add('active');
+            }
         }
 
-        // 🌟 어드민 패널에 유저 목록 + 밴 기능 실시간 렌더링
+        function switchAdminCharTarget(target) {
+            currentAdminCharTarget = target;
+            const btn1p = document.getElementById('char-1p-btn');
+            const btn2p = document.getElementById('char-2p-btn');
+            const label = document.getElementById('admin-target-label');
+
+            if (target === '1p') {
+                btn1p.classList.add('active-type');
+                btn2p.classList.remove('active-type');
+                label.innerText = '1P';
+                document.getElementById('admin-set-hp-input').value = p1.maxHp;
+                document.getElementById('admin-set-dmg-input').value = p1.damage;
+            } else {
+                btn2p.classList.add('active-type');
+                btn1p.classList.remove('active-type');
+                label.innerText = '2P';
+                document.getElementById('admin-set-hp-input').value = p2.maxHp;
+                document.getElementById('admin-set-dmg-input').value = p2.damage;
+            }
+        }
+
+        function applyCustomStats() {
+            let hpVal = parseInt(document.getElementById('admin-set-hp-input').value);
+            let dmgVal = parseInt(document.getElementById('admin-set-dmg-input').value);
+
+            if (isNaN(hpVal) || isNaN(dmgVal)) {
+                alert("올바른 숫자를 입력하세요.");
+                return;
+            }
+
+            if (currentAdminCharTarget === '1p') {
+                p1.maxHp = hpVal;
+                p1.hp = Math.min(p1.hp, hpVal);
+                p1.damage = dmgVal;
+            } else {
+                p2.maxHp = hpVal;
+                p2.hp = Math.min(p2.hp, hpVal);
+                p2.damage = dmgVal;
+            }
+            updateHpBars();
+            alert(`[${currentAdminCharTarget.toUpperCase()}] 체력 ${hpVal}, 데미지 ${dmgVal} 적용 완료!`);
+        }
+
+        function setAdminSpeed(mult) {
+            speedMultiplier = mult;
+            isDoubleSpeed = (mult === 2 || mult === 4);
+            const btn = document.getElementById('speed-toggle-btn');
+            if (btn) {
+                btn.innerText = `⚡ x${mult} 배속`;
+                if (mult > 1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+            alert(`게임 속도가 x${mult}로 설정되었습니다.`);
+        }
+
+        // 🌟 유저 목록 실시간 표시
         function renderAdminUserList() {
             const container = document.getElementById('admin-user-list-container');
             if (!container) return;
@@ -799,20 +1843,23 @@
 
                 let isBanned = u.banUntil && u.banUntil > Date.now();
                 let statusClass = isBanned ? "admin-user-status banned" : "admin-user-status";
-                let statusText = isBanned ? `정지됨 (${u.banReason || "사유 없음"})` : "온라인";
+                let statusText = isBanned ? `정지됨 (${u.banReason ? u.banReason : "사유 없음"})` : "온라인";
+
                 let playTimeMinutes = Math.floor((Date.now() - (u.startTime || Date.now())) / 60000);
 
                 card.innerHTML = `
                     <div class="admin-user-card-top">
-                        <span class="admin-user-name"><b>${u.name}</b></span>
+                        <span class="admin-user-name" onclick="openUserProfile('${u.name}')"><b>${u.name}</b></span>
                         <span class="${statusClass}">${statusText}</span>
                     </div>
-                    <div class="admin-user-sub">플레이 타임 ${playTimeMinutes}분 | 코인: ${u.coins || 0} | 트로피: ${u.trophies || 0}</div>
+                    <div class="admin-user-sub">플레이 타임 ${playTimeMinutes}분</div>
+                    
                     <div class="admin-time-row">
                         <input type="number" id="ban-time-${index}" value="0" min="0"> 시간
                         <input type="number" id="ban-min-${index}" value="0" min="0"> 분
                     </div>
-                    <input type="text" id="ban-reason-${index}" class="admin-reason-input" placeholder="추방 사유 입력" value="${u.banReason || ''}">
+                    <input type="text" id="ban-reason-${index}" class="admin-reason-input" placeholder="추방 사유 (선택)" value="${u.banReason || ''}">
+                    
                     <div style="display: flex; gap: 4px;">
                         <button class="admin-ban-btn" onclick="executeCustomBan(${index})">밴(추방)</button>
                         <button class="admin-unban-btn" onclick="executeUnban(${index})">밴 해제</button>
@@ -825,69 +1872,233 @@
         function executeCustomBan(index) {
             let hoursInput = parseInt(document.getElementById(`ban-time-${index}`).value) || 0;
             let minsInput = parseInt(document.getElementById(`ban-min-${index}`).value) || 0;
-            let reasonInput = document.getElementById(`ban-reason-${index}`).value.trim() || "운영자 규정 위반";
+            let reasonInput = document.getElementById(`ban-reason-${index}`).value.trim();
+            
             let totalMs = (hoursInput * 3600 + minsInput * 60) * 1000;
-            if (totalMs <= 0) totalMs = 7 * 24 * 3600 * 1000;
+
+            if (totalMs <= 0) {
+                totalMs = 7 * 24 * 3600 * 1000; // 시간 미입력 시 기본 7일 정지
+            }
 
             let targetUser = registeredUsers[index];
+            let banTime = Date.now() + totalMs;
+
             db.ref('users/' + targetUser.name.replace(/[.#$/\[\]]/g, "_")).update({
-                banUntil: Date.now() + totalMs,
+                banUntil: banTime,
                 banReason: reasonInput
             });
-            alert(`[${targetUser.name}] 님을 밴 처리했습니다.`);
+
+            alert(`[${targetUser.name}] 님이 정지되었습니다.`);
         }
 
         function executeUnban(index) {
             let targetUser = registeredUsers[index];
-            db.ref('users/' + targetUser.name.replace(/[.#$/\[\]]/g, "_")).update({ banUntil: 0, banReason: "" });
-            alert(`[${targetUser.name}] 님의 밴을 해제했습니다.`);
+            db.ref('users/' + targetUser.name.replace(/[.#$/\[\]]/g, "_")).update({
+                banUntil: 0,
+                banReason: ""
+            });
+
+            alert(`[${targetUser.name}] 님의 밴이 해제되었습니다!`);
         }
 
         function renderAdminGiftUserSelect() {
             const selectEl = document.getElementById('admin-gift-target-user');
             if (!selectEl) return;
-            selectEl.innerHTML = `<option value="ALL_USERS">🌐 전체 유저</option>`;
+            selectEl.innerHTML = '';
+
+            let allOpt = document.createElement('option');
+            allOpt.value = "ALL_USERS";
+            allOpt.innerText = "🌐 전체 유저에게 보내기";
+            selectEl.appendChild(allOpt);
+
             registeredUsers.forEach(u => {
                 let opt = document.createElement('option');
-                opt.value = u.name; opt.innerText = u.name;
+                opt.value = u.name;
+                opt.innerText = u.name;
                 selectEl.appendChild(opt);
             });
+        }
+
+        function selectGiftType(type) {
+            selectedGiftType = type;
+            const coinBtn = document.getElementById('gift-type-coin-btn');
+            const trophyBtn = document.getElementById('gift-type-trophy-btn');
+
+            if (type === 'coin') {
+                coinBtn.classList.add('active-type');
+                trophyBtn.classList.remove('active-type');
+            } else {
+                trophyBtn.classList.add('active-type');
+                coinBtn.classList.remove('active-type');
+            }
         }
 
         function sendAdminGift() {
             const targetVal = document.getElementById('admin-gift-target-user').value;
             const amountVal = parseInt(document.getElementById('admin-gift-amount').value);
-            if (isNaN(amountVal) || amountVal <= 0) { alert("올바른 수량을 입력하세요."); return; }
 
-            let newGift = { id: "gift_" + Date.now(), targetUser: targetVal, type: 'coin', amount: amountVal };
+            if (!targetVal) {
+                alert("대상을 선택하세요.");
+                return;
+            }
+            if (isNaN(amountVal) || amountVal <= 0) {
+                alert("올바른 수량을 입력하세요.");
+                return;
+            }
+
+            let typeName = selectedGiftType === 'coin' ? '코인' : '트로피';
+            let newGift = {
+                id: "gift_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+                targetUser: targetVal,
+                type: selectedGiftType,
+                amount: amountVal
+            };
+
             globalMails.push(newGift);
             localStorage.setItem(GLOBAL_GIFT_KEY, JSON.stringify(globalMails));
-            alert("우편이 발송되었습니다!");
+
+            saveData();
+            checkMailRedDot();
+            document.getElementById('admin-gift-amount').value = '';
+            alert(`[${targetVal}] 님께 ${typeName} ${amountVal}개 우편 발송 완료!`);
         }
 
-        function publishAdminNotice() {
-            activeNotice = document.getElementById('admin-notice-input').value.trim();
-            localStorage.setItem(GLOBAL_NOTICE_KEY, activeNotice);
-            updateNoticeBanner();
-            alert("공지 등록 완료!");
-        }
-        function deleteAdminNotice() {
-            activeNotice = "";
-            localStorage.removeItem(GLOBAL_NOTICE_KEY);
-            updateNoticeBanner();
-            alert("공지 삭제 완료!");
-        }
-        function updateNoticeBanner() {
-            const banner = document.getElementById('top-notice-banner');
-            if (activeNotice) {
-                document.getElementById('notice-banner-text').innerText = activeNotice;
-                banner.classList.remove('hidden');
+        function adminSetHp(target, hp) {
+            if (target === '1p') {
+                p1.hp = hp;
+                p1.maxHp = Math.max(p1.maxHp, hp);
             } else {
-                banner.classList.add('hidden');
+                p2.hp = hp;
+            }
+            updateHpBars();
+            checkGameOver();
+            alert(`[${target.toUpperCase()}] 체력이 ${hp}로 설정되었습니다.`);
+        }
+
+        function changeAdminOpacity(val) {
+            document.getElementById('admin-panel').style.opacity = val;
+        }
+
+        function resetAdminPos() {
+            const panel = document.getElementById('admin-panel');
+            panel.style.top = "50%";
+            panel.style.left = "50%";
+            panel.style.transform = "translate(-50%, -50%)";
+        }
+
+        function isMailValid() {
+            const now = new Date().getTime();
+            const hasDefaultMail = !mailClaimed && (now < EXPIRY_TIME);
+            const hasUnclaimedGlobalGifts = globalMails.some(m => 
+                (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
+                !claimedMailIds.includes(m.id)
+            );
+            return hasDefaultMail || hasUnclaimedGlobalGifts;
+        }
+
+        function checkMailRedDot() {
+            const redDot = document.getElementById('mail-red-dot');
+            if (!redDot) return;
+            if (isMailValid()) {
+                redDot.classList.remove('hidden');
+            } else {
+                redDot.classList.add('hidden');
             }
         }
 
-        // 🏆 랭킹보드 (1위~100위 + 내 순위 고정 바 포함)
+        function renderMailbox() {
+            const msgEl = document.getElementById('mail-status-msg');
+            const contentEl = document.getElementById('mail-content-area');
+            const now = new Date().getTime();
+
+            contentEl.innerHTML = '';
+            let itemCount = 0;
+
+            if (!mailClaimed && now < EXPIRY_TIME) {
+                itemCount++;
+                let itemDiv = document.createElement('div');
+                itemDiv.className = 'mail-item';
+                itemDiv.innerHTML = `
+                    <div>
+                        <div class="mail-info-title">🎁 특별 선물: 1000 코인</div>
+                        <div class="mail-info-time">유효 기간: 10월 15일 오후 9시 30분까지</div>
+                    </div>
+                    <button class="btn-claim" onclick="claimMailReward()">보상 받기</button>
+                `;
+                contentEl.appendChild(itemDiv);
+            }
+
+            const availableGifts = globalMails.filter(m => 
+                (m.targetUser === "ALL_USERS" || m.targetUser === savedUsername) && 
+                !claimedMailIds.includes(m.id)
+            );
+
+            availableGifts.forEach(gift => {
+                itemCount++;
+                let itemDiv = document.createElement('div');
+                itemDiv.className = 'mail-item';
+                let typeText = gift.type === 'coin' ? '코인' : '트로피';
+                let icon = gift.type === 'coin' ? '🪙' : '🏆';
+                let tag = gift.targetUser === "ALL_USERS" ? "[전체 선물]" : "[개별 선물]";
+
+                itemDiv.innerHTML = `
+                    <div>
+                        <div class="mail-info-title">🎁 ${tag} ${typeText} ${gift.amount}개</div>
+                        <div class="mail-info-time" style="color: #a29bfe;">유효 기간: 없음</div>
+                    </div>
+                    <button class="btn-claim" onclick="claimGlobalGift('${gift.id}')">받기 ${icon}</button>
+                `;
+                contentEl.appendChild(itemDiv);
+            });
+
+            if (itemCount > 0) {
+                msgEl.innerText = "도착한 우편이 있습니다!";
+            } else {
+                msgEl.innerText = "받을 보상이 없습니다";
+                contentEl.innerHTML = `<div style="font-size:12px; color:#d7ccc8; padding:10px 0; text-align:center;">도착한 우편이 없거나 이미 수령했습니다.</div>`;
+            }
+        }
+
+        function claimMailReward() {
+            const now = new Date().getTime();
+            if (now >= EXPIRY_TIME) {
+                alert("보상을 받을수 없습니다 (유효기간 만료)");
+                renderMailbox();
+                checkMailRedDot();
+                return;
+            }
+
+            if (!mailClaimed) {
+                mailClaimed = true;
+                userCoins += 1000;
+                updateCoinsUI();
+                saveData();
+                checkMailRedDot();
+                renderMailbox();
+                alert("🎉 1000코인을 받았습니다!");
+            }
+        }
+
+        function claimGlobalGift(giftId) {
+            let gift = globalMails.find(m => m.id === giftId);
+            if (gift && !claimedMailIds.includes(giftId)) {
+                claimedMailIds.push(giftId);
+                localStorage.setItem(CLAIMED_GIFT_KEY, JSON.stringify(claimedMailIds));
+
+                if (gift.type === 'coin') {
+                    userCoins += gift.amount;
+                } else {
+                    userTrophies += gift.amount;
+                }
+
+                updateCoinsUI();
+                saveData();
+                checkMailRedDot();
+                renderMailbox();
+                alert(`🎉 선물로 ${gift.type === 'coin' ? '코인' : '트로피'} ${gift.amount}개를 수령했습니다!`);
+            }
+        }
+
         function showRankingBoard() {
             document.getElementById('lobby-screen').classList.add('hidden');
             renderRankingList();
@@ -898,7 +2109,12 @@
             currentRankingType = type;
             document.getElementById('rank-tab-trophy').classList.remove('active');
             document.getElementById('rank-tab-coin').classList.remove('active');
-            document.getElementById(type === 'trophy' ? 'rank-tab-trophy' : 'rank-tab-coin').classList.add('active');
+
+            if (type === 'trophy') {
+                document.getElementById('rank-tab-trophy').classList.add('active');
+            } else {
+                document.getElementById('rank-tab-coin').classList.add('active');
+            }
             renderRankingList();
         }
 
@@ -916,154 +2132,689 @@
             let displayList = sorted.slice(0, 100);
 
             if (displayList.length === 0) {
-                container.innerHTML = `<div style="font-size:12px; color:#ffe0b2; text-align:center; padding:15px 0;">랭킹 데이터가 없습니다.</div>`;
-            } else {
-                displayList.forEach((user, index) => {
-                    let rank = index + 1;
-                    let rankClass = rank === 1 ? "top1" : (rank === 2 ? "top2" : (rank === 3 ? "top3" : ""));
-                    let val = currentRankingType === 'trophy' ? (user.trophies || 0) + '🏆' : (user.coins || 0) + '🪙';
-
-                    let item = document.createElement('div');
-                    item.className = 'ranking-item';
-                    item.innerHTML = `
-                        <div class="ranking-left">
-                            <span class="ranking-rank ${rankClass}">${rank}등</span>
-                            <span class="ranking-username">${user.name}</span>
-                        </div>
-                        <div class="ranking-val">${val}</div>
-                    `;
-                    container.appendChild(item);
-                });
+                container.innerHTML = `<div style="font-size:12px; color:#ffe0b2; text-align:center; padding:15px 0;">랭킹에 등록된 유저가 없습니다.</div>`;
+                return;
             }
 
-            // 내 순위 및 정보 하단 바 갱신
-            let myIndex = sorted.findIndex(u => u.name === savedUsername);
-            let myRankText = myIndex !== -1 ? `${myIndex + 1}등` : "-등";
-            let myVal = currentRankingType === 'trophy' ? userTrophies + '🏆' : userCoins + '🪙';
+            displayList.forEach((user, index) => {
+                let rank = index + 1;
+                let rankClass = "";
+                if (rank === 1) rankClass = "top1";
+                else if (rank === 2) rankClass = "top2";
+                else if (rank === 3) rankClass = "top3";
 
-            document.getElementById('my-rank-text').innerText = myRankText;
-            document.getElementById('my-rank-name').innerText = savedUsername || "나";
-            document.getElementById('my-rank-val').innerText = myVal;
+                let val = currentRankingType === 'trophy' ? (user.trophies || 0) + '🏆' : (user.coins || 0) + '🪙';
+
+                let item = document.createElement('div');
+                item.className = 'ranking-item';
+                item.innerHTML = `
+                    <div class="ranking-left">
+                        <span class="ranking-rank ${rankClass}">${rank}등</span>
+                        <button class="ranking-profile-btn" onclick="openUserProfile('${user.name}')">프로필</button>
+                        <span class="ranking-username">${user.name}</span>
+                    </div>
+                    <div class="ranking-val">${val}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openUserProfile(username) {
+            let target = registeredUsers.find(u => u.name === username);
+            if (!target) {
+                target = { name: username, coins: 0, trophies: 0 };
+            }
+
+            document.getElementById('profile-modal-title').innerText = "👤 유저 프로필";
+            document.getElementById('profile-modal-name').innerText = target.name;
+            document.getElementById('profile-modal-coin').innerText = (target.coins || 0) + "개";
+            document.getElementById('profile-modal-trophy').innerText = (target.trophies || 0) + "개";
+            document.getElementById('profile-modal').classList.remove('hidden');
         }
 
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '체력: 200, 데미지 없음', price: 0, hp: 200, damage: 0, owned: true, equipped: true },
             { id: 'mrbeast', name: '미스터 비스트 볼', desc: '미스터 비스트 이미지 공', price: 1500, hp: 300, damage: 15, owned: false, equipped: false },
-            { id: 'fire', name: '화염 볼', desc: '체력: 200, 2초마다 화염구 & 6초마다 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
-            { id: 'ice', name: '아이스 볼', desc: '체력: 200, 3초마다 얼음 & 8초마다 폭격', price: 100, hp: 200, damage: 15, owned: false, equipped: false },
-            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 250, 2.5초마다 투척 & 폭풍 낙하', price: 350, hp: 250, damage: 30, owned: false, equipped: false },
-            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 250, 어몽어스 암살 (75뎀)', price: 1000, hp: 250, damage: 20, owned: false, equipped: false }
+            { id: 'fire', name: '화염 볼', desc: '체력: 200, 2초마다 화염구 & 6초마다 거대 화염볼 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'ice', name: '아이스 볼', desc: '체력: 200, 3초마다 얼음 & 8초마다 경기장 덮치는 대형 얼음 폭격', price: 100, hp: 200, damage: 15, owned: false, equipped: false },
+            { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 250, 2.5초마다 포켓몬볼 투척 & 9초마다 50개 폭풍 낙하', price: 350, hp: 250, damage: 30, owned: false, equipped: false },
+            { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 250, 2.5초마다 쉿 텍스트 & 8초마다 어몽어스 암살 (75뎀)', price: 1000, hp: 250, damage: 20, owned: false, equipped: false },
+            { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 250, 8초마다 쓱싹쓱싹 행주 & 미용티슈 소환 폭발 (100뎀)', price: 3000, hp: 250, damage: 0, owned: false, equipped: false }
         ];
 
         function saveData() {
-            const gameData = { coins: userCoins, trophies: userTrophies, username: savedUsername, balls: ballsData, mailClaimed: mailClaimed };
+            const gameData = {
+                coins: userCoins,
+                trophies: userTrophies,
+                username: savedUsername,
+                sessionStartTime: sessionStartTime,
+                balls: ballsData,
+                mailClaimed: mailClaimed
+            };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
             syncGlobalUsers();
         }
 
         function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
+            let hasRealUsername = false;
+
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     if (parsed.coins !== undefined) userCoins = parsed.coins;
                     if (parsed.trophies !== undefined) userTrophies = parsed.trophies;
-                    if (parsed.username) savedUsername = parsed.username;
-                } catch(e){}
+                    if (parsed.sessionStartTime !== undefined) sessionStartTime = parsed.sessionStartTime;
+                    if (parsed.username !== undefined && parsed.username.trim() !== "" && !parsed.username.startsWith("유저_")) {
+                        savedUsername = parsed.username;
+                        hasRealUsername = true;
+                    }
+                    if (parsed.mailClaimed !== undefined) mailClaimed = parsed.mailClaimed;
+                    if (parsed.balls !== undefined && Array.isArray(parsed.balls)) {
+                        parsed.balls.forEach(savedBall => {
+                            let match = ballsData.find(b => b.id === savedBall.id);
+                            if (match) {
+                                match.owned = savedBall.owned;
+                                match.equipped = savedBall.equipped;
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("데이터 로드 실패:", e);
+                }
             }
 
-            if (!savedUsername || savedUsername.startsWith("유저_")) {
+            const savedGlobalGifts = localStorage.getItem(GLOBAL_GIFT_KEY);
+            if (savedGlobalGifts) {
+                try { globalMails = JSON.parse(savedGlobalGifts); } catch(e) {}
+            }
+
+            const savedClaimedIds = localStorage.getItem(CLAIMED_GIFT_KEY);
+            if (savedClaimedIds) {
+                try { claimedMailIds = JSON.parse(savedClaimedIds); } catch(e) {}
+            }
+
+            const savedNotice = localStorage.getItem(GLOBAL_NOTICE_KEY);
+            if (savedNotice) {
+                activeNotice = savedNotice;
+                updateNoticeBanner();
+            }
+
+            checkMaintenanceStatus();
+
+            if (!hasRealUsername) {
                 document.getElementById('name-modal').classList.remove('hidden');
                 document.getElementById('lobby-screen').classList.add('hidden');
             } else {
                 syncGlobalUsers();
-                document.getElementById('name-modal').classList.add('hidden');
-                document.getElementById('lobby-screen').classList.remove('hidden');
+                if (!checkUserBanStatus(savedUsername)) {
+                    document.getElementById('name-modal').classList.add('hidden');
+                    document.getElementById('lobby-screen').classList.remove('hidden');
+                }
             }
+
+            checkMailRedDot();
             updateCoinsUI();
         }
 
-        // 🌟 플레이 하기 버튼 클릭 시 즉시 유저 등록 및 Firebase 동기화
+        function checkUserBanStatus(name) {
+            if (!name) return false;
+            let found = registeredUsers.find(u => u.name === name);
+            if (found && found.banUntil && found.banUntil > Date.now()) {
+                alert(`정지된 계정입니다.\n사유: ${found.banReason || "없음"}`);
+                return true;
+            }
+            return false;
+        }
+
         function saveInitialUsernameAndPlay() {
             const input = document.getElementById('init-username-input');
             const err = document.getElementById('modal-error-msg');
             const val = input.value.trim();
 
-            if (!val) { err.innerText = "이름을 입력해주세요!"; return; }
-            if (val.length > 10) { err.innerText = "10글자 이내로 입력하세요."; return; }
+            if (!val) {
+                err.innerText = "이름을 입력해주세요!";
+                return;
+            }
+            if (val.length > 10) {
+                err.innerText = "10글자가 넘었습니다.";
+                return;
+            }
+
+            const isBadWord = badWords.some(word => val.toLowerCase().includes(word.toLowerCase()));
+            if (isBadWord) {
+                err.innerText = "이 이름은 사용할 수 없습니다.";
+                return;
+            }
 
             savedUsername = val;
             sessionStartTime = Date.now();
             
-            // Firebase에 즉시 등록
             syncGlobalUsers();
             saveData();
 
             document.getElementById('name-modal').classList.add('hidden');
             document.getElementById('lobby-screen').classList.remove('hidden');
+            checkMailRedDot();
         }
 
         function openProfileModal() {
-            document.getElementById('profile-modal-name').innerText = savedUsername || "-";
+            document.getElementById('profile-modal-title').innerText = "👤 내 프로필";
+            document.getElementById('profile-modal-name').innerText = savedUsername || "미설정";
             document.getElementById('profile-modal-coin').innerText = userCoins + "개";
             document.getElementById('profile-modal-trophy').innerText = userTrophies + "개";
             document.getElementById('profile-modal').classList.remove('hidden');
         }
-        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
 
-        let p1 = { x: 130, y: 270, radius: 36, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200, type: 'standard', damage: 0, freezeTimer: 0 };
-        let p2 = { x: 410, y: 270, radius: 36, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200, type: 'standard', damage: 0, freezeTimer: 0 };
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        let p1 = { 
+            x: 130, y: 270, radius: 36, color: '#2980b9', vx: 2.0, vy: 2.0, hp: 200, maxHp: 200,
+            type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
+        };
+        let p2 = { 
+            x: 410, y: 270, radius: 36, color: '#c0392b', vx: -2.0, vy: -2.0, hp: 200, maxHp: 200,
+            type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
+        };
 
         function updateCoinsUI() {
             document.getElementById('coin-count').innerText = userCoins;
+            document.getElementById('coin-count-friend').innerText = userCoins;
+            document.getElementById('coin-count-shop').innerText = userCoins;
             document.getElementById('trophy-count').innerText = userTrophies;
+            document.getElementById('trophy-count-friend').innerText = userTrophies;
+            document.getElementById('trophy-count-shop').innerText = userTrophies;
         }
 
-        function startAI() { isBossMode = false; nextGameMode = 'ai'; showCharacterSelect(); }
-        function startBossMode() { isBossMode = true; nextGameMode = 'boss'; showCharacterSelect(); }
+        function renderShop() {
+            const listContainer = document.getElementById('shop-list-container');
+            listContainer.innerHTML = '';
+
+            ballsData.forEach(ball => {
+                let itemDiv = document.createElement('div');
+                itemDiv.className = 'shop-item';
+                if (ball.equipped) itemDiv.classList.add('equipped');
+                else if (ball.owned) itemDiv.classList.add('owned');
+
+                let infoDiv = document.createElement('div');
+                infoDiv.className = 'shop-info';
+                infoDiv.innerHTML = `<div class="shop-name">${ball.name}</div><div class="shop-desc">${ball.desc}</div>`;
+                
+                let btn = document.createElement('button');
+                btn.className = 'shop-action-btn';
+
+                if (ball.equipped) {
+                    btn.className += ' btn-equipped';
+                    btn.innerText = '장착 중';
+                } else if (ball.owned) {
+                    btn.className += ' btn-select';
+                    btn.innerText = '선택하기';
+                    btn.onclick = () => equipBall(ball.id);
+                } else {
+                    btn.className += ' btn-buy';
+                    btn.innerText = `${ball.price} 코인 구매`;
+                    btn.onclick = () => buyBall(ball.id);
+                }
+
+                itemDiv.appendChild(infoDiv);
+                itemDiv.appendChild(btn);
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        function buyBall(id) {
+            let ball = ballsData.find(b => b.id === id);
+            if (userCoins >= ball.price) {
+                userCoins -= ball.price;
+                ball.owned = true;
+                equipBall(id);
+                updateCoinsUI();
+                renderShop();
+                saveData();
+                alert(`${ball.name} 구매 완료!`);
+            } else {
+                alert(`코인이 부족합니다! (필요 코인: ${ball.price}개)`);
+            }
+        }
+
+        function equipBall(id) {
+            ballsData.forEach(b => b.equipped = (b.id === id));
+            renderShop();
+            saveData();
+        }
+
+        function getEquippedBall() {
+            return ballsData.find(b => b.equipped) || ballsData[0];
+        }
+
+        function checkUserHasName() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) {
+                alert("현재 서버 점검 중이므로 게임을 플레이할 수 없습니다.");
+                return false;
+            }
+            if (!savedUsername || savedUsername.trim() === "" || savedUsername.startsWith("유저_")) {
+                document.getElementById('name-modal').classList.remove('hidden');
+                return false;
+            }
+            if (checkUserBanStatus(savedUsername)) {
+                return false;
+            }
+            return true;
+        }
+
+        function startAI() {
+            if (!checkUserHasName()) return;
+            isBossMode = false;
+            nextGameMode = 'ai';
+            showCharacterSelect();
+        }
+
+        function startBossMode() {
+            if (!checkUserHasName()) return;
+            isBossMode = true;
+            nextGameMode = 'boss';
+            showCharacterSelect();
+        }
+
+        function openGroupMenu() {
+            if (!checkUserHasName()) return;
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.remove('hidden');
+        }
+
+        function createGroupRoom() {
+            let code = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('group-room-display').innerText = "그룹 코드: " + code;
+            document.getElementById('group-room-display').classList.remove('hidden');
+            document.getElementById('group-error').style.color = "#27ae60";
+            document.getElementById('group-error').innerText = "그룹 대기실이 생성되었습니다! 친구를 초대하세요.";
+        }
+
+        function joinGroupRoom() {
+            let code = document.getElementById('group-code-input').value.trim();
+            if (code.length !== 4 || isNaN(code)) {
+                document.getElementById('group-error').style.color = "#ff4757";
+                document.getElementById('group-error').innerText = "올바른 4자리 코드를 입력해주세요!";
+                return;
+            }
+            document.getElementById('group-error').style.color = "#27ae60";
+            document.getElementById('group-error').innerText = `[${code}] 그룹에 참가했습니다! 대기 중...`;
+        }
+
+        function joinRoomMatch() {
+            if (!checkUserHasName()) return;
+
+            const code = document.getElementById('room-input').value.trim();
+            const err = document.getElementById('friend-error');
+
+            if (createdCode && code === createdCode) {
+                err.innerText = "자신과 싸울수 없습니다";
+                return;
+            }
+
+            if (code.length !== 4 || isNaN(code)) {
+                err.innerText = "방 번호 4자리를 정확히 입력하세요";
+                return;
+            }
+
+            err.innerText = "친구 방에 연결 중입니다...";
+
+            if (peer) peer.destroy();
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                const targetPeerId = 'lily-ball-room-' + code;
+                conn = peer.connect(targetPeerId);
+                isHost = false;
+
+                conn.on('open', () => {
+                    err.innerText = "";
+                    isBossMode = false;
+                    nextGameMode = 'friend';
+                    conn.send({
+                        type: 'JOIN_INFO',
+                        name: savedUsername,
+                        ball: getEquippedBall()
+                    });
+                    showCharacterSelect();
+                });
+
+                conn.on('data', handleNetworkData);
+                conn.on('error', (e) => {
+                    err.innerText = "방을 찾을 수 없습니다! 방 번호를 확인하세요.";
+                });
+            });
+
+            peer.on('error', (e) => {
+                err.innerText = "네트워크 연결 실패. 다시 시도해주세요.";
+            });
+        }
+
+        function createRoom() {
+            if (!checkUserHasName()) return;
+
+            const err = document.getElementById('friend-error');
+            createdCode = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            const box = document.getElementById('room-display');
+            box.innerText = "방 번호: " + createdCode;
+            box.classList.remove('hidden');
+
+            document.getElementById('join-container').classList.add('hidden');
+            err.style.color = "#27ae60";
+            err.innerText = "친구의 접속을 기다리는 중입니다...";
+
+            if (peer) peer.destroy();
+            peer = new Peer('lily-ball-room-' + createdCode);
+            isHost = true;
+
+            peer.on('open', (id) => {});
+
+            peer.on('connection', (c) => {
+                conn = c;
+                conn.on('open', () => {
+                    err.innerText = "친구가 접속했습니다!";
+                    isBossMode = false;
+                    nextGameMode = 'friend';
+                    showCharacterSelect();
+                });
+                conn.on('data', handleNetworkData);
+            });
+
+            peer.on('error', (e) => {
+                err.style.color = "#ff4757";
+                err.innerText = "방 생성 오류. 다시 '방 생성하기'를 눌러주세요.";
+            });
+        }
+
+        function handleNetworkData(data) {
+            if (data.type === 'JOIN_INFO') {
+                friendName = data.name;
+            } else if (data.type === 'GAME_SYNC') {
+                if (!isHost) {
+                    p1.x = data.p1.x; p1.y = data.p1.y; p1.hp = data.p1.hp;
+                    p2.x = data.p2.x; p2.y = data.p2.y; p2.hp = data.p2.hp;
+                    gameOverState = data.gameOverState;
+                    updateHpBars();
+                }
+            } else if (data.type === 'SPEED_TOGGLE') {
+                isDoubleSpeed = data.isDoubleSpeed;
+                speedMultiplier = isDoubleSpeed ? 2 : 1;
+                const btn = document.getElementById('speed-toggle-btn');
+                btn.innerText = isDoubleSpeed ? "⚡ 2X 온 (ON)" : "⚡ 2X 배속";
+                if (isDoubleSpeed) btn.classList.add('active');
+                else btn.classList.remove('active');
+            } else if (data.type === 'RETRY_GAME') {
+                startCountdownAndGame();
+            } else if (data.type === 'CHAT_MSG') {
+                appendChatMessage(data.sender, data.text, false);
+            }
+        }
 
         function showCharacterSelect() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
+            document.getElementById('myball-screen').classList.add('hidden');
+            document.getElementById('mailbox-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
             document.getElementById('char-select-screen').classList.remove('hidden');
+
+            let equipped = getEquippedBall();
+            document.getElementById('equipped-ball-desc').innerText = `현재 장착 공: [ ${equipped.name} ]`;
+
             remainingTime = 10;
             document.getElementById('timer-display').innerText = remainingTime + "초";
+            
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 remainingTime--;
                 document.getElementById('timer-display').innerText = remainingTime + "초";
-                if (remainingTime <= 0) { clearInterval(timerInterval); confirmCharacterSelection(); }
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    confirmCharacterSelection();
+                }
             }, 1000);
         }
 
         function confirmCharacterSelection() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('char-select-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+
+            let equipped = getEquippedBall();
+            document.getElementById('p1-label').innerText = `${savedUsername} (${equipped.name}) (블루)`;
+
+            if (isBossMode) {
+                document.getElementById('p2-label').innerText = "😈 L 보스 (체력: 750)";
+                document.getElementById('boss-joystick-panel').classList.remove('hidden');
+                document.getElementById('game-event-date').classList.remove('hidden');
+            } else {
+                document.getElementById('boss-joystick-panel').classList.add('hidden');
+                document.getElementById('game-event-date').classList.add('hidden');
+                if (nextGameMode === 'ai') {
+                    document.getElementById('p2-label').innerText = "AI 봇 (기본 볼) (레드)";
+                } else {
+                    document.getElementById('p2-label').innerText = `${friendName} (기본 볼) (레드)`;
+                }
+            }
+
             startCountdownAndGame();
         }
 
         function startCountdownAndGame() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             gameStarted = false;
             gameOverState = null;
             document.getElementById('btn-game-retry').classList.add('hidden');
             resetGameState();
+
             isCountingDown = true;
             countdownValue = 3;
+
             if (countdownInterval) clearInterval(countdownInterval);
             countdownInterval = setInterval(() => {
                 countdownValue--;
-                if (countdownValue <= 0) { clearInterval(countdownInterval); isCountingDown = false; gameStarted = true; }
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    isCountingDown = false;
+                    gameStarted = true;
+                }
             }, 1000);
         }
 
+        function startMoveLeft(e) {
+            e.preventDefault();
+            if (!gameStarted || !isBossMode) return;
+            moveDirection = -1;
+        }
+
+        function startMoveRight(e) {
+            e.preventDefault();
+            if (!gameStarted || !isBossMode) return;
+            moveDirection = 1;
+        }
+
+        function stopMove() {
+            moveDirection = 0;
+        }
+
+        function retryGame() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
+            if (nextGameMode === 'friend' && conn && conn.open) {
+                conn.send({ type: 'RETRY_GAME' });
+            }
+            startCountdownAndGame();
+        }
+
+        function toggleSpeed() {
+            if (!gameStarted) return;
+            if (nextGameMode === 'friend') {
+                const confirmChoice = confirm("⚡ 친구에게 2배속 요청이 들어왔습니다.\n승인하시겠습니까?");
+                if (!confirmChoice) {
+                    alert("2배속 요청이 거절되었습니다.");
+                    return;
+                }
+            }
+
+            isDoubleSpeed = !isDoubleSpeed;
+            speedMultiplier = isDoubleSpeed ? 2 : 1;
+            const btn = document.getElementById('speed-toggle-btn');
+
+            if (isDoubleSpeed) {
+                btn.innerText = "⚡ 2X 온 (ON)";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "⚡ 2X 배속";
+                btn.classList.remove('active');
+            }
+
+            if (conn && conn.open) {
+                conn.send({ type: 'SPEED_TOGGLE', isDoubleSpeed: isDoubleSpeed });
+            }
+        }
+
+        function showFriendMenu() {
+            if (!checkUserHasName()) return;
+            resetRoom();
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.remove('hidden');
+        }
+
+        function showMyBallShop() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
+            document.getElementById('lobby-screen').classList.add('hidden');
+            renderShop();
+            document.getElementById('myball-screen').classList.remove('hidden');
+        }
+
+        function showMailbox() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            renderMailbox();
+            document.getElementById('mailbox-screen').classList.remove('hidden');
+        }
+
+        function showLobby() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            gameStarted = false;
+            isCountingDown = false;
+            gameOverState = null;
+
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+            createdCode = null;
+
+            resetGameState();
+            updateCoinsUI();
+            checkMailRedDot();
+            closeChatModal();
+
+            document.getElementById('btn-game-retry').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('friend-screen').classList.add('hidden');
+            document.getElementById('group-screen').classList.add('hidden');
+            document.getElementById('char-select-screen').classList.add('hidden');
+            document.getElementById('myball-screen').classList.add('hidden');
+            document.getElementById('mailbox-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
+            document.getElementById('profile-modal').classList.add('hidden');
+            
+            if (!isServerUnderMaintenance || isAdminLoggedIn || isBypassedByPassword) {
+                document.getElementById('lobby-screen').classList.remove('hidden');
+            } else {
+                applyMaintenanceUI();
+            }
+        }
+
+        function resetRoom() {
+            createdCode = null;
+            if (peer) peer.destroy();
+            document.getElementById('room-display').classList.add('hidden');
+            document.getElementById('join-container').classList.remove('hidden');
+            document.getElementById('room-input').value = "";
+            const err = document.getElementById('friend-error');
+            err.style.color = "#ff4757";
+            err.innerText = "";
+        }
+
+        function joinRoom() {
+            joinRoomMatch();
+        }
+
+        function getRandomVelocity() {
+            let angle = Math.random() * Math.PI * 2;
+            let speed = 2.0 + Math.random() * 1.0;
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
+            if (Math.abs(vx) < 1.0) vx = vx > 0 ? 1.5 : -1.5;
+            if (Math.abs(vy) < 1.0) vy = vy > 0 ? 1.5 : -1.5;
+            return { vx, vy };
+        }
+
         function resetGameState() {
-            p1.x = 130; p1.y = 270; p1.hp = 200; p1.maxHp = 200;
+            let equipped = getEquippedBall();
+
+            p1.type = equipped.id;
+            p1.maxHp = equipped.hp;
+            p1.hp = equipped.hp;
+            p1.damage = equipped.damage;
+            p1.radius = isBossMode ? 20 : 36;
+            p1.x = 130; 
+            p1.y = 270;
+            let v1 = getRandomVelocity();
+            p1.vx = isBossMode ? 0 : v1.vx; 
+            p1.vy = isBossMode ? 0 : v1.vy;
+            p1.lastSkillTime = Date.now();
+            p1.lastProjTime = Date.now();
+            p1.freezeTimer = 0;
+            moveDirection = 0;
+
             if (isBossMode) {
-                p1.x = 270; p1.y = 470;
-                p2.type = 'boss'; p2.maxHp = 750; p2.hp = 750; p2.x = 270; p2.y = 75;
+                p1.x = 270;
+                p1.y = 470;
+                p2.type = 'boss';
+                p2.maxHp = 750;
+                p2.hp = 750;
+                p2.damage = 0;
+                p2.x = 270; p2.y = 75;
+                p2.vx = 0; p2.vy = 0;
+                p2.radius = 45;
                 bossTimerFrames = 0;
             } else {
-                p2.hp = 200; p2.maxHp = 200; p2.x = 410; p2.y = 270;
+                p2.type = 'standard';
+                p2.maxHp = 200;
+                p2.hp = 200;
+                p2.damage = 0;
+                p2.x = 410; 
+                p2.y = 270; 
+                p2.radius = 36;
+                let v2 = getRandomVelocity();
+                p2.vx = v2.vx; p2.vy = v2.vy;
+            }
+            
+            p2.freezeTimer = 0;
+            projectiles = [];
+            iceFallBlocks = [];
+            fireFallBlocks = [];
+            bossObstacles = [];
+            bossTextObstacles = [];
+            specialAttackEntities = [];
+            
+            isDoubleSpeed = false;
+            speedMultiplier = 1;
+            const btn = document.getElementById('speed-toggle-btn');
+            if (btn) {
+                btn.innerText = "⚡ 2X 배속";
+                btn.classList.remove('active');
             }
             updateHpBars();
         }
@@ -1071,34 +2822,281 @@
         function checkGameOver() {
             if (p1.hp <= 0 || p2.hp <= 0) {
                 gameStarted = false;
+
                 if (p1.hp > 0 && p2.hp <= 0) {
                     gameOverState = 'win';
-                    if (isBossMode) userCoins += 1000;
-                    else { userCoins += 1; userTrophies += 1; }
+                    if (isBossMode) {
+                        userCoins += 1000; 
+                    } else {
+                        userCoins += 1;
+                        userTrophies += 1;
+                    }
                     updateCoinsUI();
                     saveData();
-                } else {
+                } else if (p1.hp <= 0 && p2.hp > 0) {
                     gameOverState = 'lose';
+                } else {
+                    gameOverState = 'draw';
                 }
                 document.getElementById('btn-game-retry').classList.remove('hidden');
             }
         }
 
         function update() {
+            if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
+            if (nextGameMode === 'friend' && !isHost) return;
+
             if (!isBossMode) {
-                p1.x += p1.vx; p1.y += p1.vy;
-                if (p1.x - p1.radius < 0 || p1.x + p1.radius > canvas.width) p1.vx *= -1;
-                if (p1.y - p1.radius < 0 || p1.y + p1.radius > canvas.height) p1.vy *= -1;
+                let now = Date.now();
 
-                p2.x += p2.vx; p2.y += p2.vy;
-                if (p2.x - p2.radius < 0 || p2.x + p2.radius > canvas.width) p2.vx *= -1;
-                if (p2.y - p2.radius < 0 || p2.y + p2.radius > canvas.height) p2.vy *= -1;
+                if (p1.type === 'fire' && now - p1.lastProjTime > 2000) {
+                    p1.lastProjTime = now;
+                    projectiles.push({ type: 'fireball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 0.7, damage: 15, target: p2 });
+                } else if (p1.type === 'ice' && now - p1.lastProjTime > 3000) {
+                    p1.lastProjTime = now;
+                    projectiles.push({ type: 'iceball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius, damage: 15, target: p2 });
+                } else if (p1.type === 'pokemon' && now - p1.lastProjTime > 2500) {
+                    p1.lastProjTime = now;
+                    projectiles.push({ type: 'pokeball', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.04, vy: (p2.y - p1.y)*0.04, radius: 14, damage: 30, target: p2 });
+                } else if (p1.type === 'dongryong' && now - p1.lastProjTime > 2500) {
+                    p1.lastProjTime = now;
+                    specialAttackEntities.push({ type: 'shh_text', x: p1.x, y: p1.y, vx: (p2.x - p1.x)*0.03, vy: (p2.y - p1.y)*0.03, radius: p1.radius * 2, damage: 20, target: p2 });
+                }
 
-                let dx = p2.x - p1.x, dy = p2.y - p1.y;
-                if (Math.sqrt(dx*dx + dy*dy) < p1.radius + p2.radius) {
-                    p1.hp = Math.max(0, p1.hp - 10);
-                    p2.hp = Math.max(0, p2.hp - 10);
+                let skillInterval = 8000;
+                if (p1.type === 'fire') skillInterval = 6000;
+                else if (p1.type === 'ice') skillInterval = 8000;
+                else if (p1.type === 'pokemon') skillInterval = 9000;
+                else if (p1.type === 'dongryong') skillInterval = 8000;
+                else if (p1.type === 'sangsampany') skillInterval = 8000;
+
+                if (now - p1.lastSkillTime > skillInterval) {
+                    p1.lastSkillTime = now;
+
+                    if (p1.type === 'fire') {
+                        let hugeR = p1.radius * 4;
+                        fireFallBlocks.push({ x: canvas.width * 0.25, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                        fireFallBlocks.push({ x: canvas.width * 0.50, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                        fireFallBlocks.push({ x: canvas.width * 0.75, y: -100, radius: hugeR, speed: 3, damage: 20 });
+                    } 
+                    else if (p1.type === 'ice') {
+                        let hugeIceR = 55;
+                        iceFallBlocks.push({ x: 80, y: -80, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 200, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 340, y: -80, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                        iceFallBlocks.push({ x: 460, y: -120, radius: hugeIceR, speed: 3, damage: 20, freeze: true });
+                    } 
+                    else if (p1.type === 'pokemon') {
+                        for(let i=0; i<55; i++) {
+                            specialAttackEntities.push({
+                                type: 'pokeball_storm',
+                                x: Math.random() * canvas.width,
+                                y: -10 - Math.random() * 400,
+                                speed: (4 + Math.random() * 5) * speedMultiplier,
+                                radius: 10,
+                                damage: 2,
+                                targetPlayer: p2
+                            });
+                        }
+                    } 
+                    else if (p1.type === 'dongryong') {
+                        specialAttackEntities.push({
+                            type: 'amongus_assassinate',
+                            x: p2.x, y: p2.y - 80,
+                            targetPlayer: p2,
+                            damage: 75,
+                            timer: 40
+                        });
+                    } 
+                    else if (p1.type === 'sangsampany') {
+                        specialAttackEntities.push({
+                            type: 'sangsampany_combo',
+                            targetPlayer: p2,
+                            timer: 60
+                        });
+                    }
+                }
+
+                if (p1.freezeTimer > 0) {
+                    p1.freezeTimer -= speedMultiplier;
+                } else {
+                    p1.x += p1.vx * speedMultiplier; 
+                    p1.y += p1.vy * speedMultiplier;
+                    if (p1.x - p1.radius < 0) { p1.x = p1.radius + 2; p1.vx *= -1; }
+                    if (p1.x + p1.radius > canvas.width) { p1.x = canvas.width - p1.radius - 2; p1.vx *= -1; }
+                    if (p1.y - p1.radius < 0) { p1.y = p1.radius + 2; p1.vy *= -1; }
+                    if (p1.y + p1.radius > canvas.height) { p1.y = canvas.height - p1.radius - 2; p1.vy *= -1; }
+                }
+
+                if (p2.freezeTimer > 0) {
+                    p2.freezeTimer -= speedMultiplier;
+                } else {
+                    p2.x += p2.vx * speedMultiplier; 
+                    p2.y += p2.vy * speedMultiplier;
+                    if (p2.x - p2.radius < 0) { p2.x = p2.radius + 2; p2.vx *= -1; }
+                    if (p2.x + p2.radius > canvas.width) { p2.x = canvas.width - p2.radius - 2; p2.vx *= -1; }
+                    if (p2.y - p2.radius < 0) { p2.y = p2.radius + 2; p2.vy *= -1; }
+                    if (p2.y + p2.radius > canvas.height) { p2.y = canvas.height - p2.radius - 2; p2.vy *= -1; }
+                }
+
+                for (let i = specialAttackEntities.length - 1; i >= 0; i--) {
+                    let se = specialAttackEntities[i];
+                    if (se.type === 'pokeball_storm') {
+                        se.y += se.speed;
+                        let dx = se.x - se.targetPlayer.x;
+                        let dy = se.y - se.targetPlayer.y;
+                        if (Math.sqrt(dx*dx + dy*dy) < se.radius + se.targetPlayer.radius) {
+                            se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - se.damage);
+                            specialAttackEntities.splice(i, 1);
+                            updateHpBars();
+                            checkGameOver();
+                            continue;
+                        }
+                        if (se.y > canvas.height + 20) specialAttackEntities.splice(i, 1);
+                    } 
+                    else if (se.type === 'amongus_assassinate' || se.type === 'sangsampany_combo') {
+                        se.timer -= speedMultiplier;
+                        if (se.timer <= 0) {
+                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : 190;
+                            se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - hitDmg);
+                            specialAttackEntities.splice(i, 1);
+                            updateHpBars();
+                            checkGameOver();
+                        }
+                    }
+                }
+
+                for (let i = fireFallBlocks.length - 1; i >= 0; i--) {
+                    let fb = fireFallBlocks[i];
+                    fb.y += fb.speed * speedMultiplier;
+                    let dx = fb.x - p2.x;
+                    let dy = fb.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < fb.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - fb.damage);
+                        fireFallBlocks.splice(i, 1);
+                        updateHpBars();
+                        checkGameOver();
+                        continue;
+                    }
+                    if (fb.y > canvas.height + 120) fireFallBlocks.splice(i, 1);
+                }
+
+                for (let i = iceFallBlocks.length - 1; i >= 0; i--) {
+                    let ib = iceFallBlocks[i];
+                    ib.y += ib.speed * speedMultiplier;
+                    let dx = ib.x - p2.x;
+                    let dy = ib.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < ib.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - ib.damage);
+                        if (ib.freeze) p2.freezeTimer = 60;
+                        iceFallBlocks.splice(i, 1);
+                        updateHpBars();
+                        checkGameOver();
+                        continue;
+                    }
+                    if (ib.y > canvas.height + 120) iceFallBlocks.splice(i, 1);
+                }
+
+                for (let i = projectiles.length - 1; i >= 0; i--) {
+                    let pr = projectiles[i];
+                    pr.x += pr.vx * speedMultiplier;
+                    pr.y += pr.vy * speedMultiplier;
+                    let dx = pr.x - p2.x;
+                    let dy = pr.y - p2.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < pr.radius + p2.radius) {
+                        p2.hp = Math.max(0, p2.hp - pr.damage);
+                        if (pr.type === 'iceball') p2.freezeTimer = 30;
+                        projectiles.splice(i, 1);
+                        updateHpBars();
+                        checkGameOver();
+                        continue;
+                    }
+                    if (pr.x < 0 || pr.x > canvas.width || pr.y < 0 || pr.y > canvas.height) {
+                        projectiles.splice(i, 1);
+                    }
+                }
+
+            } else {
+                if (moveDirection !== 0) {
+                    p1.x = Math.max(p1.radius, Math.min(canvas.width - p1.radius, p1.x + moveDirection * 6 * speedMultiplier));
+                }
+                bossTimerFrames += speedMultiplier;
+
+                if (bossTimerFrames <= 480) {
+                    if (Math.floor(bossTimerFrames) % 4 < speedMultiplier) {
+                        bossObstacles.push({
+                            x: 15 + Math.random() * (canvas.width - 30),
+                            y: -15,
+                            radius: 12, 
+                            speed: (5.0 + Math.random() * 3.5) * speedMultiplier,
+                            damage: 15 
+                        });
+                    }
+                } 
+                else if (bossTimerFrames > 480 && bossTimerFrames <= 1680) {
+                    let relFrame = bossTimerFrames - 480;
+                    if (Math.abs(relFrame - 0) < speedMultiplier) {
+                        bossTextObstacles.push({ text: 'L', x: canvas.width * 0.75, y: -60, width: canvas.width / 2, height: 100, speed: 4.0 * speedMultiplier, damage: 50 });
+                    }
+                    if (Math.abs(relFrame - 120) < speedMultiplier) {
+                        bossTextObstacles.push({ text: '을 가져가', x: canvas.width * 0.25, y: -60, width: canvas.width / 2, height: 100, speed: 4.0 * speedMultiplier, damage: 50 });
+                    }
+                }
+            }
+
+            for (let i = bossObstacles.length - 1; i >= 0; i--) {
+                let bo = bossObstacles[i];
+                bo.y += bo.speed;
+                let dx = bo.x - p1.x;
+                let dy = bo.y - p1.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < bo.radius + p1.radius) {
+                    p1.hp = Math.max(0, p1.hp - bo.damage);
+                    bossObstacles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+                if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
+            }
+
+            for (let i = bossTextObstacles.length - 1; i >= 0; i--) {
+                let bto = bossTextObstacles[i];
+                bto.y += bto.speed;
+                let hitX = bto.x - bto.width / 2;
+                if (p1.x + p1.radius > hitX && p1.x - p1.radius < hitX + bto.width &&
+                    p1.y + p1.radius > bto.y && p1.y - p1.radius < bto.y + bto.height) {
+                    p1.hp = Math.max(0, p1.hp - bto.damage);
+                    bossTextObstacles.splice(i, 1);
+                    updateHpBars();
+                    checkGameOver();
+                    continue;
+                }
+                if (bto.y > canvas.height + 70) bossTextObstacles.splice(i, 1);
+            }
+
+            if (!isBossMode) {
+                let dx = p2.x - p1.x;
+                let dy = p2.y - p1.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < p1.radius + p2.radius) {
+                    let tempVx = p1.vx; let tempVy = p1.vy;
+                    p1.vx = p2.vx; p1.vy = p2.vy;
+                    p2.vx = tempVx; p2.vy = tempVy;
+
+                    let overlap = (p1.radius + p2.radius) - dist + 1;
+                    let nx = dx / (dist || 1);
+                    let ny = dy / (dist || 1);
+                    p1.x -= nx * overlap / 2;
+                    p1.y -= ny * overlap / 2;
+                    p2.x += nx * overlap / 2;
+                    p2.y += ny * overlap / 2;
+
+                    p1.hp = Math.max(0, p1.hp - (10 + p2.damage));
+                    p2.hp = Math.max(0, p2.hp - (10 + p1.damage));
+
                     updateHpBars();
                     checkGameOver();
                 }
@@ -1106,34 +3104,290 @@
         }
 
         function updateHpBars() {
-            document.getElementById('p1-hp').style.width = Math.max(0, (p1.hp / p1.maxHp * 100)) + '%';
-            document.getElementById('p1-hp-text').innerText = Math.max(0, Math.ceil(p1.hp)) + " / " + p1.maxHp;
-            document.getElementById('p2-hp').style.width = Math.max(0, (p2.hp / p2.maxHp * 100)) + '%';
-            document.getElementById('p2-hp-text').innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
+            const p1HpEl = document.getElementById('p1-hp');
+            const p1TextEl = document.getElementById('p1-hp-text');
+            const p2HpEl = document.getElementById('p2-hp');
+            const p2TextEl = document.getElementById('p2-hp-text');
+
+            if (p1HpEl) p1HpEl.style.width = Math.max(0, (p1.hp / p1.maxHp * 100)) + '%';
+            if (p1TextEl) p1TextEl.innerText = Math.max(0, Math.ceil(p1.hp)) + " / " + p1.maxHp;
+
+            if (p2HpEl) p2HpEl.style.width = Math.max(0, (p2.hp / p2.maxHp * 100)) + '%';
+            if (p2TextEl) p2TextEl.innerText = Math.max(0, Math.ceil(p2.hp)) + " / " + p2.maxHp;
+        }
+
+        function drawPlayer(p, isPlayer1) {
+            if (p.type === 'boss') {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.font = "900 36px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("L", p.x, p.y);
+                return;
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.clip(); 
+
+            if (p.type === 'mrbeast' && characterImg.complete && characterImg.naturalWidth !== 0) {
+                ctx.drawImage(characterImg, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = isPlayer1 ? "#3498db" : "#c0392b";
+            ctx.stroke();
+            ctx.closePath();
+
+            if (isPlayer1) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = "#2ecc71";
+                ctx.stroke();
+                ctx.closePath();
+
+                let skillInterval = 8000;
+                if (p.type === 'fire') skillInterval = 6000;
+                else if (p.type === 'pokemon') skillInterval = 9000;
+
+                let timePassed = Date.now() - p.lastSkillTime;
+                let progress = Math.min(1, timePassed / skillInterval);
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius + 7, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#f1c40f";
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+
+        function drawHalloweenBackground() {
+            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#0f051d');
+            grad.addColorStop(0.5, '#2b0a3d');
+            grad.addColorStop(1, '#11051b');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.strokeStyle = "rgba(255, 117, 24, 0.15)";
+            ctx.lineWidth = 1;
+            for(let x=0; x<canvas.width; x+=45) {
+                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y=0; y<canvas.height; y+=45) {
+                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            ctx.restore();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(450, 80, 40, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffec99';
+            ctx.shadowColor = '#ffaa00';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.restore();
+
+            halloweenProps.forEach(prop => {
+                prop.y += prop.speed;
+                if (prop.y > canvas.height + 30) {
+                    prop.y = -30;
+                    prop.x = Math.random() * canvas.width;
+                }
+                let floatX = prop.x + Math.sin(Date.now() * 0.002 + prop.floatOffset) * 15;
+
+                ctx.save();
+                ctx.font = `${prop.size}px sans-serif`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                if (prop.type === 'pumpkin') {
+                    ctx.fillText('🎃', floatX, prop.y);
+                } else if (prop.type === 'ghost') {
+                    ctx.fillText('👻', floatX, prop.y);
+                } else if (prop.type === 'bat') {
+                    ctx.fillText('🦇', floatX, prop.y);
+                } else {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillText('✨', floatX, prop.y);
+                }
+                ctx.restore();
+            });
         }
 
         function draw() {
-            ctx.fillStyle = '#11051b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 플레이어 그리기
-            ctx.beginPath(); ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2); ctx.fillStyle = p1.color; ctx.fill(); ctx.closePath();
-            ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.radius, 0, Math.PI * 2); ctx.fillStyle = p2.color; ctx.fill(); ctx.closePath();
+            drawHalloweenBackground();
+
+            drawPlayer(p1, true);
+            drawPlayer(p2, false);
+
+            specialAttackEntities.forEach(se => {
+                if (se.type === 'amongus_assassinate') {
+                    ctx.save();
+                    ctx.font = "bold 18px sans-serif";
+                    ctx.fillStyle = "#ff4757";
+                    ctx.textAlign = "center";
+                    ctx.fillText("🔪 어몽어스 암살!", se.targetPlayer.x, se.targetPlayer.y - se.targetPlayer.radius - 10);
+                    ctx.restore();
+                } else if (se.type === 'sangsampany_combo') {
+                    ctx.save();
+                    ctx.font = "bold 20px sans-serif";
+                    ctx.fillStyle = "#3498db";
+                    ctx.textAlign = "center";
+                    ctx.fillText("🧽 쓱싹쓱싹 행주 & 미용티슈 폭발!", canvas.width / 2, 50);
+                    ctx.restore();
+                }
+            });
+
+            fireFallBlocks.forEach(fb => {
+                ctx.beginPath();
+                ctx.arc(fb.x, fb.y, fb.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#e67e22';
+                ctx.fill();
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            iceFallBlocks.forEach(ib => {
+                ctx.beginPath();
+                ctx.arc(ib.x, ib.y, ib.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#3498db';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.closePath();
+            });
+
+            projectiles.forEach(pr => {
+                ctx.beginPath();
+                ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2);
+                if (pr.type === 'fireball') ctx.fillStyle = '#e67e22';
+                else if (pr.type === 'iceball') ctx.fillStyle = '#3498db';
+                else if (pr.type === 'pokeball') ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.closePath();
+
+                if (pr.type === 'shh_text') {
+                    ctx.save();
+                    ctx.font = "bold 24px sans-serif";
+                    ctx.fillStyle = "#ffffff";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("쉿", pr.x, pr.y);
+                    ctx.restore();
+                }
+            });
+
+            bossObstacles.forEach(bo => {
+                ctx.beginPath();
+                ctx.arc(bo.x, bo.y, bo.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.font = "12px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("💀", bo.x, bo.y);
+            });
+
+            bossTextObstacles.forEach(bto => {
+                ctx.save();
+                ctx.font = bto.text === 'L' ? "900 80px sans-serif" : "900 55px sans-serif";
+                ctx.fillStyle = "#e74c3c";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 5;
+                ctx.strokeText(bto.text, bto.x, bto.y);
+                ctx.fillText(bto.text, bto.x, bto.y);
+                ctx.restore();
+            });
 
             if (isCountingDown) {
-                ctx.font = "900 90px sans-serif"; ctx.fillStyle = "#f1c40f"; ctx.textAlign = "center";
+                ctx.save();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = "900 90px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 8;
+                ctx.strokeText(countdownValue, canvas.width / 2, canvas.height / 2);
+                ctx.fillStyle = "#f1c40f";
                 ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
             }
+
             if (gameOverState) {
-                ctx.font = "900 52px sans-serif"; ctx.fillStyle = gameOverState === 'win' ? "#2ecc71" : "#ff4757"; ctx.textAlign = "center";
-                ctx.fillText(gameOverState === 'win' ? "승리!!" : "패배", canvas.width / 2, canvas.height / 2);
+                ctx.save();
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = "900 52px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                let resultText = "";
+                let textColor = "";
+
+                if (gameOverState === 'win') {
+                    resultText = isBossMode ? "🎉 보스 처치! (+1000C)" : "승리!!!";
+                    textColor = "#2ecc71";
+                } else if (gameOverState === 'lose') {
+                    resultText = "패배";
+                    textColor = "#ff4757";
+                } else {
+                    resultText = "무승부 ㅠ";
+                    textColor = "#f1c40f";
+                }
+
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 6;
+                ctx.strokeText(resultText, canvas.width / 2, canvas.height / 2);
+                ctx.fillStyle = textColor;
+                ctx.fillText(resultText, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
             }
         }
 
-        function loop() { update(); draw(); requestAnimationFrame(loop); }
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
 
         loadData();
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
