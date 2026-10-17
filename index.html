@@ -23,7 +23,7 @@
         }
         .container {
             width: 100%;
-            max-width: 520px;
+            max-width: 580px;
             background: #ffffff;
             border: 3px solid #e67e22;
             border-radius: 12px;
@@ -534,7 +534,7 @@
         .canvas-container {
             position: relative;
             width: 100%;
-            max-width: 480px;
+            max-width: 540px;
             aspect-ratio: 1 / 1;
             margin: 0 auto 12px auto;
             border: 3px solid #2c3e50;
@@ -1017,8 +1017,9 @@
 
     <div class="container hidden" id="game-screen">
         <div class="boss-event-date-text hidden" id="game-event-date">10월15일~10월22일</div>
+        <div style="font-size:11px; color:#95a5a6; font-weight:bold; margin-bottom:4px;">created by ball_fight_tiktok</div>
         <div class="canvas-container">
-            <canvas id="gameCanvas" width="480" height="480"></canvas>
+            <canvas id="gameCanvas" width="540" height="540"></canvas>
             <button class="speed-btn" id="speed-toggle-btn" onclick="toggleSpeed()">⚡ 2X 배속</button>
         </div>
         
@@ -1043,9 +1044,14 @@
             <div class="hp-text" id="p2-hp-text">200 / 200</div>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 15px;">
+        <div style="display: flex; gap: 8px; margin-top: 15px; align-items: center;">
             <button class="btn btn-retry hidden" id="btn-game-retry" onclick="retryGame()" style="margin-top: 0; flex: 1;">🔄 다시 플레이</button>
-            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 1;">🏠 로비로 가기</button>
+            <button class="btn btn-back" id="btn-game-lobby" onclick="showLobby()" style="margin-top: 0; flex: 2; background-color: #e74c3c; border: 2px solid #c0392b; font-size:16px; padding:14px; border-radius:10px;">🚪 나가기 🏃</button>
+            <button style="margin-top: 0; width: 50px; height: 50px; background: #ffffff; border: 2px solid #2c3e50; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center;" onclick="alert('💬 채팅 기능 준비중!')">💬</button>
+        </div>
+        <div style="font-size: 10px; color: #7f8c8d; margin-top: 10px; line-height: 1.3;">
+            ⚠️ 인게임 화면을 녹화 후 영상으로 사용하는 행위는 엄격히 금지됩니다<br>
+            <a href="#" onclick="alert('도움말: 공을 부딪혀 상대 체력을 깎으세요!')" style="color: #2980b9; font-weight: bold; text-decoration: none;">도움말 ↓</a>
         </div>
     </div>
 
@@ -1855,11 +1861,11 @@
         }
 
         let p1 = { 
-            x: 120, y: 240, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
+            x: 130, y: 270, radius: 24, color: '#2980b9', vx: 2, vy: 2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
         let p2 = { 
-            x: 360, y: 240, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
+            x: 410, y: 270, radius: 24, color: '#c0392b', vx: -2, vy: -2, hp: 200, maxHp: 200,
             type: 'standard', damage: 10, skillGauge: 0, lastIceAttackTime: 0, lastShhTime: 0, lastSuseumiTime: 0, freezeTimer: 0 
         };
 
@@ -2314,8 +2320,8 @@
             p1.damage = equipped.damage;
             p1.radius = isBossMode ? 14 : 26; 
             
-            p1.x = 120; 
-            p1.y = 240;
+            p1.x = 130; 
+            p1.y = 270;
             
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
@@ -2325,23 +2331,23 @@
             moveDirection = 0;
 
             if (isBossMode) {
-                p1.x = 240;
-                p1.y = 420;
+                p1.x = 270;
+                p1.y = 470;
                 p2.type = 'boss';
                 p2.maxHp = 750;
                 p2.hp = 750;
                 p2.damage = 0;
-                p2.x = 240; p2.y = 70;
+                p2.x = 270; p2.y = 75;
                 p2.vx = 0; p2.vy = 0;
-                p2.radius = 38;
+                p2.radius = 40;
                 bossTimerFrames = 0;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
                 p2.hp = 200;
                 p2.damage = 10;
-                p2.x = 360; 
-                p2.y = 240; 
+                p2.x = 410; 
+                p2.y = 270; 
                 p2.radius = 26;
                 let v2 = getRandomVelocity();
                 p2.vx = v2.vx; p2.vy = v2.vy;
@@ -2628,7 +2634,7 @@
                 ctx.stroke();
                 ctx.closePath();
 
-                ctx.font = "900 34px sans-serif";
+                ctx.font = "900 36px sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -2708,7 +2714,7 @@
 
             bossTextObstacles.forEach(bto => {
                 ctx.save();
-                ctx.font = bto.text === 'L' ? "900 75px sans-serif" : "900 50px sans-serif";
+                ctx.font = bto.text === 'L' ? "900 80px sans-serif" : "900 55px sans-serif";
                 ctx.fillStyle = "#e74c3c";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -2724,7 +2730,7 @@
                 ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "900 84px sans-serif";
+                ctx.font = "900 90px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.strokeStyle = "#000000";
@@ -2740,7 +2746,7 @@
                 ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "900 48px sans-serif";
+                ctx.font = "900 52px sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
 
