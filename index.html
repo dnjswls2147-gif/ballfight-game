@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>릴리 볼 파이트 - 할로윈 에디션</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- 🌟 실시간 전체 유저 공유를 위한 Firebase 라이브러리 추가 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -1368,7 +1367,6 @@
     </div>
 
     <script>
-        // 🌟 실시간 데이터베이스 연동 세팅
         const firebaseConfig = {
             databaseURL: "https://lily-ball-fight-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
@@ -1378,11 +1376,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v37';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v37';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v37';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v37';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v37';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v39';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v39';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v39';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v39';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v39';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1433,7 +1431,16 @@
         let bossObstacles = [];
         let bossWideBlocks = [];
         let isDefending = false;
-        let bossTextDialog = { text: "", color: "#3498db", size: 24, x: 0, y: 0, visible: false };
+
+        // 보스전 단계별 제어 변수
+        let bossPhase = 1; 
+        let bossMessageState = ""; 
+        let bossMessageTimer = 0;
+        let roundTwoActive = false;
+        let defenseCount = 4;
+        let defenseCooldown = 0;
+        let defenseAlertText = "";
+        let defenseAlertTimer = 0;
 
         let moveDirection = 0;
 
@@ -1723,9 +1730,7 @@
                 if (e.key === 'ArrowLeft' || e.key === 'a') moveDirection = -1;
                 if (e.key === 'ArrowRight' || e.key === 'd') moveDirection = 1;
                 if (e.key === ' ' || e.key === 'Shift') {
-                    isDefending = true;
-                    const btn = document.getElementById('defense-btn');
-                    if(btn) btn.classList.add('defending');
+                    triggerDefense();
                 }
             }
         });
@@ -1735,13 +1740,35 @@
                 if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') {
                     moveDirection = 0;
                 }
-                if (e.key === ' ' || e.key === 'Shift') {
-                    isDefending = false;
-                    const btn = document.getElementById('defense-btn');
-                    if(btn) btn.classList.remove('defending');
-                }
             }
         });
+
+        function triggerDefense() {
+            if (!isBossMode || !gameStarted || !roundTwoActive) return;
+            const now = Date.now();
+            if (defenseCount <= 0) {
+                defenseAlertText = "4번을 다 썼습니다";
+                defenseAlertTimer = 120;
+                return;
+            }
+            if (now < defenseCooldown) {
+                let leftSec = ((defenseCooldown - now) / 1000).toFixed(1);
+                defenseAlertText = `${leftSec}초 뒤에 사용하세요`;
+                defenseAlertTimer = 120;
+                return;
+            }
+
+            defenseCount--;
+            defenseCooldown = now + 2000;
+            isDefending = true;
+            const btn = document.getElementById('defense-btn');
+            if(btn) btn.classList.add('defending');
+
+            setTimeout(() => {
+                isDefending = false;
+                if(btn) btn.classList.remove('defending');
+            }, 600);
+        }
 
         function publishAdminNotice() {
             const text = document.getElementById('admin-notice-input').value.trim();
@@ -2347,7 +2374,7 @@
         }
 
         let p1 = { 
-            x: 130, y: 270, radius: 36, color: '#2980b9', vx: 2.0, vy: 2.0, hp: 200, maxHp: 200,
+            x: 270, y: 500, radius: 36, color: '#2980b9', vx: 2.0, vy: 2.0, hp: 200, maxHp: 200,
             type: 'standard', damage: 0, skillGauge: 0, maxSkillGauge: 100, lastSkillTime: 0, lastProjTime: 0, freezeTimer: 0 
         };
         let p2 = { 
@@ -2679,17 +2706,7 @@
 
         function startDefense(e) {
             if (e) e.preventDefault();
-            if (!gameStarted || !isBossMode) return;
-            isDefending = true;
-            const btn = document.getElementById('defense-btn');
-            if(btn) btn.classList.add('defending');
-        }
-
-        function stopDefense(e) {
-            if (e) e.preventDefault();
-            isDefending = false;
-            const btn = document.getElementById('defense-btn');
-            if(btn) btn.classList.remove('defending');
+            triggerDefense();
         }
 
         function retryGame() {
@@ -2817,8 +2834,8 @@
             p1.hp = equipped.hp;
             p1.damage = equipped.damage;
             p1.radius = isBossMode ? 20 : 36;
-            p1.x = 130; 
-            p1.y = 270;
+            p1.x = 270; 
+            p1.y = 500; 
             let v1 = getRandomVelocity();
             p1.vx = isBossMode ? 0 : v1.vx; 
             p1.vy = isBossMode ? 0 : v1.vy;
@@ -2829,8 +2846,6 @@
             isDefending = false;
 
             if (isBossMode) {
-                p1.x = 270;
-                p1.y = 470;
                 p2.type = 'boss';
                 p2.maxHp = 750;
                 p2.hp = 750;
@@ -2839,7 +2854,12 @@
                 p2.vx = 0; p2.vy = 0;
                 p2.radius = 45;
                 bossTimerFrames = 0;
-                bossTextDialog.visible = false;
+                bossPhase = 1;
+                bossMessageState = "";
+                bossMessageTimer = 0;
+                roundTwoActive = false;
+                defenseCount = 4;
+                defenseCooldown = 0;
             } else {
                 p2.type = 'standard';
                 p2.maxHp = 200;
@@ -2897,6 +2917,8 @@
             if (isServerUnderMaintenance && !isAdminLoggedIn && !isBypassedByPassword) return;
             if (!gameStarted) return;
             if (nextGameMode === 'friend' && !isHost) return;
+
+            if (defenseAlertTimer > 0) defenseAlertTimer--;
 
             if (!isBossMode) {
                 let now = Date.now();
@@ -3074,54 +3096,80 @@
                 }
                 bossTimerFrames += speedMultiplier;
 
-                // 1단계: 공 피하기 (0~480프레임)
-                if (bossTimerFrames <= 480) {
-                    if (Math.floor(bossTimerFrames) % 4 < speedMultiplier) {
+                if (bossPhase === 1) {
+                    if (Math.floor(bossTimerFrames) % 5 < speedMultiplier) {
                         bossObstacles.push({
                             x: 15 + Math.random() * (canvas.width - 30),
                             y: -15,
                             radius: 12, 
                             speed: (5.0 + Math.random() * 3.5) * speedMultiplier,
-                            damage: 15 
+                            damage: 35 
+                        });
+                    }
+                    if (bossTimerFrames >= 420) {
+                        bossPhase = 2;
+                        bossMessageState = "좀 하네 ㅋ";
+                        bossMessageTimer = 240; 
+                        bossObstacles = [];
+                    }
+                }
+                else if (bossPhase === 2) {
+                    bossMessageTimer -= speedMultiplier;
+                    if (bossMessageTimer <= 0) {
+                        if (bossMessageState === "좀 하네 ㅋ") {
+                            bossMessageState = "다시 시작할게";
+                            bossMessageTimer = 180; 
+                        } else if (bossMessageState === "다시 시작할게") {
+                            bossMessageState = "wait";
+                            bossMessageTimer = 180; 
+                        } else if (bossMessageState === "wait") {
+                            bossPhase = 3;
+                            roundTwoActive = true;
+                            bossTimerFrames = 0;
+                            bossMessageState = "";
+                        }
+                    }
+                }
+                else if (bossPhase === 3) {
+                    let r2Time = bossTimerFrames;
+                    
+                    if (Math.floor(r2Time) === 180) {
+                        bossWideBlocks.push({
+                            x: 0, y: -40, width: canvas.width, height: 40,
+                            speed: 3 * speedMultiplier, damage: 35, hitProcessed: false, type: 'down'
                         });
                     }
 
-                    if (bossTimerFrames >= 200 && bossTimerFrames < 350) {
-                        bossTextDialog = {
-                            text: "좀하네 ㅋ\n이번에는 못피할걸",
-                            color: "#3498db",
-                            size: 24,
-                            x: p2.x + 55,
-                            y: p2.y,
-                            visible: true
-                        };
-                    } else if (bossTimerFrames >= 350 && bossTimerFrames <= 480) {
-                        bossTextDialog = {
-                            text: "이제 시작 할게 ㅋ",
-                            color: "#e74c3c",
-                            size: 26,
-                            x: p2.x + 55,
-                            y: p2.y,
-                            visible: true
-                        };
-                    } else {
-                        bossTextDialog.visible = false;
-                    }
-                } 
-                // 2단계: 꽉 채우는 가로 블록 4번 낙하 (480프레임 이후)
-                else {
-                    bossTextDialog.visible = false;
-                    let relFrame = bossTimerFrames - 480;
-                    let blockInterval = 90; 
-                    if (Math.floor(relFrame) % blockInterval < speedMultiplier && bossWideBlocks.length < 4) {
+                    if (Math.floor(r2Time) === 360) {
+                        bossMessageState = "지금";
+                        bossMessageTimer = 120;
                         bossWideBlocks.push({
-                            x: 0,
-                            y: -40,
-                            width: canvas.width,
-                            height: 40,
-                            speed: (canvas.height / 60) * speedMultiplier, 
-                            damage: 35,
-                            hitProcessed: false
+                            x: 0, y: canvas.height + 40, width: canvas.width, height: 40,
+                            speed: -3 * speedMultiplier, damage: 35, hitProcessed: false, type: 'up'
+                        });
+                    }
+
+                    if (Math.floor(r2Time) === 660) {
+                        bossWideBlocks.push({
+                            x: 0, y: -40, width: canvas.width, height: 40,
+                            speed: 1.5 * speedMultiplier, damage: 35, hitProcessed: false, type: 'down_slow'
+                        });
+                    }
+                    if (Math.floor(r2Time) === 900) {
+                        bossWideBlocks.push({
+                            x: 0, y: canvas.height + 40, width: canvas.width, height: 40,
+                            speed: -3 * speedMultiplier, damage: 35, hitProcessed: false, type: 'up'
+                        });
+                    }
+
+                    if (Math.floor(r2Time) === 1320) {
+                        bossWideBlocks.push({
+                            x: -40, y: 0, width: 40, height: canvas.height,
+                            speed: 2 * speedMultiplier, damage: 35, hitProcessed: false, type: 'right_slow'
+                        });
+                        bossWideBlocks.push({
+                            x: canvas.width, y: 0, width: 40, height: canvas.height,
+                            speed: -2 * speedMultiplier, damage: 35, hitProcessed: false, type: 'left_slow'
                         });
                     }
                 }
@@ -3136,10 +3184,10 @@
                 if (dist < bo.radius + p1.radius) {
                     if (!isDefending) {
                         p1.hp = Math.max(0, p1.hp - bo.damage);
+                        updateHpBars();
+                        checkGameOver();
                     }
                     bossObstacles.splice(i, 1);
-                    updateHpBars();
-                    checkGameOver();
                     continue;
                 }
                 if (bo.y > canvas.height + 30) bossObstacles.splice(i, 1);
@@ -3147,7 +3195,11 @@
 
             for (let i = bossWideBlocks.length - 1; i >= 0; i--) {
                 let wb = bossWideBlocks[i];
-                wb.y += wb.speed;
+                if (wb.type === 'right_slow' || wb.type === 'left_slow') {
+                    wb.x += wb.speed;
+                } else {
+                    wb.y += wb.speed;
+                }
                 
                 if (!wb.hitProcessed &&
                     p1.x + p1.radius > wb.x && p1.x - p1.radius < wb.x + wb.width &&
@@ -3161,7 +3213,7 @@
                     }
                 }
 
-                if (wb.y > canvas.height + 50) {
+                if (wb.y > canvas.height + 100 || wb.y < -100 || wb.x > canvas.width + 100 || wb.x < -100) {
                     bossWideBlocks.splice(i, 1);
                 }
             }
@@ -3222,6 +3274,15 @@
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText("L", p.x, p.y);
+
+                if (bossMessageState && bossMessageState !== "wait") {
+                    ctx.save();
+                    ctx.font = "bold 16px sans-serif";
+                    ctx.fillStyle = "#3498db";
+                    ctx.textAlign = "left";
+                    ctx.fillText(bossMessageState, p.x + p.radius + 10, p.y);
+                    ctx.restore();
+                }
                 return;
             }
 
@@ -3245,10 +3306,9 @@
             ctx.stroke();
             ctx.closePath();
 
-            // 방어 중일 때 플레이어 주위에 보호막 효과 표시
             if (isPlayer1 && isDefending && isBossMode) {
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius + 10, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.radius + 12, 0, Math.PI * 2);
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = "#f1c40f";
                 ctx.fillStyle = "rgba(241, 196, 15, 0.3)";
@@ -3257,7 +3317,7 @@
                 ctx.closePath();
             }
 
-            if (isPlayer1 && !isDefending) {
+            if (isPlayer1 && !isDefending && !isBossMode) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
                 ctx.lineWidth = 3.5;
@@ -3341,6 +3401,28 @@
 
             drawHalloweenBackground();
 
+            if (isBossMode && roundTwoActive) {
+                ctx.save();
+                ctx.font = "bold 22px sans-serif";
+                ctx.fillStyle = "#f1c40f";
+                ctx.textAlign = "center";
+                ctx.fillText("라운드 2", canvas.width / 2, 35);
+
+                ctx.font = "bold 13px sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(`방어는 4번만 할 수 있습니다 (남은 횟수: ${defenseCount}회)`, canvas.width / 2, 60);
+                ctx.restore();
+            }
+
+            if (defenseAlertTimer > 0 && defenseAlertText) {
+                ctx.save();
+                ctx.font = "bold 16px sans-serif";
+                ctx.fillStyle = "#ff4757";
+                ctx.textAlign = "center";
+                ctx.fillText(defenseAlertText, canvas.width / 2, canvas.height - 70);
+                ctx.restore();
+            }
+
             drawPlayer(p1, true);
             drawPlayer(p2, false);
 
@@ -3421,7 +3503,6 @@
                 ctx.fillText("💀", bo.x, bo.y);
             });
 
-            // 꽉 채우는 가로 블록 렌더링
             bossWideBlocks.forEach(wb => {
                 ctx.save();
                 ctx.fillStyle = "rgba(231, 76, 60, 0.85)";
@@ -3431,19 +3512,6 @@
                 ctx.strokeRect(wb.x, wb.y, wb.width, wb.height);
                 ctx.restore();
             });
-
-            if (bossTextDialog.visible) {
-                ctx.save();
-                ctx.font = `bold ${bossTextDialog.size}px sans-serif`;
-                ctx.fillStyle = bossTextDialog.color;
-                ctx.textAlign = "left";
-                ctx.textBaseline = "middle";
-                let lines = bossTextDialog.text.split('\n');
-                lines.forEach((line, idx) => {
-                    ctx.fillText(line, bossTextDialog.x, bossTextDialog.y + (idx * (bossTextDialog.size + 6)));
-                });
-                ctx.restore();
-            }
 
             if (isCountingDown) {
                 ctx.save();
@@ -3502,5 +3570,5 @@
         loadData();
         requestAnimationFrame(loop);
     </script>
-</body>
+</body> 
     </html>
