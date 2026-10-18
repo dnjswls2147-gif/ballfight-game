@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1376,11 +1377,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const STORAGE_KEY = 'lily_ball_fight_permanent_v39';
-        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v39';
-        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v39';
-        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v39';
-        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v39';
+        const STORAGE_KEY = 'lily_ball_fight_permanent_v40';
+        const GLOBAL_USERS_KEY = 'lily_ball_fight_global_users_v40';
+        const GLOBAL_GIFT_KEY = 'lily_ball_fight_global_gifts_v40';
+        const CLAIMED_GIFT_KEY = 'lily_ball_fight_claimed_gifts_v40';
+        const GLOBAL_NOTICE_KEY = 'lily_ball_fight_global_notice_v40';
         
         const ADMIN_PASSWORD = "123kpq";
         const MAINTENANCE_PASS = "123kpq";
@@ -1432,7 +1433,6 @@
         let bossWideBlocks = [];
         let isDefending = false;
 
-        // 보스전 단계별 제어 변수
         let bossPhase = 1; 
         let bossMessageState = ""; 
         let bossMessageTimer = 0;
@@ -1524,19 +1524,32 @@
 
         function syncGlobalUsers() {
             if (savedUsername && savedUsername.trim() !== "") {
+                if (!window.userUniqueId) {
+                    window.userUniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                }
+
+                const playTimeMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
+
                 const userData = {
                     name: savedUsername,
+                    uid: window.userUniqueId,
                     coins: userCoins,
                     trophies: userTrophies,
+                    friendsCount: 0,
+                    recvReqCount: 0,
+                    sendReqCount: 0,
+                    playTime: playTimeMinutes,
+                    status: "온라인",
+                    lastAccess: "지금 접속 중",
                     banUntil: 0,
-                    banReason: "",
-                    startTime: sessionStartTime
+                    banReason: ""
                 };
                 
                 let match = registeredUsers.find(u => u.name === savedUsername);
                 if (match) {
                     userData.banUntil = match.banUntil || 0;
                     userData.banReason = match.banReason || "";
+                    if (match.uid) window.userUniqueId = match.uid;
                 }
 
                 db.ref('users/' + savedUsername.replace(/[.#$/\[\]]/g, "_")).set(userData);
@@ -1907,15 +1920,16 @@
                 let isBanned = u.banUntil && u.banUntil > Date.now();
                 let statusClass = isBanned ? "admin-user-status banned" : "admin-user-status";
                 let statusText = isBanned ? `정지됨 (${u.banReason ? u.banReason : "사유 없음"})` : "온라인";
+                let userId = u.uid || "6LJ8QB";
 
                 let playTimeMinutes = Math.floor((Date.now() - (u.startTime || Date.now())) / 60000);
 
                 card.innerHTML = `
                     <div class="admin-user-card-top">
-                        <span class="admin-user-name" onclick="openUserProfile('${u.name}')"><b>${u.name}</b></span>
+                        <span class="admin-user-name" onclick="openUserProfile('${u.name}')"><b>${u.name}</b> <span style="font-size:9px; color:#888;">(${userId})</span></span>
                         <span class="${statusClass}">${statusText}</span>
                     </div>
-                    <div class="admin-user-sub">플레이 타임 ${playTimeMinutes}분</div>
+                    <div class="admin-user-sub">친구 ${u.friendsCount || 0}명 · 플레이 타임 ${playTimeMinutes}분</div>
                     
                     <div class="admin-time-row">
                         <input type="number" id="ban-time-${index}" value="0" min="0"> 시간
@@ -1924,11 +1938,18 @@
                     <input type="text" id="ban-reason-${index}" class="admin-reason-input" placeholder="추방 사유 (선택)" value="${u.banReason || ''}">
                     
                     <div style="display: flex; gap: 4px;">
+                        <button class="admin-small-btn" style="background:#2b263e; border:1px solid #4a4463;" onclick="copyToClipboard('${userId}')">아이디 복사</button>
                         <button class="admin-ban-btn" onclick="executeCustomBan(${index})">밴(추방)</button>
                         <button class="admin-unban-btn" onclick="executeUnban(${index})">밴 해제</button>
                     </div>
                 `;
                 container.appendChild(card);
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("아이디가 복사되었습니다: " + text);
             });
         }
 
@@ -2235,13 +2256,14 @@
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
+        // 미스터 비스트 볼을 동룡쓰 볼 밑으로 이동 및 설명 수정 완료
         let ballsData = [
             { id: 'standard', name: '기본 볼', desc: '체력: 200, 데미지 없음', price: 0, hp: 200, damage: 0, owned: true, equipped: true },
-            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '미스터 비스트 이미지 공', price: 1500, hp: 300, damage: 15, owned: false, equipped: false },
             { id: 'fire', name: '화염 볼', desc: '체력: 200, 2초마다 화염구 & 6초마다 거대 화염볼 3개 폭격', price: 50, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'ice', name: '아이스 볼', desc: '체력: 200, 3초마다 얼음 & 8초마다 경기장 덮치는 대형 얼음 폭격', price: 100, hp: 200, damage: 15, owned: false, equipped: false },
             { id: 'pokemon', name: '포켓몬 볼', desc: '체력: 250, 2.5초마다 포켓몬볼 투척 & 9초마다 50개 폭풍 낙하', price: 350, hp: 250, damage: 30, owned: false, equipped: false },
             { id: 'dongryong', name: '동룡쓰 볼', desc: '체력: 250, 2.5초마다 쉿 텍스트 & 8초마다 어몽어스 암살 (75뎀)', price: 1000, hp: 250, damage: 20, owned: false, equipped: false },
+            { id: 'mrbeast', name: '미스터 비스트 볼', desc: '체력 250 공격:없음 기술 8초마다 상대의 공을 내려찍는다', price: 1500, hp: 250, damage: 0, owned: false, equipped: false },
             { id: 'sangsampany', name: '상품컴퍼니 볼', desc: '체력: 250, 8초마다 쓱싹쓱싹 행주 & 미용티슈 소환 폭발 (100뎀)', price: 3000, hp: 250, damage: 0, owned: false, equipped: false }
         ];
 
@@ -2942,6 +2964,7 @@
                 else if (p1.type === 'ice') skillInterval = 8000;
                 else if (p1.type === 'pokemon') skillInterval = 9000;
                 else if (p1.type === 'dongryong') skillInterval = 8000;
+                else if (p1.type === 'mrbeast') skillInterval = 8000;
                 else if (p1.type === 'sangsampany') skillInterval = 8000;
 
                 if (now - p1.lastSkillTime > skillInterval) {
@@ -2982,6 +3005,14 @@
                             timer: 40
                         });
                     } 
+                    else if (p1.type === 'mrbeast') {
+                        specialAttackEntities.push({
+                            type: 'mrbeast_slam',
+                            targetPlayer: p2,
+                            timer: 30,
+                            damage: 40
+                        });
+                    }
                     else if (p1.type === 'sangsampany') {
                         specialAttackEntities.push({
                             type: 'sangsampany_combo',
@@ -3028,11 +3059,14 @@
                         }
                         if (se.y > canvas.height + 20) specialAttackEntities.splice(i, 1);
                     } 
-                    else if (se.type === 'amongus_assassinate' || se.type === 'sangsampany_combo') {
+                    else if (se.type === 'amongus_assassinate' || se.type === 'sangsampany_combo' || se.type === 'mrbeast_slam') {
                         se.timer -= speedMultiplier;
                         if (se.timer <= 0) {
-                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : 190;
+                            let hitDmg = se.type === 'amongus_assassinate' ? 75 : (se.type === 'sangsampany_combo' ? 190 : 40);
                             se.targetPlayer.hp = Math.max(0, se.targetPlayer.hp - hitDmg);
+                            if (se.type === 'mrbeast_slam') {
+                                se.targetPlayer.vy += 12; // 내려찍기 타격 효과
+                            }
                             specialAttackEntities.splice(i, 1);
                             updateHpBars();
                             checkGameOver();
@@ -3441,6 +3475,13 @@
                     ctx.textAlign = "center";
                     ctx.fillText("🧽 쓱싹쓱싹 행주 & 미용티슈 폭발!", canvas.width / 2, 50);
                     ctx.restore();
+                } else if (se.type === 'mrbeast_slam') {
+                    ctx.save();
+                    ctx.font = "bold 20px sans-serif";
+                    ctx.fillStyle = "#f1c40f";
+                    ctx.textAlign = "center";
+                    ctx.fillText("💥 미스터 비스트 내려찍기!", se.targetPlayer.x, se.targetPlayer.y - se.targetPlayer.radius - 10);
+                    ctx.restore();
                 }
             });
 
@@ -3569,90 +3610,6 @@
 
         loadData();
         requestAnimationFrame(loop);
-                // 1. 유저 정보 및 플레이 타임 동기화 함수
-        function syncGlobalUsers() {
-            if (savedUsername && savedUsername.trim() !== "") {
-                if (!window.userUniqueId) {
-                    window.userUniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                }
-
-                const playTimeMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
-
-                const userData = {
-                    name: savedUsername,
-                    uid: window.userUniqueId,
-                    coins: userCoins,
-                    trophies: userTrophies,
-                    friendsCount: 0,
-                    recvReqCount: 0,
-                    sendReqCount: 0,
-                    playTime: playTimeMinutes,
-                    status: "온라인",
-                    lastAccess: "지금 접속 중",
-                    banUntil: 0,
-                    banReason: ""
-                };
-
-                db.ref('users/' + savedUsername.replace(/[.#$/\[\]]/g, "_")).update(userData);
-            }
-        }
-
-        // 2. 어드민 패널 유저 목록 렌더링 함수
-        function renderAdminUserList() {
-            const container = document.getElementById('admin-user-list-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (registeredUsers.length === 0) {
-                container.innerHTML = `<div style="color: #b2bec3; font-size:12px; padding:10px 0;">등록된 플레이어가 없습니다.</div>`;
-                return;
-            }
-
-            registeredUsers.forEach((u, index) => {
-                let card = document.createElement('div');
-                card.style.cssText = "background: #181524; border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid #2d2640; text-align: left;";
-
-                let isBanned = u.banUntil && u.banUntil > Date.now();
-                let statusText = isBanned ? "정지됨" : (u.status || "온라인");
-                let statusColor = isBanned ? "#e74c3c" : "#2ecc71";
-                let userId = u.uid || "6LJ8QB";
-
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                        <div>
-                            <span style="font-size:14px; font-weight:bold; color:#fff;">${u.name}</span>
-                            <span style="font-size:11px; color:#888; background:#2b263e; padding:2px 6px; border-radius:4px; margin-left:6px;">${userId}</span>
-                        </div>
-                        <span style="font-size:12px; font-weight:bold; color:${statusColor};">${statusText}</span>
-                    </div>
-
-                    <div style="font-size:11px; color:#aaa; margin-bottom: 6px;">
-                        친구 <b style="color:#fff;">${u.friendsCount || 0}명</b> · 받은 요청 <b style="color:#fff;">${u.recvReqCount || 0}</b> · 보낸 요청 <b style="color:#fff;">${u.sendReqCount || 0}</b>
-                    </div>
-
-                    <div style="font-size:11px; color:#aaa; margin-bottom: 10px;">
-                        마지막 접속 <b style="color:#fff;">${u.lastAccess || '지금 접속 중'}</b> · 플레이 타임 <b style="color:#fff;">${u.playTime || 0}분</b>
-                    </div>
-
-                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                        <button onclick="copyToClipboard('${userId}')" style="background:#2b263e; color:#fff; border:1px solid #4a4463; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer;">아이디 복사</button>
-                        <input type="number" id="ban-time-${index}" value="0" min="0" placeholder="0" style="width:35px; padding:5px; font-size:11px; text-align:center; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;"> 시간
-                        <input type="number" id="ban-min-${index}" value="0" min="0" placeholder="0" style="width:35px; padding:5px; font-size:11px; text-align:center; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;"> 분
-                        <input type="text" id="ban-reason-${index}" placeholder="추방 사유 (선택)" style="flex:1; min-width:100px; padding:5px; font-size:11px; background:#0d0a14; border:1px solid #3a354d; color:#fff; border-radius:4px;">
-                        <button onclick="executeCustomBan(${index})" style="background:#8b263e; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:bold; cursor:pointer;">추방</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // 3. 아이디 복사 기능 함수
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("아이디가 복사되었습니다: " + text);
-            });
-        }
-
     </script>
-</body> 
+</body>
     </html>
